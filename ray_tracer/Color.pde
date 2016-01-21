@@ -50,4 +50,13 @@ public class Color{
     B += durp.getB();
   }
   
+  public String toString(){
+    return "R: " + R + "\tG: " + G + "\tB: " + B;
+  }
+  
+  // returns new Color object
+  public Color dotProduct(Color b){
+    return new Color(R*b.getR(), G*b.getG(), B*b.getB());
+  }
+  
 }

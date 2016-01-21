@@ -116,6 +116,7 @@ void interpreter() {
 void rayTrace(){
   loadPixels();
   Ray ray = new Ray();
+  Color backgroundColor = currentScene.getBackground();
   //println(currentScene.getFOV());
   float k = tan(radians(currentScene.getFOV()/2.0));
   ArrayList<Shape> allObjects = currentScene.getAllObjects();
@@ -140,6 +141,7 @@ void rayTrace(){
         DiffuseSurface currentShapeSurface = firstShape.getDiffuseSurface();
         Color diffuseColor = currentShapeSurface.getDiffuseCoefficient();
         Color ambientColor = currentShapeSurface.getAmbientCoefficient();
+        totalColor.add(ambientColor);
         ArrayList<PointLight> pointLights = currentScene.getPointLights();
         Point intersectionPoint = firstShape.hitPoint(ray, minTime);
         for(PointLight light : pointLights){
@@ -172,25 +174,23 @@ void rayTrace(){
           
           float lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
           float diffuse = max(0, lightAndShapeNormalAlignment);
-          // QUESTION: WHAT IS THIS?
-          float NL = 2.0*lightAndShapeNormalAlignment;
-          firstShapeSurfaceNormal.mult(NL);
-          //PVector R = PVector.sub(firstShapeSurfaceNormal, shapeToLight);
+
           Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
-          totalColor.add(ambientColor);
-          if(shadyShape!=null && blockTime<MAX_FLOAT && (shapeToLightMag > distShader2Light)){
-            totalColor.add(light.getColor());
-          }
-          else{
-            totalColor.add(diffuseSurfaceColor);
-          }
           
+          //if(shadyShape!=null && blockTime<MAX_FLOAT && (shapeToLightMag > distShader2Light)){
+          //  totalColor.add(light.getColor());
+          //}
+          //else{
+          //  totalColor.add(diffuseSurfaceColor.dotProduct(light.getColor()));
+          //}
+          totalColor.add(diffuseSurfaceColor.dotProduct(light.getColor()));
         }
         pixels[y*width+x] = color(totalColor.getR(), totalColor.getG(), totalColor.getB());
+        //println(totalColor.toString());
         //println("X: " + x + "\tY: " + y +"\tX': " + xPrime + "\tY': " + yPrime + "\tMag: " + rayMag);  
       }
       else{
-        pixels[y*width+x] = color(0, 0, 0);
+        pixels[y*width+x] = color(backgroundColor.getR(), backgroundColor.getG(), backgroundColor.getB());
       }
       
     }
@@ -201,6 +201,7 @@ void rayTrace(){
 void draw() {
   if(!gCurrentFile.equals("rect_test.cli")){
     rayTrace();
+    println(millis());
   } 
 }
 
