@@ -45,4 +45,8 @@ public class Scene{
     return allObjects;
   }
   
+  public ArrayList<PointLight> getPointLights(){
+    return pointLights;
+  }
+  
 }

@@ -2,12 +2,12 @@ public class Sphere extends Shape{    // TODO CHANGE TO ABSTRACT CLASS
 
   private float radius;
   private Point location;
-  private DiffuseSurface diffuseSurface;
+  
   
   public Sphere(float radius, Point location, DiffuseSurface diffuseSurface){
     this.radius = radius;
     this.location = location;
-    this.diffuseSurface = diffuseSurface;
+    addDiffuseSurface(diffuseSurface);
   }
   
   public float getRadius(){
@@ -16,10 +16,6 @@ public class Sphere extends Shape{    // TODO CHANGE TO ABSTRACT CLASS
   
   public Point getLocation(){
     return location;
-  }
-  
-  public DiffuseSurface getDiffuseSurface(){
-    return diffuseSurface;
   }
   
   public float intersects(Ray ray){
@@ -48,4 +44,16 @@ public class Sphere extends Shape{    // TODO CHANGE TO ABSTRACT CLASS
     //println("retValPlus : " + retValPlus);
     return retValPlus;
   }
+  
+  public Point hitPoint(Ray ray, float time){
+    PVector direction = ray.getDirection();
+    Point origin = ray.getOrigin();
+    return new Point(origin.getX() + time*direction.x, origin.getY() + time*direction.y, origin.getZ() + time*direction.z);
+  }
+  
+  public PVector shapeNormal(Point hitPoint){
+    PVector sphereNormal = hitPoint.subtract(location);
+    return sphereNormal.div(sphereNormal.mag());
+  }
+
 }

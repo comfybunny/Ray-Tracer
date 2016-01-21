@@ -45,6 +45,7 @@ public class Point{
     this.z = z;
   }
   
+  // B.subtract(A) is a vector from A to B
   public PVector subtract(Point a){
     PVector B = new PVector(x, y, z);
     return B.sub(a.getX(), a.getY(), a.getZ());

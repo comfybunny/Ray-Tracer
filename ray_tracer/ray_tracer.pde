@@ -122,21 +122,71 @@ void rayTrace(){
   for(int x = 0; x < width; x++){
     float xPrime = ((2.0*k/width)*x)-k;
     for(int y = 0; y < height; y++){
+      Color totalColor = new Color();
       float yPrime = ((-2.0*k/height)*y)+k;
       Point origin = ray.getOrigin();
       float rayMag = sqrt(sq(xPrime-origin.getX()) + sq(yPrime-origin.getY()) + 1);
-      ray.setDirection((xPrime-origin.getX())/rayMag, (yPrime-origin.getY())/rayMag, -1/rayMag);
-      //println("X: " + x + "\tY: " + y +"\tX': " + xPrime + "\tY': " + yPrime + "\tMag: " + rayMag);      
-      
+      ray.setDirection((xPrime-origin.getX())/rayMag, (yPrime-origin.getY())/rayMag, -1/rayMag);      
       float minTime = MAX_FLOAT;
+      Shape firstShape = null;
       for(Shape a : allObjects){
         float currTime = a.intersects(ray);
         if(currTime > 0 && currTime <minTime){
           minTime = currTime;
+          firstShape = a;
         }
       }
-      if(minTime < MAX_FLOAT){
-        pixels[y*width+x] = color(0.2, 0.2, 1);
+      if(minTime < MAX_FLOAT && firstShape!=null){
+        DiffuseSurface currentShapeSurface = firstShape.getDiffuseSurface();
+        Color diffuseColor = currentShapeSurface.getDiffuseCoefficient();
+        Color ambientColor = currentShapeSurface.getAmbientCoefficient();
+        ArrayList<PointLight> pointLights = currentScene.getPointLights();
+        Point intersectionPoint = firstShape.hitPoint(ray, minTime);
+        for(PointLight light : pointLights){
+          Point lightLocation = light.getPoint();
+          PVector shapeToLight = lightLocation.subtract(intersectionPoint);
+          float shapeToLightMag = shapeToLight.mag();
+          shapeToLight.div(shapeToLightMag);
+          Ray lightRay = new Ray(intersectionPoint,shapeToLight);
+          
+          float blockTime = MAX_FLOAT;  // if blockTime is < MAX_FLOAT then there is a shadow
+          Shape shadyShape = null;
+          for(Shape b : allObjects){
+            float intersectTime  = b.intersects(lightRay);
+            if(intersectTime > 0 && intersectTime<blockTime && b!=firstShape){
+              shadyShape = b;
+              blockTime = intersectTime;
+            }
+          }
+          
+          float distShader2Light = 0;
+          if(shadyShape != null){
+            Point shaderIntersection = shadyShape.hitPoint(lightRay, blockTime);
+            distShader2Light = lightLocation.subtract(shaderIntersection).mag();
+          }
+          
+          PVector firstShapeSurfaceNormal = firstShape.shapeNormal(intersectionPoint);
+          firstShapeSurfaceNormal.div(firstShapeSurfaceNormal.mag());
+          PVector firstIntersectionToOrigin = origin.subtract(intersectionPoint);
+          firstIntersectionToOrigin.div(firstIntersectionToOrigin.mag());
+          
+          float lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
+          float diffuse = max(0, lightAndShapeNormalAlignment);
+          // QUESTION: WHAT IS THIS?
+          float NL = 2.0*lightAndShapeNormalAlignment;
+          firstShapeSurfaceNormal.mult(NL);
+          //PVector R = PVector.sub(firstShapeSurfaceNormal, shapeToLight);
+          Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
+          totalColor.add(ambientColor);
+          if(shadyShape!=null && blockTime<MAX_FLOAT && (shapeToLightMag > distShader2Light)){
+            totalColor.add(light.getColor());
+          }
+          else{
+            totalColor.add(diffuseSurfaceColor);
+          }
+          
+        }
+        pixels[y*width+x] = color(totalColor.getR(), totalColor.getG(), totalColor.getB());
         //println("X: " + x + "\tY: " + y +"\tX': " + xPrime + "\tY': " + yPrime + "\tMag: " + rayMag);  
       }
       else{

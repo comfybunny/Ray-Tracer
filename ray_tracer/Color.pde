@@ -44,4 +44,10 @@ public class Color{
     this.B = B;
   }
   
+  public void add(Color durp){
+    R += durp.getR();
+    G += durp.getG();
+    B += durp.getB();
+  }
+  
 }
