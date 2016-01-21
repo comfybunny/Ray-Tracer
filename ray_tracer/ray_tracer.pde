@@ -37,7 +37,7 @@ void setup(){
 
 void keyPressed() {
   switch(key) {
-    case '~':  gCurrentFile = new String("rect_test.cli"); currentScene = new Scene(); interpreter(); break;
+    case '~':  background(0); gCurrentFile = new String("rect_test.cli"); currentScene = new Scene(); interpreter(); break;
     case '1':  gCurrentFile = new String("t01.cli"); currentScene = new Scene(); interpreter(); break;
     case '2':  gCurrentFile = new String("t02.cli"); currentScene = new Scene(); interpreter(); break;
     case '3':  gCurrentFile = new String("t03.cli"); currentScene = new Scene(); interpreter(); break;
@@ -144,28 +144,12 @@ void rayTrace(){
         totalColor.add(ambientColor);
         ArrayList<PointLight> pointLights = currentScene.getPointLights();
         Point intersectionPoint = firstShape.hitPoint(ray, minTime);
+        
         for(PointLight light : pointLights){
           Point lightLocation = light.getPoint();
           PVector shapeToLight = lightLocation.subtract(intersectionPoint);
           float shapeToLightMag = shapeToLight.mag();
           shapeToLight.div(shapeToLightMag);
-          Ray lightRay = new Ray(intersectionPoint,shapeToLight);
-          
-          float blockTime = MAX_FLOAT;  // if blockTime is < MAX_FLOAT then there is a shadow
-          Shape shadyShape = null;
-          for(Shape b : allObjects){
-            float intersectTime  = b.intersects(lightRay);
-            if(intersectTime > 0 && intersectTime<blockTime && b!=firstShape){
-              shadyShape = b;
-              blockTime = intersectTime;
-            }
-          }
-          
-          float distShader2Light = 0;
-          if(shadyShape != null){
-            Point shaderIntersection = shadyShape.hitPoint(lightRay, blockTime);
-            distShader2Light = lightLocation.subtract(shaderIntersection).mag();
-          }
           
           PVector firstShapeSurfaceNormal = firstShape.shapeNormal(intersectionPoint);
           firstShapeSurfaceNormal.div(firstShapeSurfaceNormal.mag());
@@ -176,13 +160,7 @@ void rayTrace(){
           float diffuse = max(0, lightAndShapeNormalAlignment);
 
           Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
-          
-          //if(shadyShape!=null && blockTime<MAX_FLOAT && (shapeToLightMag > distShader2Light)){
-          //  totalColor.add(light.getColor());
-          //}
-          //else{
-          //  totalColor.add(diffuseSurfaceColor.dotProduct(light.getColor()));
-          //}
+
           totalColor.add(diffuseSurfaceColor.dotProduct(light.getColor()));
         }
         pixels[y*width+x] = color(totalColor.getR(), totalColor.getG(), totalColor.getB());
@@ -201,7 +179,6 @@ void rayTrace(){
 void draw() {
   if(!gCurrentFile.equals("rect_test.cli")){
     rayTrace();
-    println(millis());
   } 
 }
 
