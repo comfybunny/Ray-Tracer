@@ -3,12 +3,14 @@ public class Scene{
   private Color background;
   private float fov;
   private ArrayList<PointLight> pointLights;                                   // TODO THIS NEEDS TO BE A LIST
-  private ArrayList<Sphere> allObjects = new ArrayList<Sphere>();  // TODO CHANGE TO ABSTRACT CLASS
+  private ArrayList<Shape> allObjects;  // TODO CHANGE TO ABSTRACT CLASS
 
   
   public Scene(){
     background = new Color();
     fov = 0;
+    pointLights = new ArrayList<PointLight>();
+    allObjects = new ArrayList<Shape>();
   }
   
   public void setBackground(Color background){
@@ -35,8 +37,12 @@ public class Scene{
     pointLights.add(pointLight);
   }
   
-  public void addShape(Sphere currObject){              // TODO CHANGE TO ABSTRACT CLASS
+  public void addShape(Shape currObject){              // TODO CHANGE TO ABSTRACT CLASS
     allObjects.add(currObject);
+  }
+  
+  public ArrayList<Shape> getAllObjects(){
+    return allObjects;
   }
   
 }

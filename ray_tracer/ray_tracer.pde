@@ -7,44 +7,47 @@
 int screen_width = 300;
 int screen_height = 300;
 
+String gCurrentFile = new String("rect_test.cli"); // A global variable for holding current active file name.
+
 // global matrix values
-PMatrix3D global_mat;
-float[] gmat = new float[16];  // global matrix values
+//PMatrix3D global_mat;
+//float[] gmat = new float[16];  // global matrix values
 
 // Some initializations for the scene.
-Scene currentScene = new Scene();
-
+Scene currentScene;
 DiffuseSurface currDiffuseSurface;
 
-void setup() {
-  size (300, 300, P3D);  // use P3D environment so that matrix commands work properly
+void setup(){
+  size (300, 300);  // use P3D environment so that matrix commands work properly
   noStroke();
   colorMode (RGB, 1.0);
   background (0, 0, 0);
+  currentScene = new Scene();
   
   // grab the global matrix values (to use later when drawing pixels)
-  PMatrix3D global_mat = (PMatrix3D) getMatrix();
-  global_mat.get(gmat);  
-  printMatrix();
+  //PMatrix3D global_mat = (PMatrix3D) getMatrix();
+  //global_mat.get(gmat);  
+  //printMatrix();
   //resetMatrix();    // you may want to reset the matrix here
 
-  interpreter("rect_test.cli");
+  interpreter();
 }
 
 // Press key 1 to 9 and 0 to run different test cases.
 
 void keyPressed() {
   switch(key) {
-    case '1':  interpreter("t01.cli"); break;
-    case '2':  interpreter("t02.cli"); break;
-    case '3':  interpreter("t03.cli"); break;
-    case '4':  interpreter("t04.cli"); break;
-    case '5':  interpreter("t05.cli"); break;
-    case '6':  interpreter("t06.cli"); break;
-    case '7':  interpreter("t07.cli"); break;
-    case '8':  interpreter("t08.cli"); break;
-    case '9':  interpreter("t09.cli"); break;
-    case '0':  interpreter("t10.cli"); break;
+    case '~':  gCurrentFile = new String("rect_test.cli"); currentScene = new Scene(); interpreter(); break;
+    case '1':  gCurrentFile = new String("t01.cli"); currentScene = new Scene(); interpreter(); break;
+    case '2':  gCurrentFile = new String("t02.cli"); currentScene = new Scene(); interpreter(); break;
+    case '3':  gCurrentFile = new String("t03.cli"); currentScene = new Scene(); interpreter(); break;
+    case '4':  gCurrentFile = new String("t04.cli"); currentScene = new Scene(); interpreter(); break;
+    case '5':  gCurrentFile = new String("t05.cli"); currentScene = new Scene(); interpreter(); break;
+    case '6':  gCurrentFile = new String("t06.cli"); currentScene = new Scene(); interpreter(); break;
+    case '7':  gCurrentFile = new String("t07.cli"); currentScene = new Scene(); interpreter(); break;
+    case '8':  gCurrentFile = new String("t08.cli"); currentScene = new Scene(); interpreter(); break;
+    case '9':  gCurrentFile = new String("t09.cli"); currentScene = new Scene(); interpreter(); break;
+    case '0':  gCurrentFile = new String("t10.cli"); currentScene = new Scene(); interpreter(); break;
     case 'q':  exit(); break;
   }
 }
@@ -56,62 +59,99 @@ void keyPressed() {
 //
 //  Note: Function "splitToken()" is only available in processing 1.25 or higher.
 
-void interpreter(String filename) {
+void interpreter() {
   
-  String str[] = loadStrings(filename);
-  if (str == null) println("Error! Failed to read the file.");
-  for (int i=0; i<str.length; i++) {
-    
-    String[] token = splitTokens(str[i], " "); // Get a line and parse tokens.
-    if (token.length == 0) continue; // Skip blank line.
-    
-    if (token[0].equals("fov")) {
-      currentScene.setFOV(Float.parseFloat(token[1]));
-    }
-    else if (token[0].equals("background")) {
-      currentScene.setBackground(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]));
-    }
-    else if (token[0].equals("point_light")) {
-      currentScene.addPointLight(new PointLight(new Point(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3])), 
-                                                new Color(Float.parseFloat(token[4]),Float.parseFloat(token[5]),Float.parseFloat(token[6]))));
-    }
-    else if (token[0].equals("diffuse")) {
-      currDiffuseSurface = new DiffuseSurface(new Color(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3])), 
-                                              new Color(Float.parseFloat(token[4]), Float.parseFloat(token[5]), Float.parseFloat(token[6])));
-    }    
-    else if (token[0].equals("sphere")) {
-      Sphere toAdd = new Sphere(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4])), currDiffuseSurface);
-      currentScene.addShape(toAdd);
-    }
-    else if (token[0].equals("read")) {  // reads input from another file
-      interpreter (token[1]);
-    }
-    else if (token[0].equals("color")) {  // example command -- not part of ray tracer
-      float r = float(token[1]);
-      float g = float(token[2]);
-      float b = float(token[3]);
-      fill(r, g, b);
-    }
-    else if (token[0].equals("rect")) {  // example command -- not part of ray tracer
-      float x0 = float(token[1]);
-      float y0 = float(token[2]);
-      float x1 = float(token[3]);
-      float y1 = float(token[4]);
-      rect(x0, screen_height-y1, x1-x0, y1-y0);
-    }
-    else if (token[0].equals("write")) {
-      // save the current image to a .png file
-      save(token[1]);  
+  String str[] = loadStrings(gCurrentFile);
+  if (str == null){
+    println("Error! Failed to read the file.");
+  }
+  else{
+    for (int i=0; i<str.length; i++) {
+      
+      String[] token = splitTokens(str[i], " "); // Get a line and parse tokens.
+      if (token.length == 0) continue; // Skip blank line.
+      
+      if (token[0].equals("fov")) {
+        currentScene.setFOV(Float.parseFloat(token[1]));
+      }
+      else if (token[0].equals("background")) {
+        currentScene.setBackground(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]));
+      }
+      else if (token[0].equals("point_light")) {
+        currentScene.addPointLight(new PointLight(new Point(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3])), 
+                                                  new Color(Float.parseFloat(token[4]),Float.parseFloat(token[5]),Float.parseFloat(token[6]))));
+      }
+      else if (token[0].equals("diffuse")) {
+        currDiffuseSurface = new DiffuseSurface(new Color(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3])), 
+                                                new Color(Float.parseFloat(token[4]), Float.parseFloat(token[5]), Float.parseFloat(token[6])));
+      }    
+      else if (token[0].equals("sphere")) {
+        Sphere newShape = new Sphere(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4])), currDiffuseSurface);
+        currentScene.addShape(newShape);
+      }
+      else if (token[0].equals("read")) {  // reads input from another file
+        gCurrentFile = new String(token[1]); interpreter(); currentScene = new Scene(); break;
+      }
+      else if (token[0].equals("color")) {  // example command -- not part of ray tracer
+       float r = float(token[1]);
+       float g = float(token[2]);
+       float b = float(token[3]);
+       fill(r, g, b);
+      }
+      else if (token[0].equals("rect")) {  // example command -- not part of ray tracer
+       float x0 = float(token[1]);
+       float y0 = float(token[2]);
+       float x1 = float(token[3]);
+       float y1 = float(token[4]);
+       rect(x0, screen_height-y1, x1-x0, y1-y0);
+      }
+      else if (token[0].equals("write")) {
+        // save the current image to a .png file
+        save(token[1]);  
+      }
     }
   }
 }
 
 void rayTrace(){
-  
+  loadPixels();
+  Ray ray = new Ray();
+  //println(currentScene.getFOV());
+  float k = tan(radians(currentScene.getFOV()/2.0));
+  ArrayList<Shape> allObjects = currentScene.getAllObjects();
+  for(int x = 0; x < width; x++){
+    float xPrime = ((2.0*k/width)*x)-k;
+    for(int y = 0; y < height; y++){
+      float yPrime = ((-2.0*k/height)*y)+k;
+      Point origin = ray.getOrigin();
+      float rayMag = sqrt(sq(xPrime-origin.getX()) + sq(yPrime-origin.getY()) + 1);
+      ray.setDirection((xPrime-origin.getX())/rayMag, (yPrime-origin.getY())/rayMag, -1/rayMag);
+      //println("X: " + x + "\tY: " + y +"\tX': " + xPrime + "\tY': " + yPrime + "\tMag: " + rayMag);      
+      
+      float minTime = MAX_FLOAT;
+      for(Shape a : allObjects){
+        float currTime = a.intersects(ray);
+        if(currTime > 0 && currTime <minTime){
+          minTime = currTime;
+        }
+      }
+      if(minTime < MAX_FLOAT){
+        pixels[y*width+x] = color(0.2, 0.2, 1);
+        //println("X: " + x + "\tY: " + y +"\tX': " + xPrime + "\tY': " + yPrime + "\tMag: " + rayMag);  
+      }
+      else{
+        pixels[y*width+x] = color(0, 0, 0);
+      }
+      
+    }
+  }
+  updatePixels();
 }
 
-//  Draw frames.  Should be left empty.
 void draw() {
+  if(!gCurrentFile.equals("rect_test.cli")){
+    rayTrace();
+  } 
 }
 
 // when mouse is pressed, print the cursor location
