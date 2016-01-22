@@ -50,6 +50,7 @@ void keyPressed() {
     case '9':  gCurrentFile = new String("t09.cli"); currentScene = new Scene(); interpreter(); break;
     case '0':  gCurrentFile = new String("t10.cli"); currentScene = new Scene(); interpreter(); break;
     case 's':  gCurrentFile = new String("specular01.cli"); currentScene = new Scene(); interpreter(); break;
+    case 'S':  gCurrentFile = new String("specular02.cli"); currentScene = new Scene(); interpreter(); break;
     case 'q':  exit(); break;
   }
   if (key == 'r') {
@@ -167,8 +168,6 @@ void rayTrace(){
         totalColor.add(ambientColor);
         ArrayList<PointLight> pointLights = currentScene.getPointLights();
         Point intersectionPoint = firstShape.hitPoint(ray, minTime);
-        Point eyeSpot = new Point();
-        PVector surfaceToEye = eyeSpot.subtract(intersectionPoint);
         for(PointLight light : pointLights){
           Point lightLocation = light.getPoint();
           PVector shapeToLight = lightLocation.subtract(intersectionPoint);
@@ -176,7 +175,6 @@ void rayTrace(){
           shapeToLight.div(shapeToLightMag);
           
           PVector firstShapeSurfaceNormal = firstShape.shapeNormal(intersectionPoint);
-          firstShapeSurfaceNormal.div(firstShapeSurfaceNormal.mag());
           PVector firstIntersectionToOrigin = origin.subtract(intersectionPoint);
           firstIntersectionToOrigin.div(firstIntersectionToOrigin.mag());
           
@@ -190,7 +188,7 @@ void rayTrace(){
             //println(currentShapeSurface.getSpecularHighlightExponent());
             PVector reflectedLightVector = new PVector(firstShapeSurfaceNormal.x, firstShapeSurfaceNormal.y, firstShapeSurfaceNormal.z);
             reflectedLightVector.mult(2.0*lightAndShapeNormalAlignment).sub(shapeToLight);
-            float specular = max(0, shapeToLight.dot(reflectedLightVector));  //TODO FIX THIS
+            float specular = max(0, firstIntersectionToOrigin.dot(reflectedLightVector));  //TODO FIX THIS
             float specularPower = pow(specular, currentShapeSurface.getSpecularHighlightExponent());
             specularColor.multiply(specularPower);
             diffuseSurfaceColor.add(specularColor);

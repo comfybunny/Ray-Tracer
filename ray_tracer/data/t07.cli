@@ -2,7 +2,7 @@
 
 fov 60
 point_light 0 5 5 1 1 1
-backgroun 0 0 0
+background 0 0 0
 
 # diffuse sphere in background
 
