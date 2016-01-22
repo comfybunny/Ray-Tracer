@@ -1,6 +1,6 @@
 public abstract class Shape{
   
-  private DiffuseSurface diffuseSurface;
+  private Surface surface;
   
   abstract float intersects(Ray tempRay);
   
@@ -8,12 +8,12 @@ public abstract class Shape{
   
   abstract PVector shapeNormal(Point hitPoint);
   
-  public void addDiffuseSurface(DiffuseSurface diffuseSurface){
-    this.diffuseSurface = diffuseSurface;
+  public void addSurface(Surface surface){
+    this.surface = surface;
   }
   
-  public DiffuseSurface getDiffuseSurface(){
-    return diffuseSurface;
+  public Surface getSurface(){
+    return surface;
   }
   
 }

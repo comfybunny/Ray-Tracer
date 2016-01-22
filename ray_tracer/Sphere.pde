@@ -4,10 +4,10 @@ public class Sphere extends Shape{    // TODO CHANGE TO ABSTRACT CLASS
   private Point location;
   
   
-  public Sphere(float radius, Point location, DiffuseSurface diffuseSurface){
+  public Sphere(float radius, Point location, Surface diffuseSurface){
     this.radius = radius;
     this.location = location;
-    addDiffuseSurface(diffuseSurface);
+    addSurface(diffuseSurface);
   }
   
   public float getRadius(){

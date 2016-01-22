@@ -7,6 +7,7 @@
 int screen_width = 300;
 int screen_height = 300;
 
+int refine = 8;
 String gCurrentFile = new String("rect_test.cli"); // A global variable for holding current active file name.
 
 // global matrix values
@@ -15,7 +16,7 @@ String gCurrentFile = new String("rect_test.cli"); // A global variable for hold
 
 // Some initializations for the scene.
 Scene currentScene;
-DiffuseSurface currDiffuseSurface;
+Surface currSurface;
 
 void setup(){
   size (300, 300);  // use P3D environment so that matrix commands work properly
@@ -36,7 +37,7 @@ void setup(){
 // Press key 1 to 9 and 0 to run different test cases.
 
 void keyPressed() {
-  switch(key) {
+  switch(key){
     case '~':  background(0); gCurrentFile = new String("rect_test.cli"); currentScene = new Scene(); interpreter(); break;
     case '1':  gCurrentFile = new String("t01.cli"); currentScene = new Scene(); interpreter(); break;
     case '2':  gCurrentFile = new String("t02.cli"); currentScene = new Scene(); interpreter(); break;
@@ -48,7 +49,16 @@ void keyPressed() {
     case '8':  gCurrentFile = new String("t08.cli"); currentScene = new Scene(); interpreter(); break;
     case '9':  gCurrentFile = new String("t09.cli"); currentScene = new Scene(); interpreter(); break;
     case '0':  gCurrentFile = new String("t10.cli"); currentScene = new Scene(); interpreter(); break;
+    case 's':  gCurrentFile = new String("specular01.cli"); currentScene = new Scene(); interpreter(); break;
     case 'q':  exit(); break;
+  }
+  if (key == 'r') {
+    if(refine == 1){
+      refine = 9;
+    }
+    else{
+      refine = refine/2;
+    }
   }
 }
 
@@ -82,12 +92,20 @@ void interpreter() {
                                                   new Color(Float.parseFloat(token[4]),Float.parseFloat(token[5]),Float.parseFloat(token[6]))));
       }
       else if (token[0].equals("diffuse")) {
-        currDiffuseSurface = new DiffuseSurface(new Color(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3])), 
-                                                new Color(Float.parseFloat(token[4]), Float.parseFloat(token[5]), Float.parseFloat(token[6])));
-      }    
+        currSurface = new Surface(new Color(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3])), 
+                                  new Color(Float.parseFloat(token[4]), Float.parseFloat(token[5]), Float.parseFloat(token[6])));
+      }
+      else if (token[0].equals("shiny")) {
+        currSurface = new Surface(new Color(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3])), 
+                                  new Color(Float.parseFloat(token[4]), Float.parseFloat(token[5]), Float.parseFloat(token[6])),
+                                  new Color(Float.parseFloat(token[7]), Float.parseFloat(token[8]), Float.parseFloat(token[9])),
+                                  Float.parseFloat(token[10]), Float.parseFloat(token[11]), Float.parseFloat(token[12]), Float.parseFloat(token[13]));
+        println(currSurface.getSpecularColor().toString());
+      }
       else if (token[0].equals("sphere")) {
-        Sphere newShape = new Sphere(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4])), currDiffuseSurface);
+        Sphere newShape = new Sphere(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4])), currSurface);
         currentScene.addShape(newShape);
+        //println(currentScene.getAllObjects().get(0).getSurface().getSpecularColor().toString());
       }
       else if (token[0].equals("read")) {  // reads input from another file
         gCurrentFile = new String(token[1]); interpreter(); currentScene = new Scene(); break;
@@ -120,9 +138,9 @@ void rayTrace(){
   //println(currentScene.getFOV());
   float k = tan(radians(currentScene.getFOV()/2.0));
   ArrayList<Shape> allObjects = currentScene.getAllObjects();
-  for(int x = 0; x < width; x++){
+  for(int x = 0; x < width; x+=refine){
     float xPrime = ((2.0*k/width)*x)-k;
-    for(int y = 0; y < height; y++){
+    for(int y = 0; y < height; y+=refine){
       Color totalColor = new Color();
       float yPrime = ((-2.0*k/height)*y)+k;
       Point origin = ray.getOrigin();
@@ -138,9 +156,10 @@ void rayTrace(){
         }
       }
       if(minTime < MAX_FLOAT && firstShape!=null){
-        DiffuseSurface currentShapeSurface = firstShape.getDiffuseSurface();
-        Color diffuseColor = currentShapeSurface.getDiffuseCoefficient();
-        Color ambientColor = currentShapeSurface.getAmbientCoefficient();
+        Surface currentShapeSurface = firstShape.getSurface();
+        Color diffuseColor = currentShapeSurface.getDiffuseColor();
+        Color ambientColor = currentShapeSurface.getAmbientColor();
+        Color specularColor = currentShapeSurface.getSpecularColor();
         totalColor.add(ambientColor);
         ArrayList<PointLight> pointLights = currentScene.getPointLights();
         Point intersectionPoint = firstShape.hitPoint(ray, minTime);
@@ -160,15 +179,39 @@ void rayTrace(){
           float diffuse = max(0, lightAndShapeNormalAlignment);
 
           Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
-
+          
+          PVector reflectedLightVector = new PVector(firstShapeSurfaceNormal.x, firstShapeSurfaceNormal.y, firstShapeSurfaceNormal.z);
+          reflectedLightVector.mult(2.0*lightAndShapeNormalAlignment).sub(shapeToLight);
+          
+          if(specularColor!=null){
+           //println(specularColor.toString());
+           //println(currentShapeSurface.getSpecularHighlightExponent());
+          float specular = max(0, shapeToLight.dot(reflectedLightVector));
+          float specularPower = pow(specular, currentShapeSurface.getSpecularHighlightExponent());
+          specularColor.multiply(specularPower);
+          diffuseSurfaceColor.add(specularColor);
+          }
           totalColor.add(diffuseSurfaceColor.dotProduct(light.getColor()));
         }
-        pixels[y*width+x] = color(totalColor.getR(), totalColor.getG(), totalColor.getB());
+        for(int i = x; i < x + refine; i++){
+          for(int j = y; j< y + refine; j++){
+            if(j*width+i < width*height){
+              pixels[j*width+i] = color(totalColor.getR(), totalColor.getG(), totalColor.getB());
+            }
+          }
+        }
+        
         //println(totalColor.toString());
         //println("X: " + x + "\tY: " + y +"\tX': " + xPrime + "\tY': " + yPrime + "\tMag: " + rayMag);  
       }
       else{
-        pixels[y*width+x] = color(backgroundColor.getR(), backgroundColor.getG(), backgroundColor.getB());
+        for(int i = x; i < x + refine; i++){
+          for(int j = y; j < y + refine; j++){
+            if(j*width+i < width*height){
+              pixels[j*width+i] = color(backgroundColor.getR(), backgroundColor.getG(), backgroundColor.getB());
+            }
+          }
+        }
       }
       
     }
@@ -179,7 +222,7 @@ void rayTrace(){
 void draw() {
   if(!gCurrentFile.equals("rect_test.cli")){
     rayTrace();
-  } 
+  }
 }
 
 // when mouse is pressed, print the cursor location

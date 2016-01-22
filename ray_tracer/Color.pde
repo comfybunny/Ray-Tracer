@@ -59,4 +59,10 @@ public class Color{
     return new Color(R*b.getR(), G*b.getG(), B*b.getB());
   }
   
+  public void multiply(float factor){
+    R = R*factor;
+    G = G*factor;
+    B = B*factor;
+  }
+  
 }
