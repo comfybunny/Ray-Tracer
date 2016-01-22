@@ -100,7 +100,7 @@ void interpreter() {
                                   new Color(Float.parseFloat(token[4]), Float.parseFloat(token[5]), Float.parseFloat(token[6])),
                                   new Color(Float.parseFloat(token[7]), Float.parseFloat(token[8]), Float.parseFloat(token[9])),
                                   Float.parseFloat(token[10]), Float.parseFloat(token[11]), Float.parseFloat(token[12]), Float.parseFloat(token[13]));
-        println(currSurface.getSpecularColor().toString());
+        //println(currSurface.getSpecularColor().toString());
       }
       else if (token[0].equals("sphere")) {
         Sphere newShape = new Sphere(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4])), currSurface);
@@ -132,12 +132,14 @@ void interpreter() {
 }
 
 void rayTrace(){
+  //println(currSurface.getSpecularColor().toString());
   loadPixels();
   Ray ray = new Ray();
   Color backgroundColor = currentScene.getBackground();
   //println(currentScene.getFOV());
   float k = tan(radians(currentScene.getFOV()/2.0));
   ArrayList<Shape> allObjects = currentScene.getAllObjects();
+  //println(allObjects.get(0).getSurface().getSpecularColor().toString());
   for(int x = 0; x < width; x+=refine){
     float xPrime = ((2.0*k/width)*x)-k;
     for(int y = 0; y < height; y+=refine){
@@ -159,11 +161,14 @@ void rayTrace(){
         Surface currentShapeSurface = firstShape.getSurface();
         Color diffuseColor = currentShapeSurface.getDiffuseColor();
         Color ambientColor = currentShapeSurface.getAmbientColor();
-        Color specularColor = currentShapeSurface.getSpecularColor();
+        Color tempSpecularColor = currentShapeSurface.getSpecularColor();
+        
+        //println(specularColor.toString());
         totalColor.add(ambientColor);
         ArrayList<PointLight> pointLights = currentScene.getPointLights();
         Point intersectionPoint = firstShape.hitPoint(ray, minTime);
-        
+        Point eyeSpot = new Point();
+        PVector surfaceToEye = eyeSpot.subtract(intersectionPoint);
         for(PointLight light : pointLights){
           Point lightLocation = light.getPoint();
           PVector shapeToLight = lightLocation.subtract(intersectionPoint);
@@ -180,16 +185,15 @@ void rayTrace(){
 
           Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
           
-          PVector reflectedLightVector = new PVector(firstShapeSurfaceNormal.x, firstShapeSurfaceNormal.y, firstShapeSurfaceNormal.z);
-          reflectedLightVector.mult(2.0*lightAndShapeNormalAlignment).sub(shapeToLight);
-          
-          if(specularColor!=null){
-           //println(specularColor.toString());
-           //println(currentShapeSurface.getSpecularHighlightExponent());
-          float specular = max(0, shapeToLight.dot(reflectedLightVector));
-          float specularPower = pow(specular, currentShapeSurface.getSpecularHighlightExponent());
-          specularColor.multiply(specularPower);
-          diffuseSurfaceColor.add(specularColor);
+          if(tempSpecularColor!=null){
+            Color specularColor = new Color(tempSpecularColor.getR(), tempSpecularColor.getG(), tempSpecularColor.getB());
+            //println(currentShapeSurface.getSpecularHighlightExponent());
+            PVector reflectedLightVector = new PVector(firstShapeSurfaceNormal.x, firstShapeSurfaceNormal.y, firstShapeSurfaceNormal.z);
+            reflectedLightVector.mult(2.0*lightAndShapeNormalAlignment).sub(shapeToLight);
+            float specular = max(0, shapeToLight.dot(reflectedLightVector));  //TODO FIX THIS
+            float specularPower = pow(specular, currentShapeSurface.getSpecularHighlightExponent());
+            specularColor.multiply(specularPower);
+            diffuseSurfaceColor.add(specularColor);
           }
           totalColor.add(diffuseSurfaceColor.dotProduct(light.getColor()));
         }
