@@ -8,6 +8,8 @@ int screen_width = 300;
 int screen_height = 300;
 
 int refine = 8;
+boolean refineBoolean = true;
+
 String gCurrentFile = new String("rect_test.cli"); // A global variable for holding current active file name.
 
 // global matrix values
@@ -38,28 +40,30 @@ void setup(){
 
 void keyPressed() {
   switch(key){
-    case '~':  background(0); gCurrentFile = new String("rect_test.cli"); currentScene = new Scene(); interpreter(); break;
-    case '1':  gCurrentFile = new String("t01.cli"); currentScene = new Scene(); interpreter(); break;
-    case '2':  gCurrentFile = new String("t02.cli"); currentScene = new Scene(); interpreter(); break;
-    case '3':  gCurrentFile = new String("t03.cli"); currentScene = new Scene(); interpreter(); break;
-    case '4':  gCurrentFile = new String("t04.cli"); currentScene = new Scene(); interpreter(); break;
-    case '5':  gCurrentFile = new String("t05.cli"); currentScene = new Scene(); interpreter(); break;
-    case '6':  gCurrentFile = new String("t06.cli"); currentScene = new Scene(); interpreter(); break;
-    case '7':  gCurrentFile = new String("t07.cli"); currentScene = new Scene(); interpreter(); break;
-    case '8':  gCurrentFile = new String("t08.cli"); currentScene = new Scene(); interpreter(); break;
-    case '9':  gCurrentFile = new String("t09.cli"); currentScene = new Scene(); interpreter(); break;
-    case '0':  gCurrentFile = new String("t10.cli"); currentScene = new Scene(); interpreter(); break;
-    case 's':  gCurrentFile = new String("specular01.cli"); currentScene = new Scene(); interpreter(); break;
-    case 'S':  gCurrentFile = new String("specular02.cli"); currentScene = new Scene(); interpreter(); break;
+    case '~':  background(0); gCurrentFile = new String("rect_test.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case '1':  gCurrentFile = new String("t01.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case '2':  gCurrentFile = new String("t02.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case '3':  gCurrentFile = new String("t03.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case '4':  gCurrentFile = new String("t04.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case '5':  gCurrentFile = new String("t05.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case '6':  gCurrentFile = new String("t06.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case '7':  gCurrentFile = new String("t07.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case '8':  gCurrentFile = new String("t08.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case '9':  gCurrentFile = new String("t09.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case '0':  gCurrentFile = new String("t10.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case 's':  gCurrentFile = new String("specular01.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case 'S':  gCurrentFile = new String("specular02.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
     case 'q':  exit(); break;
+    case 'c':  gCurrentFile = new String("debug.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
   }
   if (key == 'r') {
-    if(refine == 1){
-      refine = 9;
+    if(!refineBoolean){
+      refine = 8;
     }
     else{
-      refine = refine/2;
+      refine = 1;
     }
+    refineBoolean = !refineBoolean;
   }
 }
 
@@ -107,6 +111,11 @@ void interpreter() {
         Sphere newShape = new Sphere(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4])), currSurface);
         currentScene.addShape(newShape);
         //println(currentScene.getAllObjects().get(0).getSurface().getSpecularColor().toString());
+      }
+      else if(token[0].equals("cylinder")){
+        Cylinder newShape = new Cylinder(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[4]), Float.parseFloat(token[3])), Float.parseFloat(token[5]), currSurface);
+        currentScene.addShape(newShape);
+        //println(newShape.debug());
       }
       else if (token[0].equals("read")) {  // reads input from another file
         gCurrentFile = new String(token[1]); interpreter(); currentScene = new Scene(); break;
@@ -215,7 +224,6 @@ void rayTrace(){
           }
         }
       }
-      
     }
   }
   updatePixels();
@@ -224,6 +232,9 @@ void rayTrace(){
 void draw() {
   if(!gCurrentFile.equals("rect_test.cli")){
     rayTrace();
+    if(refine > 1 && refineBoolean){
+      refine = refine/2;
+    }
   }
 }
 

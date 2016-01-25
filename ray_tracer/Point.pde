@@ -50,4 +50,8 @@ public class Point{
     PVector B = new PVector(x, y, z);
     return B.sub(a.getX(), a.getY(), a.getZ());
   }
+  
+  public String debug(){
+    return "X: " + x + "\tY: " + y + "\tZ: " + z;
+  }
 }
