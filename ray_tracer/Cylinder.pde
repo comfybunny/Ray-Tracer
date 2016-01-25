@@ -38,6 +38,7 @@ public class Cylinder extends Shape{
     if(discriminant < 0){
       return -1;
     }
+    
     float retValPlus = ((-1*b+sqrt(discriminant))/(2.0*a));
     float retValMinus = ((-1*b-sqrt(discriminant))/(2.0*a));
     
@@ -49,40 +50,30 @@ public class Cylinder extends Shape{
     float tMin = -1;
     
     // minimum time to hit body of cylinder
-    if(ymin < y1 && y1 < ymax && ymin < y2 && y2 < ymax){
+    if(ymin <= y1 && y1 <= ymax && ymin <= y2 && y2 <= ymax){
       // if both past test, return smallest nonnegative time
-      if(retValPlus > retValMinus && retValMinus>0){
-        tMin = retValMinus;
-      }
-      else{
-        tMin = retValPlus;
-      }
+      tMin = StaticUtility.smallestPositive(retValMinus, retValPlus);
     }
-    else if(ymin < y1 && y1 < ymax){
-      if(retValPlus > retValMinus && retValMinus>0){
-        tMin = retValMinus;
-      }
-      else{
-        tMin = retValPlus;
-      }
+    else if((ymin <= y1 && y1 <= ymax) || (ymin <= y2 && y2 <= ymax)){
+      tMin = StaticUtility.smallestPositive(retValMinus, retValPlus);
     }
-    else if(ymin < y2 && y2 < ymax){
-      if(retValPlus > retValMinus && retValMinus>0){
-        tMin = retValMinus;
-      }
-      else{
-        tMin = retValPlus;
-      }
-    }
+    // else it doesn't hit body of cylinder
     
     // check minimum time of hitting end caps
-    
+
+    if((y1 <= location.getY() && y2 >= ymax) || (y2 <= location.getY() && y1 >= ymax)){
+      float tempTime1 = (ymax - origin.getY())/direction.y;
+      float tempTime2 = (location.getY() - origin.getY())/direction.y;
+      tMin = StaticUtility.smallestPositive(tempTime1, tempTime2);
+    }
     // this is on either side of top cap so it intersects top
-    if((y1 <= ymax && ymax <= y2) || (y2 <= ymax && ymax <= y1)){
+    else if((y1 <= ymax && ymax <= y2) || (y2 <= ymax && ymax <= y1)){
       float tempT = (ymax - origin.getY())/direction.y;
-      if(tempT < tMin || tMin == -1){
-        tMin = tempT;
-      }
+      tMin = StaticUtility.smallestPositive(tempT, tMin);
+    }
+    else if((y1 <= location.getY() && location.getY() <= y2) || (y2 <= location.getY() && location.getY() <= y1)){
+     float tempT = (location.getY() - origin.getY())/direction.y;
+     tMin = StaticUtility.smallestPositive(tempT, tMin);
     }
     return tMin;
   }

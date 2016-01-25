@@ -18,4 +18,15 @@ public static final class StaticUtility{
     }
     return retValPlus;
   }
+  
+  // returns -1 if both negative
+  public static float smallestPositive(float a, float b){
+    if(a > 0 && a < b){
+      return a;
+    }
+    else if(b > 0 && b < a){
+      return b;
+    }
+    return -1;
+  }
 }
