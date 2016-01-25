@@ -39,4 +39,7 @@ public class Ray{
     return "Origin: (" + origin.getX() + ", " + origin.getY() + ", " + origin.getZ() + ")\tDirection: (" + direction.x + ", " + direction.y + ", " + direction.z + ")";
   }
   
+  public Point hitPoint(float time){
+    return new Point(origin.getX() + time*direction.x, origin.getY() + time*direction.y, origin.getZ() + time*direction.z);
+  }
 }

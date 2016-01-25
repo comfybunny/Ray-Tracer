@@ -1,4 +1,4 @@
-public class Sphere extends Shape{    // TODO CHANGE TO ABSTRACT CLASS
+public class Sphere extends Shape{
 
   private float radius;
   private Point location;
@@ -43,12 +43,6 @@ public class Sphere extends Shape{    // TODO CHANGE TO ABSTRACT CLASS
     }
     //println("retValPlus : " + retValPlus);
     return retValPlus;
-  }
-  
-  public Point hitPoint(Ray ray, float time){
-    PVector direction = ray.getDirection();
-    Point origin = ray.getOrigin();
-    return new Point(origin.getX() + time*direction.x, origin.getY() + time*direction.y, origin.getZ() + time*direction.z);
   }
   
   public PVector shapeNormal(Point hitPoint){

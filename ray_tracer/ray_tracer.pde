@@ -167,7 +167,7 @@ void rayTrace(){
         //println(specularColor.toString());
         totalColor.add(ambientColor);
         ArrayList<PointLight> pointLights = currentScene.getPointLights();
-        Point intersectionPoint = firstShape.hitPoint(ray, minTime);
+        Point intersectionPoint = ray.hitPoint(minTime);
         for(PointLight light : pointLights){
           Point lightLocation = light.getPoint();
           PVector shapeToLight = lightLocation.subtract(intersectionPoint);
