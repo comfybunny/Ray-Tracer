@@ -7,8 +7,12 @@
 int screen_width = 300;
 int screen_height = 300;
 
+boolean durp = false;
 int refine = 8;
 boolean refineBoolean = true;
+
+int recursionDepth = 1;
+int maxDepth = 0;
 
 String gCurrentFile = new String("rect_test.cli"); // A global variable for holding current active file name.
 
@@ -64,6 +68,9 @@ void keyPressed() {
       refine = 1;
     }
     refineBoolean = !refineBoolean;
+  }
+  if(key == 'p'){
+    println(maxDepth);
   }
 }
 
@@ -140,6 +147,89 @@ void interpreter() {
     }
   }
 }
+void recursive(Ray ray, Shape lastHit, Color totalColor){
+  
+  recursionDepth += 1;
+  if(maxDepth < recursionDepth){
+    maxDepth = recursionDepth;
+  }
+  ArrayList<Shape> allObjects = currentScene.getAllObjects();
+  Point origin = ray.getOrigin();
+  float minTime = MAX_FLOAT;
+  Shape firstShape = null;
+  for(Shape a : allObjects){
+    if(lastHit != a){
+      float currTime = a.intersects(ray);
+      if(currTime > 0 && currTime <minTime){
+        minTime = currTime;
+        firstShape = a;
+      }
+    }
+  }
+  if(minTime < MAX_FLOAT && firstShape!=null){
+    durp = true;
+    Surface currentShapeSurface = firstShape.getSurface();
+    Color diffuseColor = currentShapeSurface.getDiffuseColor();
+    Color ambientColor = currentShapeSurface.getAmbientColor();
+    Color tempSpecularColor = currentShapeSurface.getSpecularColor();
+    
+    //println(specularColor.toString());
+    if(lastHit == null){
+      totalColor.add(ambientColor);
+    }
+    
+    Point intersectionPoint = ray.hitPoint(minTime);
+    PVector firstShapeSurfaceNormal = firstShape.shapeNormal(intersectionPoint);
+    firstShapeSurfaceNormal.div(firstShapeSurfaceNormal.mag());
+    
+    // if reflective then recurse
+    if(firstShape.getSurface().getReflectiveCoefficient() > 0 && recursionDepth < 10){
+      PVector babyRay = intersectionPoint.subtract(origin);
+      babyRay.div(babyRay.mag());
+      
+      babyRay.sub(PVector.mult(firstShapeSurfaceNormal,(2*(babyRay.dot(firstShapeSurfaceNormal)))));
+      babyRay.div(babyRay.mag());
+      Ray newRecurseRay = new Ray(intersectionPoint, babyRay);
+      recursive(newRecurseRay, firstShape, totalColor);
+      recursionDepth -= 1;
+    }
+      
+    ArrayList<PointLight> pointLights = currentScene.getPointLights();
+    
+    // assuming no refraction for now
+    for(PointLight light : pointLights){
+      Point lightLocation = light.getPoint();
+      PVector shapeToLight = lightLocation.subtract(intersectionPoint);
+      float shapeToLightMag = shapeToLight.mag();
+      shapeToLight.div(shapeToLightMag);
+        
+      PVector firstIntersectionToOrigin = origin.subtract(intersectionPoint);
+      firstIntersectionToOrigin.div(firstIntersectionToOrigin.mag());
+      
+      float lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
+      float diffuse = max(0, lightAndShapeNormalAlignment);
+
+      Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
+      
+      if(tempSpecularColor!=null){
+        Color specularColor = new Color(tempSpecularColor.getR(), tempSpecularColor.getG(), tempSpecularColor.getB());
+        //println(currentShapeSurface.getSpecularHighlightExponent());
+        PVector reflectedLightVector = new PVector(firstShapeSurfaceNormal.x, firstShapeSurfaceNormal.y, firstShapeSurfaceNormal.z);
+        reflectedLightVector.mult(2.0*lightAndShapeNormalAlignment).sub(shapeToLight);
+        float specular = max(0, firstIntersectionToOrigin.dot(reflectedLightVector));  //TODO FIX THIS
+        float specularPower = pow(specular, currentShapeSurface.getSpecularHighlightExponent());
+        specularColor.multiply(specularPower);
+        diffuseSurfaceColor.add(specularColor);  
+      }
+      
+      Color tempToAdd = diffuseSurfaceColor.dotProduct(light.getColor());
+      if(lastHit != null){
+        tempToAdd.multiply(lastHit.getSurface().getReflectiveCoefficient());
+      }
+      totalColor.add(tempToAdd);
+    }
+  }
+}
 
 void rayTrace(){
   //println(currSurface.getSpecularColor().toString());
@@ -148,7 +238,7 @@ void rayTrace(){
   Color backgroundColor = currentScene.getBackground();
   //println(currentScene.getFOV());
   float k = tan(radians(currentScene.getFOV()/2.0));
-  ArrayList<Shape> allObjects = currentScene.getAllObjects();
+  //ArrayList<Shape> allObjects = currentScene.getAllObjects();
   //println(allObjects.get(0).getSurface().getSpecularColor().toString());
   for(int x = 0; x < width; x+=refine){
     float xPrime = ((2.0*k/width)*x)-k;
@@ -157,68 +247,25 @@ void rayTrace(){
       float yPrime = ((-2.0*k/height)*y)+k;
       Point origin = ray.getOrigin();
       float rayMag = sqrt(sq(xPrime-origin.getX()) + sq(yPrime-origin.getY()) + 1);
-      ray.setDirection((xPrime-origin.getX())/rayMag, (yPrime-origin.getY())/rayMag, -1/rayMag);      
-      float minTime = MAX_FLOAT;
-      Shape firstShape = null;
-      for(Shape a : allObjects){
-        float currTime = a.intersects(ray);
-        if(currTime > 0 && currTime <minTime){
-          minTime = currTime;
-          firstShape = a;
-        }
-      }
-      if(minTime < MAX_FLOAT && firstShape!=null){
-        Surface currentShapeSurface = firstShape.getSurface();
-        Color diffuseColor = currentShapeSurface.getDiffuseColor();
-        Color ambientColor = currentShapeSurface.getAmbientColor();
-        Color tempSpecularColor = currentShapeSurface.getSpecularColor();
-        
-        //println(specularColor.toString());
-        totalColor.add(ambientColor);
-        ArrayList<PointLight> pointLights = currentScene.getPointLights();
-        Point intersectionPoint = ray.hitPoint(minTime);
-        for(PointLight light : pointLights){
-          Point lightLocation = light.getPoint();
-          PVector shapeToLight = lightLocation.subtract(intersectionPoint);
-          float shapeToLightMag = shapeToLight.mag();
-          shapeToLight.div(shapeToLightMag);
-          
-          PVector firstShapeSurfaceNormal = firstShape.shapeNormal(intersectionPoint);
-          PVector firstIntersectionToOrigin = origin.subtract(intersectionPoint);
-          firstIntersectionToOrigin.div(firstIntersectionToOrigin.mag());
-          
-          float lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
-          float diffuse = max(0, lightAndShapeNormalAlignment);
-
-          Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
-          
-          if(tempSpecularColor!=null){
-            Color specularColor = new Color(tempSpecularColor.getR(), tempSpecularColor.getG(), tempSpecularColor.getB());
-            //println(currentShapeSurface.getSpecularHighlightExponent());
-            PVector reflectedLightVector = new PVector(firstShapeSurfaceNormal.x, firstShapeSurfaceNormal.y, firstShapeSurfaceNormal.z);
-            reflectedLightVector.mult(2.0*lightAndShapeNormalAlignment).sub(shapeToLight);
-            float specular = max(0, firstIntersectionToOrigin.dot(reflectedLightVector));  //TODO FIX THIS
-            float specularPower = pow(specular, currentShapeSurface.getSpecularHighlightExponent());
-            specularColor.multiply(specularPower);
-            diffuseSurfaceColor.add(specularColor);
-          }
-          totalColor.add(diffuseSurfaceColor.dotProduct(light.getColor()));
-        }
+      ray.setDirection((xPrime-origin.getX())/rayMag, (yPrime-origin.getY())/rayMag, -1/rayMag);
+      
+      recursive(ray, null, totalColor);
+      
+      if(durp){
         for(int i = x; i < x + refine; i++){
-          for(int j = y; j< y + refine; j++){
-            if(j*width+i < width*height){
-              pixels[j*width+i] = color(totalColor.getR(), totalColor.getG(), totalColor.getB());
+            for(int j = y; j< y + refine; j++){
+              if(j*width+i < width*height){
+                pixels[j*width+i] = color(totalColor.getR(), totalColor.getG(), totalColor.getB());
+              }
             }
           }
-        }
-        
-        //println(totalColor.toString());
-        //println("X: " + x + "\tY: " + y +"\tX': " + xPrime + "\tY': " + yPrime + "\tMag: " + rayMag);  
+          durp = false;
       }
       else{
         for(int i = x; i < x + refine; i++){
           for(int j = y; j < y + refine; j++){
             if(j*width+i < width*height){
+              //println(backgroundColor.toString());
               pixels[j*width+i] = color(backgroundColor.getR(), backgroundColor.getG(), backgroundColor.getB());
             }
           }
