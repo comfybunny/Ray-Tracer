@@ -55,7 +55,7 @@ public class Color{
   }
   
   // returns new Color object
-  public Color dotProduct(Color b){
+  public Color product(Color b){
     return new Color(R*b.getR(), G*b.getG(), B*b.getB());
   }
   

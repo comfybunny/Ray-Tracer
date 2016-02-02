@@ -23,8 +23,16 @@ public class Ray{
     direction.set(x, y, z);
   }
   
+  public void setDirection(PVector dir){
+    direction.set(dir.x, dir.y, dir.z);
+  }
+  
   public void setOrigin(float x, float y, float z){
     origin.setXYZ(x, y, z);
+  }
+  
+  public void setOrigin(Point dir){
+    origin.setXYZ(dir.x, dir.y, dir.z);
   }
   
   public Point getOrigin(){

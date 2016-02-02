@@ -33,14 +33,16 @@ public class Cylinder extends Shape{
     float a = sq(direction.x) + sq(direction.z);
     float b = 2*direction.x*(centerToOrigin.x) + 2*direction.z*(centerToOrigin.z);
     float c = sq(centerToOrigin.x) + sq(centerToOrigin.z) - sq(radius);
-    float discriminant = sq(b) - (4*a*c);
+    float discriminant = sq(b) - (4.0*a*c);
         
     if(discriminant < 0){
+      // if it doesnt hit infinite length cylinder it won't hit a finite length cylinder
       return -1;
     }
     
-    float retValPlus = ((-1*b+sqrt(discriminant))/(2.0*a));
-    float retValMinus = ((-1*b-sqrt(discriminant))/(2.0*a));
+    // retValPlus and retValMinus are the two times it hits the body
+    float retValPlus = (-1.0*b+sqrt(discriminant))/(2.0*a);
+    float retValMinus = (-1.0*b-sqrt(discriminant))/(2.0*a);
     
     float y1 = origin.getY() + retValMinus*direction.y;
     float y2 = origin.getY() + retValPlus*direction.y;
@@ -49,32 +51,35 @@ public class Cylinder extends Shape{
     
     float tMin = -1;
     
+    
     // minimum time to hit body of cylinder
     if(ymin <= y1 && y1 <= ymax && ymin <= y2 && y2 <= ymax){
       // if both past test, return smallest nonnegative time
       tMin = StaticUtility.smallestPositive(retValMinus, retValPlus);
     }
-    else if((ymin <= y1 && y1 <= ymax) || (ymin <= y2 && y2 <= ymax)){
-      tMin = StaticUtility.smallestPositive(retValMinus, retValPlus);
+    else if(ymin <= y1 && y1 <= ymax){
+      tMin = retValMinus;
+    }
+    else if(ymin <= y2 && y2 <= ymax){
+      tMin = retValPlus;
     }
     // else it doesn't hit body of cylinder
     
     // check minimum time of hitting end caps
-
-    if((y1 <= location.getY() && y2 >= ymax) || (y2 <= location.getY() && y1 >= ymax)){
-      float tempTime1 = (ymax - origin.getY())/direction.y;
-      float tempTime2 = (location.getY() - origin.getY())/direction.y;
+    if( (y1 <= ymin && y2 >= ymax) || (y2 <= ymin && y1 >= ymax) ){
+      float tempTime1 = (ymin - origin.getY())/direction.y;
+      float tempTime2 = (ymax - origin.getY())/direction.y;
       tMin = StaticUtility.smallestPositive(tempTime1, tempTime2);
     }
-    // this is on either side of top cap so it intersects top
-    else if((y1 <= ymax && ymax <= y2) || (y2 <= ymax && ymax <= y1)){
-      float tempT = (ymax - origin.getY())/direction.y;
-      tMin = StaticUtility.smallestPositive(tempT, tMin);
+    else if ( (y1 <= ymin && y2 >= ymin) || (y2 <= ymin && y1 >= ymin) ) {
+     float tempTime = (ymin - origin.getY())/direction.y;
+     tMin = StaticUtility.smallestPositive(tempTime, tMin);
     }
-    else if((y1 <= location.getY() && location.getY() <= y2) || (y2 <= location.getY() && location.getY() <= y1)){
-     float tempT = (location.getY() - origin.getY())/direction.y;
-     tMin = StaticUtility.smallestPositive(tempT, tMin);
+    else if ( (y1 <= ymax && y2 >= ymax) || (y2 <= ymax && y1 >= ymax) ) {
+     float tempTime = (ymax - origin.getY())/direction.y;
+     tMin = StaticUtility.smallestPositive(tempTime, tMin);
     }
+    
     return tMin;
   }
   

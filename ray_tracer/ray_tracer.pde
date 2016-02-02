@@ -147,12 +147,12 @@ void interpreter() {
     }
   }
 }
-void recursive(Ray ray, Shape lastHit, Color totalColor){
-  
-  recursionDepth += 1;
-  if(maxDepth < recursionDepth){
-    maxDepth = recursionDepth;
-  }
+public Color recursive(Ray ray, Shape lastHit){
+  Color totalColor = new Color();
+  //recursionDepth += 1;
+  //if(maxDepth < recursionDepth){
+  //  maxDepth = recursionDepth;
+  //}
   ArrayList<Shape> allObjects = currentScene.getAllObjects();
   Point origin = ray.getOrigin();
   float minTime = MAX_FLOAT;
@@ -189,15 +189,19 @@ void recursive(Ray ray, Shape lastHit, Color totalColor){
       
       babyRay.sub(PVector.mult(firstShapeSurfaceNormal,(2*(babyRay.dot(firstShapeSurfaceNormal)))));
       babyRay.div(babyRay.mag());
-      Ray newRecurseRay = new Ray(intersectionPoint, babyRay);
-      recursive(newRecurseRay, firstShape, totalColor);
-      recursionDepth -= 1;
+      
+      Point newOrigin = new Point(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ());
+      newOrigin.movePoint(babyRay, 0.0001);
+      //Ray newRecurseRay = new Ray(newOrigin, babyRay);
+      //totalColor.add(recursive(newRecurseRay, firstShape));
+      //recursionDepth -= 1;
     }
       
     ArrayList<PointLight> pointLights = currentScene.getPointLights();
     
     // assuming no refraction for now
     for(PointLight light : pointLights){
+      Ray lightRay = new Ray();
       Point lightLocation = light.getPoint();
       PVector shapeToLight = lightLocation.subtract(intersectionPoint);
       float shapeToLightMag = shapeToLight.mag();
@@ -211,24 +215,44 @@ void recursive(Ray ray, Shape lastHit, Color totalColor){
 
       Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
       
+      // shading stuff below
+      float distLightToBlocker = 0;
+      float shadeTime = MAX_FLOAT;
+      Shape shadeShapeIntersect = null;
+      lightRay.setDirection(shapeToLight);
+      lightRay.setOrigin(intersectionPoint);
+      for(Shape b : allObjects){
+        float intersectTime = b.intersects(lightRay);
+        if(intersectTime > 0 && intersectTime < shadeTime && b!=firstShape){
+          shadeShapeIntersect = b;
+          shadeTime = intersectTime;
+        }
+      }
+      if(shadeShapeIntersect != null){
+        Point blockerLocation = lightRay.hitPoint(shadeTime);
+        distLightToBlocker = blockerLocation.euclideanDistance(lightLocation);
+        if(intersectionPoint.euclideanDistance(lightLocation) > distLightToBlocker){
+          return totalColor;
+        }
+      }
+      
       if(tempSpecularColor!=null){
         Color specularColor = new Color(tempSpecularColor.getR(), tempSpecularColor.getG(), tempSpecularColor.getB());
         //println(currentShapeSurface.getSpecularHighlightExponent());
         PVector reflectedLightVector = new PVector(firstShapeSurfaceNormal.x, firstShapeSurfaceNormal.y, firstShapeSurfaceNormal.z);
         reflectedLightVector.mult(2.0*lightAndShapeNormalAlignment).sub(shapeToLight);
-        float specular = max(0, firstIntersectionToOrigin.dot(reflectedLightVector));  //TODO FIX THIS
+        float specular = max(0, firstIntersectionToOrigin.dot(reflectedLightVector));
         float specularPower = pow(specular, currentShapeSurface.getSpecularHighlightExponent());
         specularColor.multiply(specularPower);
         diffuseSurfaceColor.add(specularColor);  
       }
       
-      Color tempToAdd = diffuseSurfaceColor.dotProduct(light.getColor());
-      if(lastHit != null){
-        tempToAdd.multiply(lastHit.getSurface().getReflectiveCoefficient());
-      }
+      Color tempToAdd = diffuseSurfaceColor.product(light.getColor());
+
       totalColor.add(tempToAdd);
     }
   }
+  return totalColor;
 }
 
 void rayTrace(){
@@ -249,7 +273,7 @@ void rayTrace(){
       float rayMag = sqrt(sq(xPrime-origin.getX()) + sq(yPrime-origin.getY()) + 1);
       ray.setDirection((xPrime-origin.getX())/rayMag, (yPrime-origin.getY())/rayMag, -1/rayMag);
       
-      recursive(ray, null, totalColor);
+      totalColor.add(recursive(ray, null));
       
       if(durp){
         for(int i = x; i < x + refine; i++){

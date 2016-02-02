@@ -51,7 +51,17 @@ public class Point{
     return B.sub(a.getX(), a.getY(), a.getZ());
   }
   
+  public void movePoint(PVector move, float a){
+    x = x + move.x * a;
+    y = y + move.y * a;
+    z = z + move.z * a;
+  }
+  
   public String debug(){
     return "X: " + x + "\tY: " + y + "\tZ: " + z;
+  }
+  
+  public float euclideanDistance(Point b){
+    return sqrt(sq(x-b.getX()) + sq(y-b.getY()) + sq(z-b.getZ()));
   }
 }
