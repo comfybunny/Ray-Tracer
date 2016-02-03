@@ -1,5 +1,5 @@
-public class Sphere extends Shape{    // TODO CHANGE TO ABSTRACT CLASS
-
+public class Sphere extends Shape {
+  
   private float radius;
   private Point location;
   
@@ -29,15 +29,12 @@ public class Sphere extends Shape{    // TODO CHANGE TO ABSTRACT CLASS
   public float intersects(Ray ray){
     Point origin = ray.getOrigin();
     PVector direction = ray.getDirection();
-    //println(ray.debug());
+
     float a = direction.dot(direction);
     PVector centerSphereToOrigin = origin.subtract(location);
     float b = 2*(centerSphereToOrigin.dot(ray.getDirection()));
     float c = (centerSphereToOrigin.dot(centerSphereToOrigin)) - sq(radius);
-    //float b = 2*direction.x*(origin.getX() - location.getX()) + 2*direction.y*(origin.getY() - location.getY()) + 2*direction.z*(origin.getZ() - location.getZ());
-    //float c = sq(location.getX()) + sq(location.getY()) + sq(location.getZ())
-    //      + sq(origin.getX()) + sq(origin.getY()) + sq(origin.getZ())
-    //      + -2*(location.getX()*origin.getX() + location.getY()*origin.getY() + location.getZ()*origin.getZ()) - sq(radius);
+    
     float discriminant = sq(b) - (4*a*c);
     if(discriminant < 0){
       return -1;

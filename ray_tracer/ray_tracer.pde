@@ -107,6 +107,8 @@ void interpreter() {
       else if (token[0].equals("sphere")) {
         float[] location = {Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4]), 1};
         Sphere newShape = new Sphere(Float.parseFloat(token[1]), location, currSurface, currentScene.getMatrixStack().getCTM());
+        //currentScene.getMatrixStack().getCTM().printDebug();
+        //println();
         currentScene.addShape(newShape);
         //println(currentScene.getAllObjects().get(0).getSurface().getSpecularColor().toString());
         //println(newShape.debug());
@@ -124,10 +126,15 @@ void interpreter() {
         currentScene.getMatrixStack().pop();
       }
       else if(token[0].equals("translate")){
-        currentScene.getMatrixStack().translate(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]));
+        currentScene.getMatrixStack().addTranslate(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]));
         //stack.getCTM().printDebug();
       }
-      
+      else if(token[0].equals("scale")){
+        currentScene.getMatrixStack().addScale(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]));
+      }
+      else if(token[0].equals("rotate")){
+        currentScene.getMatrixStack().addRotate(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4]));
+      }
       else if (token[0].equals("read")) {  // reads input from another file
         gCurrentFile = new String(token[1]); interpreter(); currentScene = new Scene(); break;
       }

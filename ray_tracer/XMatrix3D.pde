@@ -35,8 +35,12 @@ public class XMatrix3D{
       matrix[2][2] = info[2];
       matrix[3][3] = 1;
     }
+    // The rotation matrix rotates the angle in degrees counter-clockwise about the axis (x,y,z). 
+    // The counter-clockwise rotation is looking from position (x,y,z) towards the origin.
     else if(type.equals("rotate")){
-      
+      PVector axisOfRotation = new PVector(info[1], info[2], info[3]);
+      axisOfRotation.div(axisOfRotation.mag());
+      // TODO finish this
     }
   }
   
