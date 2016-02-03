@@ -4,13 +4,15 @@ public class Scene{
   private float fov;
   private ArrayList<PointLight> pointLights;                                   // TODO THIS NEEDS TO BE A LIST
   private ArrayList<Shape> allObjects;  // TODO CHANGE TO ABSTRACT CLASS
-
+  
+  private MatrixStack stack;
   
   public Scene(){
     background = new Color();
     fov = 0;
     pointLights = new ArrayList<PointLight>();
     allObjects = new ArrayList<Shape>();
+    stack = new MatrixStack();
   }
   
   public void setBackground(Color background){
@@ -47,6 +49,10 @@ public class Scene{
   
   public ArrayList<PointLight> getPointLights(){
     return pointLights;
+  }
+  
+  public MatrixStack getMatrixStack(){
+    return stack;
   }
   
 }

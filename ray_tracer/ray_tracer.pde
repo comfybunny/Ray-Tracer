@@ -14,11 +14,9 @@ boolean refineBoolean = true;
 int recursionDepth = 1;
 int maxDepth = 0;
 
-String gCurrentFile = new String("rect_test.cli"); // A global variable for holding current active file name.
 
-// global matrix values
-//PMatrix3D global_mat;
-//float[] gmat = new float[16];  // global matrix values
+
+String gCurrentFile = new String("rect_test.cli"); // A global variable for holding current active file name.
 
 // Some initializations for the scene.
 Scene currentScene;
@@ -30,13 +28,6 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  
-  // grab the global matrix values (to use later when drawing pixels)
-  //PMatrix3D global_mat = (PMatrix3D) getMatrix();
-  //global_mat.get(gmat);  
-  //printMatrix();
-  //resetMatrix();    // you may want to reset the matrix here
-
   interpreter();
 }
 
@@ -59,6 +50,7 @@ void keyPressed() {
     case 'S':  gCurrentFile = new String("specular02.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
     case 'q':  exit(); break;
     case 'c':  gCurrentFile = new String("debug.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case 't':  gCurrentFile = new String("test.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
   }
   if (key == 'r') {
     if(!refineBoolean){
@@ -78,8 +70,6 @@ void keyPressed() {
 //  token. Only "color", "rect", and "write" tokens are implemented. 
 //  You should start from here and add more functionalities for your
 //  ray tracer.
-//
-//  Note: Function "splitToken()" is only available in processing 1.25 or higher.
 
 void interpreter() {
   
@@ -115,15 +105,29 @@ void interpreter() {
         //println(currSurface.getSpecularColor().toString());
       }
       else if (token[0].equals("sphere")) {
-        Sphere newShape = new Sphere(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4])), currSurface);
+        float[] location = {Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4]), 1};
+        Sphere newShape = new Sphere(Float.parseFloat(token[1]), location, currSurface, currentScene.getMatrixStack().getCTM());
         currentScene.addShape(newShape);
         //println(currentScene.getAllObjects().get(0).getSurface().getSpecularColor().toString());
+        //println(newShape.debug());
       }
       else if(token[0].equals("cylinder")){
         Cylinder newShape = new Cylinder(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[4]), Float.parseFloat(token[3])), Float.parseFloat(token[5]), currSurface);
         currentScene.addShape(newShape);
-        //println(newShape.debug());
+        
       }
+      
+      else if(token[0].equals("push")){
+        currentScene.getMatrixStack().push();
+      }
+      else if(token[0].equals("pop")){
+        currentScene.getMatrixStack().pop();
+      }
+      else if(token[0].equals("translate")){
+        currentScene.getMatrixStack().translate(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]));
+        //stack.getCTM().printDebug();
+      }
+      
       else if (token[0].equals("read")) {  // reads input from another file
         gCurrentFile = new String(token[1]); interpreter(); currentScene = new Scene(); break;
       }

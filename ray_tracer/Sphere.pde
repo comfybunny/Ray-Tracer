@@ -10,6 +10,14 @@ public class Sphere extends Shape{    // TODO CHANGE TO ABSTRACT CLASS
     addSurface(surface);
   }
   
+  public Sphere(float radius, float[] location, Surface surface, XMatrix3D ctm){
+    float[] newLocation = ctm.vectorMultiply(location);
+    
+    this.radius = radius;
+    this.location = new Point(newLocation[0], newLocation[1], newLocation[2]);
+    addSurface(surface);
+  }
+  
   public float getRadius(){
     return radius;
   }
@@ -45,6 +53,10 @@ public class Sphere extends Shape{    // TODO CHANGE TO ABSTRACT CLASS
   public PVector shapeNormal(Point hitPoint){
     PVector sphereNormal = hitPoint.subtract(location);
     return sphereNormal.div(sphereNormal.mag());
+  }
+  
+  public String debug(){
+    return "Location: (" + location.debug();
   }
 
 }
