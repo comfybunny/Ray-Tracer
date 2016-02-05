@@ -8,7 +8,7 @@ int screen_width = 300;
 int screen_height = 300;
 
 boolean durp = false;
-int refine = 1;
+int refine = 8;
 boolean refineBoolean = true;
 
 int recursionDepth = 1;
@@ -27,7 +27,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t08.cli");
+  interpreter("t01.cli");
 }
 
 // Press key 1 to 9 and 0 to run different test cases.
@@ -155,7 +155,6 @@ void interpreter(String filename) {
           currentScene.addShape(new Triangle(currVerticies.get(0), currVerticies.get(1), currVerticies.get(2), currSurface));
         }
         
-        //println(currentScene.getAllObjects().get(currentScene.getAllObjects().size()-1).debug());
       }
       
       else if (token[0].equals("read")) {  // reads input from another file
@@ -182,7 +181,8 @@ void interpreter(String filename) {
     }
   }
 }
-public Color recursive(Ray ray, Shape lastHit, float x, float y){
+public Color recursive(Ray ray, Shape lastHit){
+  
   Color totalColor = new Color();
   //recursionDepth += 1;
   //if(maxDepth < recursionDepth){
@@ -195,20 +195,21 @@ public Color recursive(Ray ray, Shape lastHit, float x, float y){
   for(Shape a : allObjects){
     if(lastHit != a){
       float currTime = a.intersects(ray);
-      if(currTime > 0 && currTime <minTime){
+      if(currTime >= 0 && currTime <minTime){
         minTime = currTime;
         firstShape = a;
       }
     }
   }
+  
   if(minTime < MAX_FLOAT && firstShape!=null){
+
     durp = true;
     Surface currentShapeSurface = firstShape.getSurface();
     Color diffuseColor = currentShapeSurface.getDiffuseColor();
     Color ambientColor = currentShapeSurface.getAmbientColor();
     Color tempSpecularColor = currentShapeSurface.getSpecularColor();
     
-    //println(specularColor.toString());
     if(lastHit == null){
       totalColor.add(ambientColor);
     }
@@ -219,17 +220,17 @@ public Color recursive(Ray ray, Shape lastHit, float x, float y){
     
     // if reflective then recurse
     if(firstShape.getSurface().getReflectiveCoefficient() > 0 && recursionDepth < 10){
-      PVector babyRay = intersectionPoint.subtract(origin);
-      babyRay.div(babyRay.mag());
+     PVector babyRay = intersectionPoint.subtract(origin);
+     babyRay.div(babyRay.mag());
       
-      babyRay.sub(PVector.mult(firstShapeSurfaceNormal,(2*(babyRay.dot(firstShapeSurfaceNormal)))));
-      babyRay.div(babyRay.mag());
+     babyRay.sub(PVector.mult(firstShapeSurfaceNormal,(2*(babyRay.dot(firstShapeSurfaceNormal)))));
+     babyRay.div(babyRay.mag());
       
-      Point newOrigin = new Point(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ());
-      newOrigin.movePoint(babyRay, 0.0001);
-      //Ray newRecurseRay = new Ray(newOrigin, babyRay);
-      //totalColor.add(recursive(newRecurseRay, firstShape));
-      //recursionDepth -= 1;
+     Point newOrigin = new Point(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ());
+     newOrigin.movePoint(babyRay, 0.0001);
+     //Ray newRecurseRay = new Ray(newOrigin, babyRay);
+     //totalColor.add(recursive(newRecurseRay, firstShape));
+     //recursionDepth -= 1;
     }
       
     ArrayList<PointLight> pointLights = currentScene.getPointLights();
@@ -253,7 +254,8 @@ public Color recursive(Ray ray, Shape lastHit, float x, float y){
       float diffuse = max(0, lightAndShapeNormalAlignment);
 
       Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
-      
+
+
       // shading stuff below
       float distLightToBlocker = 0;
       float shadeTime = MAX_FLOAT;
@@ -261,22 +263,20 @@ public Color recursive(Ray ray, Shape lastHit, float x, float y){
       lightRay.setDirection(shapeToLight);
       lightRay.setOrigin(intersectionPoint);
       for(Shape b : allObjects){
-        float intersectTime = b.intersects(lightRay);
-        if(intersectTime > 0 && intersectTime < shadeTime && b!=firstShape){
-          shadeShapeIntersect = b;
-          shadeTime = intersectTime;
-        }
+       float intersectTime = b.intersects(lightRay);
+       if(intersectTime > 0 && intersectTime < shadeTime && b!=firstShape){
+         shadeShapeIntersect = b;
+         shadeTime = intersectTime;
+       }
       }
       if(shadeShapeIntersect != null){
-        Point blockerLocation = lightRay.hitPoint(shadeTime);
-        distLightToBlocker = blockerLocation.euclideanDistance(lightLocation);
-        if(intersectionPoint.euclideanDistance(lightLocation) > distLightToBlocker){
-          if(x==34 && y==275){
-            println(totalColor.toString());
-          }
-          return totalColor;
-        }
+       Point blockerLocation = lightRay.hitPoint(shadeTime);
+       distLightToBlocker = blockerLocation.euclideanDistance(lightLocation);
+       if(intersectionPoint.euclideanDistance(lightLocation) > distLightToBlocker){
+         return totalColor;
+       }
       }
+      
       
       if(tempSpecularColor!=null){
         Color specularColor = new Color(tempSpecularColor.getR(), tempSpecularColor.getG(), tempSpecularColor.getB());
@@ -287,6 +287,7 @@ public Color recursive(Ray ray, Shape lastHit, float x, float y){
         float specularPower = pow(specular, currentShapeSurface.getSpecularHighlightExponent());
         specularColor.multiply(specularPower);
         diffuseSurfaceColor.add(specularColor);  
+        
       }
       
       Color tempToAdd = diffuseSurfaceColor.product(light.getColor());
@@ -294,10 +295,7 @@ public Color recursive(Ray ray, Shape lastHit, float x, float y){
       totalColor.add(tempToAdd);
     }
   }
-  if(x==102 && y==215){
-    println("durp");
-            println(totalColor.toString());
-          }
+  
   return totalColor;
 }
 
@@ -319,10 +317,9 @@ void rayTrace(){
       float rayMag = sqrt(sq(xPrime-origin.getX()) + sq(yPrime-origin.getY()) + 1);
       ray.setDirection((xPrime-origin.getX())/rayMag, (yPrime-origin.getY())/rayMag, -1/rayMag);
       
-      totalColor.add(recursive(ray, null,x,y));
+      totalColor.add(recursive(ray, null));
       
-      if(durp && x ==102 && y==215){
-        println(totalColor.toString());
+      if(durp){
         for(int i = x; i < x + refine; i++){
             for(int j = y; j< y + refine; j++){
               if(j*width+i < width*height){
@@ -352,7 +349,6 @@ void draw() {
     if(refine > 1 && refineBoolean){
       refine = refine/2;
     }
-    noLoop();
 }
 
 // when mouse is pressed, print the cursor location

@@ -86,11 +86,11 @@ public class Cylinder extends Shape{
   
   public PVector shapeNormal(Point hitPoint){
     // if it hits the bottom of the cylinder
-    if(hitPoint.getY() == location.getY()){
+    if(hitPoint.getY() < location.getY() + 0.000001 && hitPoint.getY() > location.getY() - 0.000001){
      return new PVector(0,-1,0);
     }
     // if it hits the top of the cylinder
-    else if(hitPoint.getY() == ymax){
+    else if(hitPoint.getY() < ymax + 0.000001 && hitPoint.getY() > ymax - 0.000001){
      return new PVector(0,1,0);
     }
     // if it hits the body of the cylinder
