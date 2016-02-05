@@ -26,8 +26,7 @@ public class Triangle extends Shape {
     float intersectionTime = -(planeNormal.dot(tempRay.getOrigin().getPVector()) + planeDval)/(parallelTest);
     
     Point intersection = tempRay.hitPoint(intersectionTime);
-    // project to 2D
-    
+
     PVector P0inter = intersection.subtract(P0);
     PVector P1inter = intersection.subtract(P1);
     PVector P2inter = intersection.subtract(P2);
@@ -37,15 +36,14 @@ public class Triangle extends Shape {
     PVector P2P0 = P0.subtract(P2);
     
     if(P0P1.cross(P0inter).dot(planeNormal)<0){
-      return -1;
+     return -1;
     }
     if(P1P2.cross(P1inter).dot(planeNormal)<0){
-      return -1;
+     return -1;
     }
     if(P2P0.cross(P2inter).dot(planeNormal)<0){
-      return -1;
+     return -1;
     }
-    
     return intersectionTime;
   }
   

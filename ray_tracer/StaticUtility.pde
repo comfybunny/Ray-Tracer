@@ -29,4 +29,25 @@ public static final class StaticUtility{
     }
     return -1;
   }
+  
+  public static PVector projectTo2D(PVector aPoint, PVector normal){
+    float x = abs(normal.x);
+    float y = abs(normal.y);
+    float z = abs(normal.z);
+    
+    // x is largest project onto YZ plane
+    if(x == max(x,y,z)){
+      return new PVector(aPoint.y, aPoint.z, 0);
+    }
+    // y is largest project onto XZ plane
+    else if(y == max(x,y,z)){
+      return new PVector(aPoint.x, aPoint.x, 0);
+    }
+    // else z is largest project onto XY plane
+    return new PVector(aPoint.x, aPoint.y, 0);
+  }
+  
+  public static PVector get2Dortho(PVector aPoint){
+    return new PVector(aPoint.y*-1.0, aPoint.x);
+  }
 }
