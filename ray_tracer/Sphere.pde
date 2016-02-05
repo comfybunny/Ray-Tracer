@@ -11,6 +11,7 @@ public class Sphere extends Shape {
   }
   
   public Sphere(float radius, float[] location, Surface surface, XMatrix3D ctm){
+    
     float[] newLocation = ctm.vectorMultiply(location);
     
     this.radius = radius;

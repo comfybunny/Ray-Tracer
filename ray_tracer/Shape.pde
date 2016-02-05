@@ -6,6 +6,8 @@ public abstract class Shape{
     
   abstract PVector shapeNormal(Point hitPoint);
   
+  abstract String debug();
+  
   public void addSurface(Surface surface){
     this.surface = surface;
   }

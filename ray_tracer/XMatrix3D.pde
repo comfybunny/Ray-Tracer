@@ -38,9 +38,33 @@ public class XMatrix3D{
     // The rotation matrix rotates the angle in degrees counter-clockwise about the axis (x,y,z). 
     // The counter-clockwise rotation is looking from position (x,y,z) towards the origin.
     else if(type.equals("rotate")){
-      PVector axisOfRotation = new PVector(info[1], info[2], info[3]);
-      axisOfRotation.div(axisOfRotation.mag());
-      // TODO finish this
+      float theta = info[0]*(PI/180.0);
+      matrix[3][3] = 1;
+      // x axis rotation
+      if(info[1] == 1){
+        matrix[0][0] = 1;
+        matrix[1][1] = cos(theta);
+        matrix[1][2] = -sin(theta);
+        matrix[2][1] = sin(theta);
+        matrix[2][2] = cos(theta);
+      }
+      else if(info[2] == 1){
+        matrix[0][0] = cos(theta);
+        matrix[0][2] = sin(theta);
+        matrix[1][1] = 1;
+        matrix[2][0] = -sin(theta);
+        matrix[2][2] = cos(theta);
+      }
+      else if(info[3] == 1){
+        matrix[0][0] = cos(theta);
+        matrix[0][1] = -sin(theta);
+        matrix[1][0] = sin(theta);
+        matrix[1][1] = cos(theta);
+        matrix[2][2] = 1;
+      }
+      else{
+        println("MATRIX ROTATION NOT SUPPORTED");
+      }
     }
   }
   
@@ -93,6 +117,10 @@ public class XMatrix3D{
     toReturn[2] = matrix[2][0]*toMultiply[0] + matrix[2][1]*toMultiply[1] + matrix[2][2]*toMultiply[2] + matrix[2][3]*toMultiply[3]; 
     toReturn[3] = matrix[3][0]*toMultiply[0] + matrix[3][1]*toMultiply[1] + matrix[3][2]*toMultiply[2] + matrix[3][3]*toMultiply[3]; 
     return toReturn;
+  }
+  
+  public void setMatrix(int row, int col, float value){
+    matrix[row][col] = value;
   }
   
   public void printDebug(){

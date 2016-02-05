@@ -4,7 +4,7 @@ public class Scene{
   private float fov;
   private ArrayList<PointLight> pointLights;                                   // TODO THIS NEEDS TO BE A LIST
   private ArrayList<Shape> allObjects;  // TODO CHANGE TO ABSTRACT CLASS
-  
+    
   private MatrixStack stack;
   
   public Scene(){

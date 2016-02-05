@@ -10,6 +10,8 @@ public class MatrixStack{
   public void push(){
     XMatrix3D ctm = getCTM();
     XMatrix3D newMatrix = new XMatrix3D();
+    //println("PUSH HERE");
+    //ctm.printDebug();
     newMatrix.deepCopy(ctm);
     stack.add(newMatrix);
   }
@@ -52,6 +54,7 @@ public class MatrixStack{
     matrixInfo[2] = yAxis;
     matrixInfo[3] = zAxis;
     XMatrix3D rotateMatrix = new XMatrix3D("rotate", matrixInfo);
+    //rotateMatrix.printDebug();
     getCTM().rightMultiply(rotateMatrix);
   }
 }

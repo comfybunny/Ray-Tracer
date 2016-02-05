@@ -9,6 +9,14 @@ public class Point{
     this.z = z;
   }
   
+  public Point(float[] input){
+    if(input.length >= 3){
+      x = input[0];
+      y = input[1];
+      z = input[2];
+    }
+  }
+  
   public Point(){
     x = 0;
     y = 0;
@@ -63,5 +71,9 @@ public class Point{
   
   public float euclideanDistance(Point b){
     return sqrt(sq(x-b.getX()) + sq(y-b.getY()) + sq(z-b.getZ()));
+  }
+  
+  public PVector getPVector(){
+    return new PVector(x,y,z);
   }
 }

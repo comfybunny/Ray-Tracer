@@ -8,7 +8,7 @@ int screen_width = 300;
 int screen_height = 300;
 
 boolean durp = false;
-int refine = 8;
+int refine = 1;
 boolean refineBoolean = true;
 
 int recursionDepth = 1;
@@ -16,11 +16,10 @@ int maxDepth = 0;
 
 
 
-String gCurrentFile = new String("rect_test.cli"); // A global variable for holding current active file name.
-
 // Some initializations for the scene.
 Scene currentScene;
 Surface currSurface;
+
 
 void setup(){
   size (300, 300);  // use P3D environment so that matrix commands work properly
@@ -28,29 +27,29 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter();
+  interpreter("t08.cli");
 }
 
 // Press key 1 to 9 and 0 to run different test cases.
 
 void keyPressed() {
   switch(key){
-    case '~':  background(0); gCurrentFile = new String("rect_test.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
-    case '1':  gCurrentFile = new String("t01.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
-    case '2':  gCurrentFile = new String("t02.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
-    case '3':  gCurrentFile = new String("t03.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
-    case '4':  gCurrentFile = new String("t04.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
-    case '5':  gCurrentFile = new String("t05.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
-    case '6':  gCurrentFile = new String("t06.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
-    case '7':  gCurrentFile = new String("t07.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
-    case '8':  gCurrentFile = new String("t08.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
-    case '9':  gCurrentFile = new String("t09.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
-    case '0':  gCurrentFile = new String("t10.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
-    case 's':  gCurrentFile = new String("specular01.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
-    case 'S':  gCurrentFile = new String("specular02.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case '~':  background(0); currentScene = new Scene(); interpreter("rect_test.cli"); if(refineBoolean){refine = 8;}; break;
+    case '1':  currentScene = new Scene(); interpreter("t01.cli"); if(refineBoolean){refine = 8;}; break;
+    case '2':  currentScene = new Scene(); interpreter("t02.cli"); if(refineBoolean){refine = 8;}; break;
+    case '3':  currentScene = new Scene(); interpreter("t03.cli"); if(refineBoolean){refine = 8;}; break;
+    case '4':  currentScene = new Scene(); interpreter("t04.cli"); if(refineBoolean){refine = 8;}; break;
+    case '5':  currentScene = new Scene(); interpreter("t05.cli"); if(refineBoolean){refine = 8;}; break;
+    case '6':  currentScene = new Scene(); interpreter("t06.cli"); if(refineBoolean){refine = 8;}; break;
+    case '7':  currentScene = new Scene(); interpreter("t07.cli"); if(refineBoolean){refine = 8;}; break;
+    case '8':  currentScene = new Scene(); interpreter("t08.cli"); if(refineBoolean){refine = 8;}; break;
+    case '9':  currentScene = new Scene(); interpreter("t09.cli"); if(refineBoolean){refine = 8;}; break;
+    case '0':  currentScene = new Scene(); interpreter("t10.cli"); if(refineBoolean){refine = 8;}; break;
+    case 's':  currentScene = new Scene(); interpreter("specular01.cli"); if(refineBoolean){refine = 8;}; break;
+    case 'S':  currentScene = new Scene(); interpreter("specular02.cli"); if(refineBoolean){refine = 8;}; break;
     case 'q':  exit(); break;
-    case 'c':  gCurrentFile = new String("debug.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
-    case 't':  gCurrentFile = new String("test.cli"); currentScene = new Scene(); interpreter(); if(refineBoolean){refine = 8;}; break;
+    case 'c':  currentScene = new Scene(); interpreter("debug.cli"); if(refineBoolean){refine = 8;}; break;
+    case 't':  currentScene = new Scene(); interpreter("test.cli"); if(refineBoolean){refine = 8;}; break;
   }
   if (key == 'r') {
     if(!refineBoolean){
@@ -71,9 +70,9 @@ void keyPressed() {
 //  You should start from here and add more functionalities for your
 //  ray tracer.
 
-void interpreter() {
+void interpreter(String filename) {
   
-  String str[] = loadStrings(gCurrentFile);
+  String str[] = loadStrings(filename);
   if (str == null){
     println("Error! Failed to read the file.");
   }
@@ -81,6 +80,7 @@ void interpreter() {
     for (int i=0; i<str.length; i++) {
       
       String[] token = splitTokens(str[i], " "); // Get a line and parse tokens.
+      
       if (token.length == 0) continue; // Skip blank line.
       
       if (token[0].equals("fov")) {
@@ -106,7 +106,7 @@ void interpreter() {
       }
       else if (token[0].equals("sphere")) {
         float[] location = {Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4]), 1};
-        Sphere newShape = new Sphere(Float.parseFloat(token[1]), location, currSurface, currentScene.getMatrixStack().getCTM());
+        Sphere newShape = new Sphere(Float.parseFloat(token[1]), new Point(currentScene.getMatrixStack().getCTM().vectorMultiply(location)), currSurface);
         //currentScene.getMatrixStack().getCTM().printDebug();
         //println();
         currentScene.addShape(newShape);
@@ -116,11 +116,13 @@ void interpreter() {
       else if(token[0].equals("cylinder")){
         Cylinder newShape = new Cylinder(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[4]), Float.parseFloat(token[3])), Float.parseFloat(token[5]), currSurface);
         currentScene.addShape(newShape);
-        
       }
       
       else if(token[0].equals("push")){
+        //currentScene.getMatrixStack().getCTM().printDebug();
+        //println();
         currentScene.getMatrixStack().push();
+        
       }
       else if(token[0].equals("pop")){
         currentScene.getMatrixStack().pop();
@@ -128,6 +130,7 @@ void interpreter() {
       else if(token[0].equals("translate")){
         currentScene.getMatrixStack().addTranslate(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]));
         //stack.getCTM().printDebug();
+        //currentScene.getMatrixStack().getCTM().printDebug();
       }
       else if(token[0].equals("scale")){
         currentScene.getMatrixStack().addScale(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]));
@@ -135,8 +138,28 @@ void interpreter() {
       else if(token[0].equals("rotate")){
         currentScene.getMatrixStack().addRotate(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4]));
       }
+      
+      else if (token[0].equals("begin")){
+        //should be followed by vertex commands and terminated by an end
+        ArrayList<Point> currVerticies = new ArrayList<Point>();
+        String[] parser = splitTokens(str[i], " ");
+        while(!parser[0].equals("end")){
+          if(parser[0].equals("vertex")){
+            float[] currVertex = {Float.parseFloat(parser[1]), Float.parseFloat(parser[2]), Float.parseFloat(parser[3]), 1};
+            currVerticies.add(new Point(currentScene.getMatrixStack().getCTM().vectorMultiply(currVertex)));
+          }
+          i += 1;
+          parser = splitTokens(str[i], " ");
+        }
+        if(parser[0].equals("end") && currVerticies.size()==3){
+          currentScene.addShape(new Triangle(currVerticies.get(0), currVerticies.get(1), currVerticies.get(2), currSurface));
+        }
+        
+        //println(currentScene.getAllObjects().get(currentScene.getAllObjects().size()-1).debug());
+      }
+      
       else if (token[0].equals("read")) {  // reads input from another file
-        gCurrentFile = new String(token[1]); interpreter(); currentScene = new Scene(); break;
+        interpreter (token[1]);
       }
       else if (token[0].equals("color")) {  // example command -- not part of ray tracer
        float r = float(token[1]);
@@ -155,10 +178,11 @@ void interpreter() {
         // save the current image to a .png file
         save(token[1]);  
       }
+      
     }
   }
 }
-public Color recursive(Ray ray, Shape lastHit){
+public Color recursive(Ray ray, Shape lastHit, float x, float y){
   Color totalColor = new Color();
   //recursionDepth += 1;
   //if(maxDepth < recursionDepth){
@@ -222,6 +246,10 @@ public Color recursive(Ray ray, Shape lastHit){
       firstIntersectionToOrigin.div(firstIntersectionToOrigin.mag());
       
       float lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
+      if(lightAndShapeNormalAlignment < 0 && firstShape.getClass().equals(Triangle.class)){
+        firstShapeSurfaceNormal = firstShapeSurfaceNormal.mult(-1);
+        lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
+      }
       float diffuse = max(0, lightAndShapeNormalAlignment);
 
       Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
@@ -243,6 +271,9 @@ public Color recursive(Ray ray, Shape lastHit){
         Point blockerLocation = lightRay.hitPoint(shadeTime);
         distLightToBlocker = blockerLocation.euclideanDistance(lightLocation);
         if(intersectionPoint.euclideanDistance(lightLocation) > distLightToBlocker){
+          if(x==34 && y==275){
+            println(totalColor.toString());
+          }
           return totalColor;
         }
       }
@@ -263,6 +294,10 @@ public Color recursive(Ray ray, Shape lastHit){
       totalColor.add(tempToAdd);
     }
   }
+  if(x==102 && y==215){
+    println("durp");
+            println(totalColor.toString());
+          }
   return totalColor;
 }
 
@@ -284,9 +319,10 @@ void rayTrace(){
       float rayMag = sqrt(sq(xPrime-origin.getX()) + sq(yPrime-origin.getY()) + 1);
       ray.setDirection((xPrime-origin.getX())/rayMag, (yPrime-origin.getY())/rayMag, -1/rayMag);
       
-      totalColor.add(recursive(ray, null));
+      totalColor.add(recursive(ray, null,x,y));
       
-      if(durp){
+      if(durp && x ==102 && y==215){
+        println(totalColor.toString());
         for(int i = x; i < x + refine; i++){
             for(int j = y; j< y + refine; j++){
               if(j*width+i < width*height){
@@ -312,15 +348,15 @@ void rayTrace(){
 }
 
 void draw() {
-  if(!gCurrentFile.equals("rect_test.cli")){
     rayTrace();
     if(refine > 1 && refineBoolean){
       refine = refine/2;
     }
-  }
+    noLoop();
 }
 
 // when mouse is pressed, print the cursor location
 void mousePressed() {
+  //currentScene.getMatrixStack().getCTM().printDebug();
   println ("mouse: " + mouseX + " " + mouseY);
 }
