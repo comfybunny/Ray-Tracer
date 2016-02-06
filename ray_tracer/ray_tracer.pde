@@ -7,15 +7,12 @@
 int screen_width = 300;
 int screen_height = 300;
 
-boolean durp = false;
 int refine = 1;
 boolean refineBoolean = true;
-
 
 // Some initializations for the scene.
 Scene currentScene;
 Surface currSurface;
-
 
 void setup(){
   size (300, 300);  // use P3D environment so that matrix commands work properly
@@ -95,16 +92,20 @@ void interpreter(String filename) {
                                   new Color(Float.parseFloat(token[4]), Float.parseFloat(token[5]), Float.parseFloat(token[6])),
                                   new Color(Float.parseFloat(token[7]), Float.parseFloat(token[8]), Float.parseFloat(token[9])),
                                   Float.parseFloat(token[10]), Float.parseFloat(token[11]), Float.parseFloat(token[12]), Float.parseFloat(token[13]));
-        //println(currSurface.getSpecularColor().toString());
       }
       else if (token[0].equals("sphere")) {
-        float[] location = {Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4]), 1};
-        Sphere newShape = new Sphere(Float.parseFloat(token[1]), new Point(currentScene.getMatrixStack().getCTM().vectorMultiply(location)), currSurface);
-        //currentScene.getMatrixStack().getCTM().printDebug();
-        //println();
+        Point fileCenter = new Point(Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4]));
+        float fileRadius = Float.parseFloat(token[1]);
+        float[] location = {fileCenter.getX(), fileCenter.getY(), fileCenter.getZ(), 1};
+        float[] surfacePoint = {fileCenter.getX(), fileCenter.getY()+fileRadius, fileCenter.getZ(), 1};
+        
+        Point surfacePointCTM = new Point(currentScene.getMatrixStack().getCTM().vectorMultiply(surfacePoint));
+        Point sphereCenterCTM = new Point(currentScene.getMatrixStack().getCTM().vectorMultiply(location));
+        
+        //Sphere newShape = new Sphere(surfacePointCTM.euclideanDistance(sphereCenterCTM)/fileRadius, sphereCenterCTM, currSurface);
+        Sphere newShape = new Sphere(fileRadius, sphereCenterCTM, currSurface);
+        
         currentScene.addShape(newShape);
-        //println(currentScene.getAllObjects().get(0).getSurface().getSpecularColor().toString());
-        //println(newShape.debug());
       }
       else if(token[0].equals("cylinder")){
         Cylinder newShape = new Cylinder(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[4]), Float.parseFloat(token[3])), Float.parseFloat(token[5]), currSurface);
@@ -112,10 +113,7 @@ void interpreter(String filename) {
       }
       
       else if(token[0].equals("push")){
-        //currentScene.getMatrixStack().getCTM().printDebug();
-        //println();
         currentScene.getMatrixStack().push();
-        
       }
       else if(token[0].equals("pop")){
         currentScene.getMatrixStack().pop();
@@ -192,21 +190,15 @@ public Color recursive(Ray ray, Shape lastHit, float x, float y){
     }
   }
   
-  if(minTime < MAX_FLOAT && firstShape!=null){
+  if(firstShape!=null){
 
-    durp = true;
     Surface currentShapeSurface = firstShape.getSurface();
     Color diffuseColor = currentShapeSurface.getDiffuseColor();
     Color ambientColor = currentShapeSurface.getAmbientColor();
     Color tempSpecularColor = currentShapeSurface.getSpecularColor();
-    
     if(lastHit == null){
-      if(x==226 && y==166){
-        println("YAS ONCE");
-      }
       totalColor.add(ambientColor);
     }
-    
     Point intersectionPoint = ray.hitPoint(minTime);
     PVector firstShapeSurfaceNormal = firstShape.shapeNormal(intersectionPoint);
     firstShapeSurfaceNormal.div(firstShapeSurfaceNormal.mag());
@@ -215,25 +207,24 @@ public Color recursive(Ray ray, Shape lastHit, float x, float y){
     if(firstShape.getSurface().getReflectiveCoefficient() > 0){
      PVector babyRay = intersectionPoint.subtract(origin);
      babyRay.div(babyRay.mag());
-      
      babyRay.sub(PVector.mult(firstShapeSurfaceNormal,(2*(babyRay.dot(firstShapeSurfaceNormal)))));
      babyRay.div(babyRay.mag());
       
      Point newOrigin = new Point(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ());
      newOrigin.movePoint(babyRay, 0.000001);
      Ray newRecurseRay = new Ray(newOrigin, babyRay);
-     totalColor.add(recursive(newRecurseRay, firstShape, x, y));
+     Color returnColor = recursive(newRecurseRay, firstShape, x, y);
+     returnColor.multiply(firstShape.getSurface().getReflectiveCoefficient());
+     totalColor.add(returnColor);
     }
       
     ArrayList<PointLight> pointLights = currentScene.getPointLights();
-    
     // assuming no refraction for now
     for(PointLight light : pointLights){
       Ray lightRay = new Ray();
       Point lightLocation = light.getPoint();
       PVector shapeToLight = lightLocation.subtract(intersectionPoint);
-      float shapeToLightMag = shapeToLight.mag();
-      shapeToLight.div(shapeToLightMag);
+      shapeToLight.div(shapeToLight.mag());
         
       PVector firstIntersectionToOrigin = origin.subtract(intersectionPoint);
       firstIntersectionToOrigin.div(firstIntersectionToOrigin.mag());
@@ -244,9 +235,7 @@ public Color recursive(Ray ray, Shape lastHit, float x, float y){
         lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
       }
       float diffuse = max(0, lightAndShapeNormalAlignment);
-
       Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
-
 
       // shading stuff below
       float distLightToBlocker = 0;
@@ -265,7 +254,6 @@ public Color recursive(Ray ray, Shape lastHit, float x, float y){
        Point blockerLocation = lightRay.hitPoint(shadeTime);
        distLightToBlocker = blockerLocation.euclideanDistance(lightLocation);
        if(intersectionPoint.euclideanDistance(lightLocation) > distLightToBlocker){
-         
          return totalColor;
        }
       }
@@ -287,20 +275,19 @@ public Color recursive(Ray ray, Shape lastHit, float x, float y){
 
       totalColor.add(tempToAdd);
     }
+    return totalColor;
   }
-  
-  return totalColor;
+  else{          
+    return new Color(currentScene.getBackground().getR(), currentScene.getBackground().getG(), currentScene.getBackground().getB());
+  }
 }
 
 void rayTrace(){
   //println(currSurface.getSpecularColor().toString());
   loadPixels();
   Ray ray = new Ray();
-  Color backgroundColor = currentScene.getBackground();
-  //println(currentScene.getFOV());
   float k = tan(radians(currentScene.getFOV()/2.0));
-  //ArrayList<Shape> allObjects = currentScene.getAllObjects();
-  //println(allObjects.get(0).getSurface().getSpecularColor().toString());
+
   for(int x = 0; x < width; x+=refine){
     float xPrime = ((2.0*k/width)*x)-k;
     for(int y = 0; y < height; y+=refine){
@@ -311,29 +298,15 @@ void rayTrace(){
       ray.setDirection((xPrime-origin.getX())/rayMag, (yPrime-origin.getY())/rayMag, -1/rayMag);
       
       totalColor.add(recursive(ray, null, x, y));
-      if(x==226 && y == 166){
-        println(totalColor.toString());
-      }
-      if(durp){
-        for(int i = x; i < x + refine; i++){
-            for(int j = y; j< y + refine; j++){
-              if(j*width+i < width*height){
-                pixels[j*width+i] = color(totalColor.getR(), totalColor.getG(), totalColor.getB());
-              }
-            }
-          }
-          durp = false;
-      }
-      else{
-        for(int i = x; i < x + refine; i++){
-          for(int j = y; j < y + refine; j++){
-            if(j*width+i < width*height){
-              //println(backgroundColor.toString());
-              pixels[j*width+i] = color(backgroundColor.getR(), backgroundColor.getG(), backgroundColor.getB());
-            }
+
+      for(int i = x; i < x + refine; i++){
+        for(int j = y; j< y + refine; j++){
+          if(j*width+i < width*height){
+            pixels[j*width+i] = color(totalColor.getR(), totalColor.getG(), totalColor.getB());
           }
         }
       }
+      
     }
   }
   updatePixels();
@@ -344,7 +317,7 @@ void draw() {
     if(refine > 1 && refineBoolean){
       refine = refine/2;
     }
-    noLoop();
+    //noLoop();
 }
 
 // when mouse is pressed, print the cursor location

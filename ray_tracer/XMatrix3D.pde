@@ -41,21 +41,21 @@ public class XMatrix3D{
       float theta = info[0]*(PI/180.0);
       matrix[3][3] = 1;
       // x axis rotation
-      if(info[1] == 1){
+      if(info[1] == 1 && info[2] == 0 && info[3] == 0){
         matrix[0][0] = 1;
         matrix[1][1] = cos(theta);
         matrix[1][2] = -sin(theta);
         matrix[2][1] = sin(theta);
         matrix[2][2] = cos(theta);
       }
-      else if(info[2] == 1){
+      else if(info[1] == 0 && info[2] == 1 && info[3] == 0){
         matrix[0][0] = cos(theta);
         matrix[0][2] = sin(theta);
         matrix[1][1] = 1;
         matrix[2][0] = -sin(theta);
         matrix[2][2] = cos(theta);
       }
-      else if(info[3] == 1){
+      else if(info[1] == 0 && info[2] == 0 && info[3] == 1){
         matrix[0][0] = cos(theta);
         matrix[0][1] = -sin(theta);
         matrix[1][0] = sin(theta);

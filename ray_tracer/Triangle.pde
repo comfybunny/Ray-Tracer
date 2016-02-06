@@ -47,6 +47,44 @@ public class Triangle extends Shape {
     return intersectionTime;
   }
   
+/**  public float intersects(Ray tempRay){
+    PVector E1 = P1.subtract(P0);
+    PVector E2 = P2.subtract(P0);
+    Point originPoint = tempRay.getOrigin();
+    PVector rayOrigin = new PVector(originPoint.getX(), originPoint.getY(), originPoint.getZ());
+    PVector rayDirection = tempRay.getDirection();
+    PVector P = new PVector();
+    PVector.cross(rayDirection, E2, P);
+    float det = E1.dot(P);
+    float invDet = 1.0/det;
+    if(det > -0.000001 && det < 0.000001){
+      return -1;
+    }
+    PVector T = new PVector();
+    PVector.sub(new PVector(P0.getX(), P0.getY(), P0.getZ()), rayOrigin, T);
+    float u = T.dot(P)*invDet;
+    
+    if(u < 0 || u > 1.0){
+      return -1;
+    }
+    PVector Q = new PVector();
+    PVector.cross(E1, T, Q);
+
+    float v = Q.dot(rayDirection)*invDet;
+    
+    if(v < 0 || u+v > 1.0){
+      return -1;
+    }
+    
+    float time = E2.dot(Q);
+    if(time > 0.000001){
+      return time;
+    }
+    
+    return -1;
+  }
+  **/
+  
   public PVector shapeNormal(Point hitPoint){
     PVector E1 = P1.subtract(P0);
     PVector E2 = P2.subtract(P0);
