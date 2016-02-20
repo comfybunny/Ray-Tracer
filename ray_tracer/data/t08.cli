@@ -1,31 +1,87 @@
-# several cylinders
+# testing depth-of-field, multiple rays per pixel
+
+rays_per_pixel 100
+
+lens  0.08  3
 
 fov 60
-background .4 .4 .7
 
-point_light -3 5 5  .5 .5 .5
-point_light 5 3 3   1 1 1
+# blue background
 
-diffuse   0.8 0.8 0.8   0.2 0.2 0.2
+background 0.2 0.2 1
 
-# large cylinder that acts as a floor
-cylinder 20.0  0 0  -4 -1
+# light sources 
 
-# smaller cylinders sitting on floor
+point_light  2 5 0  .8 .8 .8
+point_light -3 4 0  .2 .2 .2
 
-diffuse  0.8 0.4 0.4  0.2 0.2 0.2
-cylinder  0.3   -2  -5  -1 0
+# spheres resting on ground
 
-diffuse  0.4 0.8 0.4  0.2 0.2 0.2
-cylinder  0.3   -1  -5  -1 0.5
+diffuse  .8 .8 .8  .2 .2 .2
 
-diffuse  0.4 0.4 0.8  0.2 0.2 0.2
-cylinder  0.3    0  -5  -1 1
+push
+translate -1.5 -1.5 0
+sphere  0.5  0 0 -1
+sphere  0.5  0 0 -2
+sphere  0.5  0 0 -3
+sphere  0.5  0 0 -4
+sphere  0.5  0 0 -5
+sphere  0.5  0 0 -6
+sphere  0.5  0 0 -7
+sphere  0.5  0 0 -8
+sphere  0.5  0 0 -9
+sphere  0.5  0 0 -10
+sphere  0.5  0 0 -11
+sphere  0.5  0 0 -12
+sphere  0.5  0 0 -13
+sphere  0.5  0 0 -14
+sphere  0.5  0 0 -15
+sphere  0.5  0 0 -16
+sphere  0.5  0 0 -17
+sphere  0.5  0 0 -18
+sphere  0.5  0 0 -19
+sphere  0.5  0 0 -20
+pop
 
-diffuse  0.8 0.4 0.8  0.2 0.2 0.2
-cylinder  0.3    1  -5  -1 1.5
+push
+translate 1.5 -1.5 0
+sphere  0.5  0 0 -1
+sphere  0.5  0 0 -2
+sphere  0.5  0 0 -3
+sphere  0.5  0 0 -4
+sphere  0.5  0 0 -5
+sphere  0.5  0 0 -6
+sphere  0.5  0 0 -7
+sphere  0.5  0 0 -8
+sphere  0.5  0 0 -9
+sphere  0.5  0 0 -10
+sphere  0.5  0 0 -11
+sphere  0.5  0 0 -12
+sphere  0.5  0 0 -13
+sphere  0.5  0 0 -14
+sphere  0.5  0 0 -15
+sphere  0.5  0 0 -16
+sphere  0.5  0 0 -17
+sphere  0.5  0 0 -18
+sphere  0.5  0 0 -19
+sphere  0.5  0 0 -20
+pop
 
-diffuse  0.8 0.8 0.8  0.2 0.2 0.2
-cylinder  0.3    2  -5  -1 2
+# these two triangles acts as a ground plane
 
-write t05.png
+diffuse  .8 .8 .8  .2 .2 .2
+
+begin
+vertex -100 -2 -100
+vertex  100 -2 -100
+vertex  100 -2  100
+end
+
+begin
+vertex  100 -2  100
+vertex -100 -2  100
+vertex -100 -2 -100
+end
+
+write t08.png
+

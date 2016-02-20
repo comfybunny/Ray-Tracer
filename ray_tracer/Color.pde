@@ -64,5 +64,9 @@ public class Color{
     G = G*factor;
     B = B*factor;
   }
-  
+   public void divide(float factor){
+    R = R/factor;
+    G = G/factor;
+    B = B/factor;
+  }
 }

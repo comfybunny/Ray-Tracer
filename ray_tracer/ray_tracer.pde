@@ -8,7 +8,7 @@ int screen_width = 300;
 int screen_height = 300;
 
 int refine = 1;
-boolean refineBoolean = true;
+boolean refineBoolean = false;
 
 // Some initializations for the scene.
 Scene currentScene;
@@ -20,7 +20,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t09.cli");
+  interpreter("t01.cli");
 }
 
 // Press key 1 to 9 and 0 to run different test cases.
@@ -148,6 +148,10 @@ void interpreter(String filename) {
         
       }
       
+      else if (token[0].equals("rays_per_pixel")){
+        currentScene.setRaysPerPixel(Integer.parseInt(token[1]));
+      }
+      
       else if (token[0].equals("read")) {  // reads input from another file
         interpreter (token[1]);
       }
@@ -168,11 +172,10 @@ void interpreter(String filename) {
         // save the current image to a .png file
         save(token[1]);  
       }
-      
     }
   }
 }
-public Color recursive(Ray ray, Shape lastHit, float x, float y){
+public Color recursive(Ray ray, Shape lastHit){
   
   Color totalColor = new Color();
   
@@ -213,7 +216,7 @@ public Color recursive(Ray ray, Shape lastHit, float x, float y){
      Point newOrigin = new Point(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ());
      newOrigin.movePoint(babyRay, 0.000001);
      Ray newRecurseRay = new Ray(newOrigin, babyRay);
-     Color returnColor = recursive(newRecurseRay, firstShape, x, y);
+     Color returnColor = recursive(newRecurseRay, firstShape);
      returnColor.multiply(firstShape.getSurface().getReflectiveCoefficient());
      totalColor.add(returnColor);
     }
@@ -258,7 +261,6 @@ public Color recursive(Ray ray, Shape lastHit, float x, float y){
        }
       }
       
-      
       if(tempSpecularColor!=null){
         Color specularColor = new Color(tempSpecularColor.getR(), tempSpecularColor.getG(), tempSpecularColor.getB());
         //println(currentShapeSurface.getSpecularHighlightExponent());
@@ -287,17 +289,34 @@ void rayTrace(){
   loadPixels();
   Ray ray = new Ray();
   float k = tan(radians(currentScene.getFOV()/2.0));
-
+  float half_x = k/width;
+  float half_y = k/height;
   for(int x = 0; x < width; x+=refine){
     float xPrime = ((2.0*k/width)*x)-k;
     for(int y = 0; y < height; y+=refine){
       Color totalColor = new Color();
       float yPrime = ((-2.0*k/height)*y)+k;
-      Point origin = ray.getOrigin();
-      float rayMag = sqrt(sq(xPrime-origin.getX()) + sq(yPrime-origin.getY()) + 1);
-      ray.setDirection((xPrime-origin.getX())/rayMag, (yPrime-origin.getY())/rayMag, -1/rayMag);
       
-      totalColor.add(recursive(ray, null, x, y));
+      Point origin = ray.getOrigin();
+      float xlocation = xPrime + half_x;
+      float ylocation = yPrime + half_y;
+      if(currentScene.getRaysPerPixel() == 1){
+        // shoot from center
+        float rayMag = sqrt(sq(xlocation-origin.getX()) + sq(ylocation-origin.getY()) + 1);
+        ray.setDirection((xlocation-origin.getX())/rayMag, (ylocation-origin.getY())/rayMag, -1/rayMag);
+        totalColor.add(recursive(ray, null));
+      }
+      else{
+        for(int multi_ray=0; multi_ray < currentScene.getRaysPerPixel(); multi_ray++){
+          float randX = random(-1*half_x, half_x);
+          float randY = random(-1*half_y, half_y);
+          float rayMag = sqrt(sq(xlocation+randX-origin.getX()) + sq(ylocation+randY-origin.getY()) + 1);
+          ray.setDirection((xlocation+randX-origin.getX())/rayMag, (ylocation+randY-origin.getY())/rayMag, -1/rayMag);
+          totalColor.add(recursive(ray, null));
+        }
+      }
+      
+      totalColor.divide(currentScene.getRaysPerPixel());
 
       for(int i = x; i < x + refine; i++){
         for(int j = y; j< y + refine; j++){

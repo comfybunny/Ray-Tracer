@@ -7,12 +7,15 @@ public class Scene{
     
   private MatrixStack stack;
   
+  private int rays_per_pixel;
+  
   public Scene(){
     background = new Color();
     fov = 0;
     pointLights = new ArrayList<PointLight>();
     allObjects = new ArrayList<Shape>();
     stack = new MatrixStack();
+    rays_per_pixel = 1;
   }
   
   public void setBackground(Color background){
@@ -53,6 +56,14 @@ public class Scene{
   
   public MatrixStack getMatrixStack(){
     return stack;
+  }
+  
+  public int getRaysPerPixel(){
+    return rays_per_pixel;
+  }
+  
+  public void setRaysPerPixel(int rayNum){
+    rays_per_pixel = rayNum;
   }
   
 }
