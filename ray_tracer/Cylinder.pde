@@ -24,7 +24,7 @@ public class Cylinder extends Shape{
   }
   
   
-  public float intersects(Ray tempRay){
+  public IntersectionObject intersects(Ray tempRay){
     
     // equation for infinite cylinder along y axis is : (x-a)^2 + (z-b)^2 = r^2
     Point origin = tempRay.getOrigin();
@@ -37,7 +37,7 @@ public class Cylinder extends Shape{
         
     if(discriminant < 0){
       // if it doesnt hit infinite length cylinder it won't hit a finite length cylinder
-      return -1;
+      return new IntersectionObject(-1, null);
     }
     
     // retValPlus and retValMinus are the two times it hits the body
@@ -80,7 +80,10 @@ public class Cylinder extends Shape{
      tMin = StaticUtility.smallestPositive(tempTime, tMin);
     }
     
-    return tMin;
+    if(tMin == -1){
+      return new IntersectionObject(tMin, null);
+    }
+    return new IntersectionObject(tMin, shapeNormal(tempRay.hitPoint(tMin)));
   }
   
   

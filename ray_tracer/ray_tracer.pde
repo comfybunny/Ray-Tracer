@@ -41,7 +41,7 @@ void keyPressed() {
     case 's':  currentScene = new Scene(); interpreter("specular01.cli"); if(refineBoolean){refine = 8;}; break;
     case 'S':  currentScene = new Scene(); interpreter("specular02.cli"); if(refineBoolean){refine = 8;}; break;
     case 'q':  exit(); break;
-    case 'c':  currentScene = new Scene(); interpreter("debug.cli"); if(refineBoolean){refine = 8;}; break;
+    case 'd':  currentScene = new Scene(); interpreter("debug.cli"); if(refineBoolean){refine = 8;}; break;
     case 't':  currentScene = new Scene(); interpreter("test.cli"); if(refineBoolean){refine = 8;}; break;
   }
   if (key == 'r') {
@@ -97,13 +97,25 @@ void interpreter(String filename) {
         Point fileCenter = new Point(Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4]));
         float fileRadius = Float.parseFloat(token[1]);
         float[] location = {fileCenter.getX(), fileCenter.getY(), fileCenter.getZ(), 1};
-        float[] surfacePoint = {fileCenter.getX(), fileCenter.getY()+fileRadius, fileCenter.getZ(), 1};
-        
-        Point surfacePointCTM = new Point(currentScene.getMatrixStack().getCTM().vectorMultiply(surfacePoint));
+        //float[] surfacePoint = {fileCenter.getX(), fileCenter.getY()+fileRadius, fileCenter.getZ(), 1};
+        //Point surfacePointCTM = new Point(currentScene.getMatrixStack().getCTM().vectorMultiply(surfacePoint));
         Point sphereCenterCTM = new Point(currentScene.getMatrixStack().getCTM().vectorMultiply(location));
-        
         //Sphere newShape = new Sphere(surfacePointCTM.euclideanDistance(sphereCenterCTM)/fileRadius, sphereCenterCTM, currSurface);
         Sphere newShape = new Sphere(fileRadius, sphereCenterCTM, currSurface);
+        
+        currentScene.addShape(newShape);
+      }
+      
+      else if(token[0].equals("moving_sphere")){
+        Point fileCenter = new Point(Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4]));
+        float fileRadius = Float.parseFloat(token[1]);
+        Point fileCenter2 = new Point(Float.parseFloat(token[5]), Float.parseFloat(token[6]), Float.parseFloat(token[7]));
+        float[] location = {fileCenter.getX(), fileCenter.getY(), fileCenter.getZ(), 1};
+        Point sphereCenterCTM = new Point(currentScene.getMatrixStack().getCTM().vectorMultiply(location));
+        float[] location2 = {fileCenter2.getX(), fileCenter2.getY(), fileCenter2.getZ(), 1};
+        Point sphereCenterCTM2 = new Point(currentScene.getMatrixStack().getCTM().vectorMultiply(location2));
+        
+        Sphere newShape = new MovingSphere(fileRadius, sphereCenterCTM, currSurface, sphereCenterCTM2);
         
         currentScene.addShape(newShape);
       }
@@ -183,17 +195,19 @@ public Color recursive(Ray ray, Shape lastHit){
   Point origin = ray.getOrigin();
   float minTime = MAX_FLOAT;
   Shape firstShape = null;
+  IntersectionObject intersectionInfo= null;
   for(Shape a : allObjects){
     if(lastHit != a){
-      float currTime = a.intersects(ray);
-      if(currTime >= 0 && currTime <minTime){
-        minTime = currTime;
+      IntersectionObject currIntersectionInfo = a.intersects(ray);
+      if(currIntersectionInfo.getTime() >= 0 && currIntersectionInfo.getTime() <minTime){
+        minTime = currIntersectionInfo.getTime();
         firstShape = a;
+        intersectionInfo = currIntersectionInfo;
       }
     }
   }
   
-  if(firstShape!=null){
+  if(firstShape!=null && intersectionInfo!=null){
 
     Surface currentShapeSurface = firstShape.getSurface();
     Color diffuseColor = currentShapeSurface.getDiffuseColor();
@@ -203,7 +217,7 @@ public Color recursive(Ray ray, Shape lastHit){
       totalColor.add(ambientColor);
     }
     Point intersectionPoint = ray.hitPoint(minTime);
-    PVector firstShapeSurfaceNormal = firstShape.shapeNormal(intersectionPoint);
+    PVector firstShapeSurfaceNormal = intersectionInfo.getSurfaceNormal();
     firstShapeSurfaceNormal.div(firstShapeSurfaceNormal.mag());
     
     // if reflective then recurse
@@ -247,10 +261,10 @@ public Color recursive(Ray ray, Shape lastHit){
       lightRay.setDirection(shapeToLight);
       lightRay.setOrigin(intersectionPoint);
       for(Shape b : allObjects){
-       float intersectTime = b.intersects(lightRay);
-       if(intersectTime > 0 && intersectTime < shadeTime && b!=firstShape){
+        IntersectionObject currIntersectionInfo = b.intersects(lightRay);
+       if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && b!=firstShape){
          shadeShapeIntersect = b;
-         shadeTime = intersectTime;
+         shadeTime = currIntersectionInfo.getTime();
        }
       }
       if(shadeShapeIntersect != null){

@@ -65,6 +65,10 @@ public class Point{
     z = z + move.z * a;
   }
   
+  public Point newPoint(PVector direction, float r){
+    return new Point(x + direction.x * r, y + direction.y * r, z + direction.z * r);
+  }
+  
   public String debug(){
     return "X: " + x + "\tY: " + y + "\tZ: " + z;
   }

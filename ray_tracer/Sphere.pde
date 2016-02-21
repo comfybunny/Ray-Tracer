@@ -27,7 +27,7 @@ public class Sphere extends Shape {
     return location;
   }
   
-  public float intersects(Ray ray){
+  public IntersectionObject intersects(Ray ray){
     Point origin = ray.getOrigin();
     PVector direction = ray.getDirection();
 
@@ -38,14 +38,14 @@ public class Sphere extends Shape {
     
     float discriminant = sq(b) - (4*a*c);
     if(discriminant < 0){
-      return -1;
+      return new IntersectionObject(-1, null);
     }
     float retValPlus = ((-1*b+sqrt(discriminant))/(2.0f*a));
     float retValMinus = ((-1*b-sqrt(discriminant))/(2.0f*a));
     if(retValPlus > retValMinus && retValMinus>0){
-      return retValMinus;
+      return new IntersectionObject(retValMinus, shapeNormal(ray.hitPoint(retValMinus)));
     }
-    return retValPlus;
+    return new IntersectionObject(retValPlus, shapeNormal(ray.hitPoint(retValPlus)));
   }
   
   public PVector shapeNormal(Point hitPoint){

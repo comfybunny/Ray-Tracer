@@ -11,7 +11,7 @@ public class Triangle extends Shape {
     addSurface(surface);
   }
   
-  public float intersects(Ray tempRay){
+  public IntersectionObject intersects(Ray tempRay){
     // intersect ray w/ plane of polygon
     PVector E1 = P1.subtract(P0);
     PVector E2 = P2.subtract(P0);
@@ -20,7 +20,7 @@ public class Triangle extends Shape {
     planeNormal.div(planeNormal.mag());
     float parallelTest = tempRay.getDirection().dot(planeNormal);
     if(parallelTest == 0){
-      return -1;
+      return new IntersectionObject(-1, null);
     }
     float planeDval = -planeNormal.dot(P0.getPVector());
     float intersectionTime = -(planeNormal.dot(tempRay.getOrigin().getPVector()) + planeDval)/(parallelTest);
@@ -36,55 +36,17 @@ public class Triangle extends Shape {
     PVector P2P0 = P0.subtract(P2);
     
     if(P0P1.cross(P0inter).dot(planeNormal)<0){
-     return -1;
+     return new IntersectionObject(-1, null);
     }
     if(P1P2.cross(P1inter).dot(planeNormal)<0){
-     return -1;
+     return new IntersectionObject(-1, null);
     }
     if(P2P0.cross(P2inter).dot(planeNormal)<0){
-     return -1;
+     return new IntersectionObject(-1, null);
     }
-    return intersectionTime;
+    return new IntersectionObject(intersectionTime, shapeNormal(tempRay.hitPoint(intersectionTime)));
   }
-  
-/**  public float intersects(Ray tempRay){
-    PVector E1 = P1.subtract(P0);
-    PVector E2 = P2.subtract(P0);
-    Point originPoint = tempRay.getOrigin();
-    PVector rayOrigin = new PVector(originPoint.getX(), originPoint.getY(), originPoint.getZ());
-    PVector rayDirection = tempRay.getDirection();
-    PVector P = new PVector();
-    PVector.cross(rayDirection, E2, P);
-    float det = E1.dot(P);
-    float invDet = 1.0/det;
-    if(det > -0.000001 && det < 0.000001){
-      return -1;
-    }
-    PVector T = new PVector();
-    PVector.sub(new PVector(P0.getX(), P0.getY(), P0.getZ()), rayOrigin, T);
-    float u = T.dot(P)*invDet;
-    
-    if(u < 0 || u > 1.0){
-      return -1;
-    }
-    PVector Q = new PVector();
-    PVector.cross(E1, T, Q);
 
-    float v = Q.dot(rayDirection)*invDet;
-    
-    if(v < 0 || u+v > 1.0){
-      return -1;
-    }
-    
-    float time = E2.dot(Q);
-    if(time > 0.000001){
-      return time;
-    }
-    
-    return -1;
-  }
-  **/
-  
   public PVector shapeNormal(Point hitPoint){
     PVector E1 = P1.subtract(P0);
     PVector E2 = P2.subtract(P0);

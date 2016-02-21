@@ -2,7 +2,7 @@ public abstract class Shape{
   
   private Surface surface;
   
-  abstract float intersects(Ray tempRay);
+  abstract IntersectionObject intersects(Ray tempRay);
     
   abstract PVector shapeNormal(Point hitPoint);
   
