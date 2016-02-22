@@ -2,7 +2,7 @@
 
 rays_per_pixel 1
 
-lens  0.08  3
+# lens  0.08  3
 
 fov 60
 
@@ -13,7 +13,7 @@ background 0.2 0.2 1
 # light sources 
 
 point_light  2 5 0  .8 .8 .8
-#point_light -3 4 0  .2 .2 .2
+point_light -3 4 0  .2 .2 .2
 
 # spheres resting on ground
 

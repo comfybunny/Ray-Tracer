@@ -20,4 +20,8 @@ public class Light{
     return lightColor;
   }
   
+  public String getType(){
+    return "POINT";
+  }
+  
 }

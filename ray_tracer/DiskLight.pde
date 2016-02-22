@@ -53,4 +53,8 @@ public class DiskLight extends Light{
     return newPoint;
   }
   
+  public String getType(){
+    return "DISK";
+  }
+  
 }

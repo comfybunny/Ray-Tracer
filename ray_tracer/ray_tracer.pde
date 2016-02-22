@@ -263,6 +263,7 @@ public Color recursive(Ray ray, Shape lastHit){
       }
       float diffuse = max(0, lightAndShapeNormalAlignment);
       Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
+
       // shading stuff below
       float distLightToBlocker = 0;
       float shadeTime = MAX_FLOAT;
@@ -280,7 +281,7 @@ public Color recursive(Ray ray, Shape lastHit){
        Point blockerLocation = lightRay.hitPoint(shadeTime);
        distLightToBlocker = blockerLocation.euclideanDistance(lightLocation);
        if(intersectionPoint.euclideanDistance(lightLocation) > distLightToBlocker){
-         return totalColor;
+         //return totalColor;
        }
       }
       if(tempSpecularColor!=null){
@@ -291,12 +292,16 @@ public Color recursive(Ray ray, Shape lastHit){
         float specular = max(0, firstIntersectionToOrigin.dot(reflectedLightVector));
         float specularPower = pow(specular, currentShapeSurface.getSpecularHighlightExponent());
         specularColor.multiply(specularPower);
-        diffuseSurfaceColor.add(specularColor);  
+        diffuseSurfaceColor.add(specularColor);
       }
       Color tempToAdd = diffuseSurfaceColor.product(light.getColor());
-      totalColor.add(tempToAdd);
-    }
-    
+      
+      if(intersectionPoint.euclideanDistance(lightLocation) < distLightToBlocker || shadeShapeIntersect == null){
+         totalColor.add(tempToAdd);
+       }
+      
+      
+    }    
     return totalColor;
   }
   else{          
