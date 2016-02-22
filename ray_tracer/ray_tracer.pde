@@ -263,7 +263,6 @@ public Color recursive(Ray ray, Shape lastHit){
       }
       float diffuse = max(0, lightAndShapeNormalAlignment);
       Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
-
       // shading stuff below
       float distLightToBlocker = 0;
       float shadeTime = MAX_FLOAT;
@@ -284,7 +283,6 @@ public Color recursive(Ray ray, Shape lastHit){
          return totalColor;
        }
       }
-      
       if(tempSpecularColor!=null){
         Color specularColor = new Color(tempSpecularColor.getR(), tempSpecularColor.getG(), tempSpecularColor.getB());
         //println(currentShapeSurface.getSpecularHighlightExponent());
@@ -294,13 +292,11 @@ public Color recursive(Ray ray, Shape lastHit){
         float specularPower = pow(specular, currentShapeSurface.getSpecularHighlightExponent());
         specularColor.multiply(specularPower);
         diffuseSurfaceColor.add(specularColor);  
-        
       }
-      
       Color tempToAdd = diffuseSurfaceColor.product(light.getColor());
-
       totalColor.add(tempToAdd);
     }
+    
     return totalColor;
   }
   else{          
@@ -325,41 +321,33 @@ void rayTrace(){
       Point origin = ray.getOrigin();
       float xlocation = xPrime + half_x;
       float ylocation = yPrime + half_y;
+      Lens currLens = currentScene.getLens();
+      
       if(currentScene.getRaysPerPixel() == 1){
-        // shoot from center
         float rayMag = sqrt(sq(xlocation-origin.getX()) + sq(ylocation-origin.getY()) + 1);
         ray.setDirection((xlocation-origin.getX())/rayMag, (ylocation-origin.getY())/rayMag, -1/rayMag);
-        totalColor.add(recursive(ray, null));
+        // shoot from center
         // if lens do the following
-        Lens currLens = currentScene.getLens();
         if(currLens != null){
-          PVector lensNormal = currLens.getLensNormal();
-          Point point_on_plane = new Point(0, 0, -1.0*currLens.getFocalDistance());
-          float timeIntersectionFocalPlane = lensNormal.dot(point_on_plane.subtract(origin))/lensNormal.dot(ray.getDirection());
-          Point Q = new Point();
-          Q.movePoint(ray.getDirection(), timeIntersectionFocalPlane);
-          float timeIntersectionLensCenter = -Q.getZ()/ray.getDirection().z;
-          Point P = new Point(Q.getX(), Q.getY(), Q.getZ());
-          P.movePoint(ray.getDirection(), timeIntersectionLensCenter);
-          float lens_radius = currLens.getRadius();
-          Point Pprime = new Point(P.getX()*(random(2) - 1)*lens_radius, P.getX()*(random(2) - 1)*lens_radius, P.getX()*(random(2) - 1)*lens_radius);
-          while(Pprime.euclideanDistance(P) > lens_radius){
-            Pprime = new Point(P.getX()*(random(2) - 1)*lens_radius, P.getX()*(random(2) - 1)*lens_radius, P.getX()*(random(2) - 1)*lens_radius);
-          }
-          Ray lens_ray = new Ray();
-          lens_ray.setOrigin(Pprime);
-          lens_ray.setDirection(Q.subtract(Pprime));
-          totalColor.add(recursive(lens_ray, null));
-          totalColor.divide(2.0);
+          totalColor.add(recursive(currLens.randomRayOnLens(ray), null));
+        }
+        else{
+          totalColor.add(recursive(ray, null));
         }
       }
+      
       else{
         for(int multi_ray=0; multi_ray < currentScene.getRaysPerPixel(); multi_ray++){
           float randX = random(-1*half_x, half_x);
           float randY = random(-1*half_y, half_y);
           float rayMag = sqrt(sq(xlocation+randX-origin.getX()) + sq(ylocation+randY-origin.getY()) + 1);
           ray.setDirection((xlocation+randX-origin.getX())/rayMag, (ylocation+randY-origin.getY())/rayMag, -1/rayMag);
-          totalColor.add(recursive(ray, null));
+          if(currLens!=null){
+            totalColor.add(recursive(currLens.randomRayOnLens(ray), null));
+          }
+          else{
+            totalColor.add(recursive(ray, null));
+          }
         }
       }
       

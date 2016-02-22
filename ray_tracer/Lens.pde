@@ -20,4 +20,19 @@ public class Lens{
   public PVector getLensNormal(){
     return lens_normal;
   }
+  
+  public Ray randomRayOnLens(Ray ray){
+    float timeIntersectionFocalPlane = -1.0*focal_distance/ray.getDirection().z;
+    Point Q = new Point();
+    Q.movePoint(ray.getDirection(), timeIntersectionFocalPlane);
+    Point P = new Point();
+    Point Pprime = new Point((random(2) - 1)*radius, (random(2) - 1)*radius, 0);
+    while(Pprime.euclideanDistance(P) > radius){
+      Pprime = new Point((random(2) - 1)*radius, (random(2) - 1)*radius, 0);
+    }
+    Ray lens_ray = new Ray();
+    lens_ray.setOrigin(Pprime);
+    lens_ray.setDirection(Q.subtract(Pprime));
+    return lens_ray;
+  }
 }
