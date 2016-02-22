@@ -73,15 +73,23 @@ void interpreter(String filename) {
       
       if (token.length == 0) continue; // Skip blank line.
       
-      if (token[0].equals("fov")) {
+      else if (token[0].equals("fov")) {
         currentScene.setFOV(Float.parseFloat(token[1]));
+      }
+      else if(token[0].equals("lens")){
+        currentScene.addLens(new Lens(Float.parseFloat(token[1]), Float.parseFloat(token[2])));
       }
       else if (token[0].equals("background")) {
         currentScene.setBackground(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]));
       }
       else if (token[0].equals("point_light")) {
-        currentScene.addPointLight(new PointLight(new Point(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3])), 
+        currentScene.addLight(new Light(new Point(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3])), 
                                                   new Color(Float.parseFloat(token[4]),Float.parseFloat(token[5]),Float.parseFloat(token[6]))));
+      }
+      else if(token[0].equals("disk_light")){
+        currentScene.addLight(new DiskLight(new Point(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3])), 
+                                                  new Color(Float.parseFloat(token[8]),Float.parseFloat(token[9]),Float.parseFloat(token[10])),
+                                                  Float.parseFloat(token[4]), new PVector(Float.parseFloat(token[5]),Float.parseFloat(token[6]),Float.parseFloat(token[7]))));
       }
       else if (token[0].equals("diffuse")) {
         currSurface = new Surface(new Color(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3])), 
@@ -132,8 +140,6 @@ void interpreter(String filename) {
       }
       else if(token[0].equals("translate")){
         currentScene.getMatrixStack().addTranslate(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]));
-        //stack.getCTM().printDebug();
-        //currentScene.getMatrixStack().getCTM().printDebug();
       }
       else if(token[0].equals("scale")){
         currentScene.getMatrixStack().addScale(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]));
@@ -182,6 +188,10 @@ void interpreter(String filename) {
       }
       else if (token[0].equals("write")) {
         // save the current image to a .png file
+        rayTrace();
+        if(refine > 1 && refineBoolean){
+          refine = refine/2;
+        }
         save(token[1]);  
       }
     }
@@ -235,9 +245,9 @@ public Color recursive(Ray ray, Shape lastHit){
      totalColor.add(returnColor);
     }
       
-    ArrayList<PointLight> pointLights = currentScene.getPointLights();
+    ArrayList<Light> lights = currentScene.getLights();
     // assuming no refraction for now
-    for(PointLight light : pointLights){
+    for(Light light : lights){
       Ray lightRay = new Ray();
       Point lightLocation = light.getPoint();
       PVector shapeToLight = lightLocation.subtract(intersectionPoint);
@@ -305,6 +315,7 @@ void rayTrace(){
   float k = tan(radians(currentScene.getFOV()/2.0));
   float half_x = k/width;
   float half_y = k/height;
+  
   for(int x = 0; x < width; x+=refine){
     float xPrime = ((2.0*k/width)*x)-k;
     for(int y = 0; y < height; y+=refine){
@@ -319,6 +330,28 @@ void rayTrace(){
         float rayMag = sqrt(sq(xlocation-origin.getX()) + sq(ylocation-origin.getY()) + 1);
         ray.setDirection((xlocation-origin.getX())/rayMag, (ylocation-origin.getY())/rayMag, -1/rayMag);
         totalColor.add(recursive(ray, null));
+        // if lens do the following
+        Lens currLens = currentScene.getLens();
+        if(currLens != null){
+          PVector lensNormal = currLens.getLensNormal();
+          Point point_on_plane = new Point(0, 0, -1.0*currLens.getFocalDistance());
+          float timeIntersectionFocalPlane = lensNormal.dot(point_on_plane.subtract(origin))/lensNormal.dot(ray.getDirection());
+          Point Q = new Point();
+          Q.movePoint(ray.getDirection(), timeIntersectionFocalPlane);
+          float timeIntersectionLensCenter = -Q.getZ()/ray.getDirection().z;
+          Point P = new Point(Q.getX(), Q.getY(), Q.getZ());
+          P.movePoint(ray.getDirection(), timeIntersectionLensCenter);
+          float lens_radius = currLens.getRadius();
+          Point Pprime = new Point(P.getX()*(random(2) - 1)*lens_radius, P.getX()*(random(2) - 1)*lens_radius, P.getX()*(random(2) - 1)*lens_radius);
+          while(Pprime.euclideanDistance(P) > lens_radius){
+            Pprime = new Point(P.getX()*(random(2) - 1)*lens_radius, P.getX()*(random(2) - 1)*lens_radius, P.getX()*(random(2) - 1)*lens_radius);
+          }
+          Ray lens_ray = new Ray();
+          lens_ray.setOrigin(Pprime);
+          lens_ray.setDirection(Q.subtract(Pprime));
+          totalColor.add(recursive(lens_ray, null));
+          totalColor.divide(2.0);
+        }
       }
       else{
         for(int multi_ray=0; multi_ray < currentScene.getRaysPerPixel(); multi_ray++){
@@ -346,10 +379,7 @@ void rayTrace(){
 }
 
 void draw() {
-    rayTrace();
-    if(refine > 1 && refineBoolean){
-      refine = refine/2;
-    }
+    
     //noLoop();
 }
 

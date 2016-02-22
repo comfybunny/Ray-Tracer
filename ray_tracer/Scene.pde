@@ -2,9 +2,9 @@ public class Scene{
   
   private Color background;
   private float fov;
-  private ArrayList<PointLight> pointLights;                                   // TODO THIS NEEDS TO BE A LIST
+  private ArrayList<Light> lights;                                   // TODO THIS NEEDS TO BE A LIST
   private ArrayList<Shape> allObjects;  // TODO CHANGE TO ABSTRACT CLASS
-  
+  private Lens lens;
   private MatrixStack stack;
   
   private int rays_per_pixel;
@@ -12,10 +12,11 @@ public class Scene{
   public Scene(){
     background = new Color();
     fov = 0;
-    pointLights = new ArrayList<PointLight>();
+    lights = new ArrayList<Light>();
     allObjects = new ArrayList<Shape>();
     stack = new MatrixStack();
     rays_per_pixel = 1;
+    lens = null;
   }
   
   public void setBackground(Color background){
@@ -38,8 +39,12 @@ public class Scene{
     return fov;
   }
   
-  public void addPointLight(PointLight pointLight){
-    pointLights.add(pointLight);
+  public void addLight(Light light){
+    lights.add(light);
+  }
+  
+  public void addLens(Lens lens){
+    this.lens = lens;
   }
   
   public void addShape(Shape currObject){              // TODO CHANGE TO ABSTRACT CLASS
@@ -50,8 +55,8 @@ public class Scene{
     return allObjects;
   }
   
-  public ArrayList<PointLight> getPointLights(){
-    return pointLights;
+  public ArrayList<Light> getLights(){
+    return lights;
   }
   
   public MatrixStack getMatrixStack(){
@@ -60,6 +65,10 @@ public class Scene{
   
   public int getRaysPerPixel(){
     return rays_per_pixel;
+  }
+  
+  public Lens getLens(){
+    return lens;
   }
   
   public void setRaysPerPixel(int rayNum){
