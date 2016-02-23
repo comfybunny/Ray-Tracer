@@ -23,6 +23,8 @@ public class DiskLight extends Light{
     u = u.div(u.mag());
     v = lightNormal.cross(u);
     v.div(v.mag());
+    
+    print(lightNormal);
   }
   
   public float getRadius(){

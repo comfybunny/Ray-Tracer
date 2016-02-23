@@ -2,7 +2,7 @@
 
 rays_per_pixel 1
 
-# lens  0.08  3
+lens  0.08  3
 
 fov 60
 
