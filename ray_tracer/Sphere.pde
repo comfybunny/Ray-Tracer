@@ -54,7 +54,7 @@ public class Sphere extends Shape {
   }
   
   public String debug(){
-    return "Location: (" + location.debug();
+    return "Location: (" + location.toString();
   }
 
 }

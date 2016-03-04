@@ -6,7 +6,7 @@
 
 int screen_width = 300;
 int screen_height = 300;
-
+int timer = 0;
 int refine = 1;
 boolean refineBoolean = false;
 
@@ -131,6 +131,10 @@ void interpreter(String filename) {
         Cylinder newShape = new Cylinder(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[4]), Float.parseFloat(token[3])), Float.parseFloat(token[5]), currSurface);
         currentScene.addShape(newShape);
       }
+      else if(token[0].equals("box")){
+        Box newShape = new Box(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4]), Float.parseFloat(token[5]), Float.parseFloat(token[6]), currSurface);
+        currentScene.addShape(newShape);
+      }
       
       else if(token[0].equals("push")){
         currentScene.getMatrixStack().push();
@@ -172,6 +176,15 @@ void interpreter(String filename) {
       
       else if (token[0].equals("read")) {  // reads input from another file
         interpreter (token[1]);
+      }
+      else if (token[0].equals("reset_timer")) {
+        timer = millis();
+      }
+      else if (token[0].equals("print_timer")) {
+        int new_timer = millis();
+        int diff = new_timer - timer;
+        float seconds = diff / 1000.0;
+        println ("timer = " + seconds);
       }
       else if (token[0].equals("color")) {  // example command -- not part of ray tracer
        float r = float(token[1]);

@@ -58,6 +58,6 @@ public class Triangle extends Shape {
   }
 
   public String debug(){
-    return "P0: " + P0.debug() + "\nP1: " + P1.debug() + "\nP2: " + P2.debug();
+    return "P0: " + P0.toString() + "\nP1: " + P1.toString() + "\nP2: " + P2.toString();
   }
 }

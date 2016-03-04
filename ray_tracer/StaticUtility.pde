@@ -50,4 +50,11 @@ public static final class StaticUtility{
   public static PVector get2Dortho(PVector aPoint){
     return new PVector(aPoint.y*-1.0, aPoint.x);
   }
+  
+  public static boolean almost_equal(float a, float b){
+    if(a < b + 0.000001 && a > b - 0.000001){
+      return true;
+    }
+    return false;
+  }
 }

@@ -69,7 +69,7 @@ public class Point{
     return new Point(x + direction.x * r, y + direction.y * r, z + direction.z * r);
   }
   
-  public String debug(){
+  public String toString(){
     return "X: " + x + "\tY: " + y + "\tZ: " + z;
   }
   

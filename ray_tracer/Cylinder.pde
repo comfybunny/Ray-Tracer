@@ -89,11 +89,11 @@ public class Cylinder extends Shape{
   
   public PVector shapeNormal(Point hitPoint){
     // if it hits the bottom of the cylinder
-    if(hitPoint.getY() < location.getY() + 0.000001 && hitPoint.getY() > location.getY() - 0.000001){
+    if(StaticUtility.almost_equal(hitPoint.getY(), location.getY())){
      return new PVector(0,-1,0);
     }
     // if it hits the top of the cylinder
-    else if(hitPoint.getY() < ymax + 0.000001 && hitPoint.getY() > ymax - 0.000001){
+    else if(StaticUtility.almost_equal(hitPoint.getY(), ymax)){
      return new PVector(0,1,0);
     }
     // if it hits the body of the cylinder
@@ -102,7 +102,7 @@ public class Cylinder extends Shape{
   }
   
   public String debug(){
-    return "Cylinder\t\tradius: " + radius + "\tlocation: " + location.debug() + "\tymax: " + ymax;
+    return "Cylinder\t\tradius: " + radius + "\tlocation: " + location.toString() + "\tymax: " + ymax;
   }
   
 }
