@@ -113,7 +113,6 @@ void interpreter(String filename) {
         
         currentScene.addShape(newShape);
       }
-      
       else if(token[0].equals("moving_sphere")){
         Point fileCenter = new Point(Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4]));
         float fileRadius = Float.parseFloat(token[1]);
@@ -136,6 +135,14 @@ void interpreter(String filename) {
         currentScene.addShape(newShape);
       }
       
+      else if(token[0].equals("named_object")){
+        // remove last item from currentScene and move it to a global list for instancing
+        Shape newInstance = currentScene.popLastShape();
+        currentScene.add_named_object(token[1], newInstance);
+      }
+      else if(token[0].equals("instance")){
+        currentScene.addInstance(currentScene.getInstance(token[1]));
+      }
       else if(token[0].equals("push")){
         currentScene.getMatrixStack().push();
       }

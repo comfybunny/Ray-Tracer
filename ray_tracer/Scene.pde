@@ -1,3 +1,5 @@
+import java.util.Map;
+
 public class Scene{
   
   private Color background;
@@ -6,6 +8,8 @@ public class Scene{
   private ArrayList<Shape> allObjects;  // TODO CHANGE TO ABSTRACT CLASS
   private Lens lens;
   private MatrixStack stack;
+  private HashMap<String, Shape> named_objects;
+  private ArrayList<Instance> instances;
   
   private int rays_per_pixel;
   
@@ -17,6 +21,7 @@ public class Scene{
     stack = new MatrixStack();
     rays_per_pixel = 1;
     lens = null;
+    named_objects = new HashMap<String, Shape>();
   }
   
   public void setBackground(Color background){
@@ -75,4 +80,24 @@ public class Scene{
     rays_per_pixel = rayNum;
   }
   
+  public Shape popLastShape(){
+    Shape lastShape = allObjects.get(allObjects.size()-1);
+    allObjects.remove(allObjects.size()-1);
+    return lastShape;
+  }
+  
+  public void add_named_object(String object_name, Shape object){
+    named_objects.put(object_name, object);
+  }
+  
+  public ArrayList<Instance> getInstances(){
+    return instances;
+  }
+  
+  public Instance getInstance(String string){
+    return instances.get(string);
+  }
+  public void addInstance(Instance instance){
+    instances.add(instance);
+  }
 }
