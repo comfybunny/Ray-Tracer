@@ -6,6 +6,26 @@ public class XMatrix3D{
     matrix = new float[4][4];
   }
   
+  public XMatrix3D(float aa, float ab, float ac, float ad, float ba, float bb, float bc, float bd, float ca, float cb, float cc, float cd, float da, float db, float dc, float dd){
+    matrix = new float[4][4];
+    matrix[0][0] = aa;
+    matrix[0][1] = ab;
+    matrix[0][2] = ac;
+    matrix[0][3] = ad;
+    matrix[1][0] = ba;
+    matrix[1][1] = bb;
+    matrix[1][2] = bc;
+    matrix[1][3] = bd;
+    matrix[2][0] = ca;
+    matrix[2][1] = cb;
+    matrix[2][2] = cc;
+    matrix[2][3] = cd;
+    matrix[3][0] = da;
+    matrix[3][1] = db;
+    matrix[3][2] = dc;
+    matrix[3][3] = dd;
+  }
+  
   public XMatrix3D(String type){
     matrix = new float[4][4];
     if(type.equals("identity")){
@@ -130,5 +150,51 @@ public class XMatrix3D{
       }
       println();
     }
+  }
+  
+  public XMatrix3D getInverse(){
+    float a11 = matrix[0][0];
+    float a12 = matrix[0][1];
+    float a13 = matrix[0][2];
+    float a14 = matrix[0][3];
+    float a21 = matrix[1][0];
+    float a22 = matrix[1][1];
+    float a23 = matrix[1][2];
+    float a24 = matrix[1][3];
+    float a31 = matrix[2][0];
+    float a32 = matrix[2][1];
+    float a33 = matrix[2][2];
+    float a34 = matrix[2][3];
+    float a41 = matrix[3][0];
+    float a42 = matrix[3][1];
+    float a43 = matrix[3][2];
+    float a44 = matrix[3][3];
+    
+    float det = a11*a22*a33*a44 + a11*a23*a34*a42 + a11*a24*a32*a43
+              + a12*a21*a34*a43 + a12*a23*a31*a44 + a12*a24*a33*a41
+              + a13*a21*a32*a44 + a12*a22*a34*a41 + a13*a24*a31*a42
+              + a14*a21*a33*a42 + a13*a22*a31*a43 + a14*a23*a32*a41
+              - a11*a22*a34*a43 - a11*a23*a32*a44 - a11*a24*a33*a42
+              - a12*a21*a33*a44 - a12*a23*a34*a41 - a12*a24*a31*a43
+              - a13*a21*a34*a42 - a13*a22*a31*a44 - a13*a24*a32*a41
+              - a14*a21*a32*a43 - a14*a22*a33*a41 - a14*a23*a31*a42;
+    float b11 = a22*a33*a44 + a23*a34*a42 + a24*a32*a43 - a22*a34*a43 - a23*a32*a44 - a24*a33*a42;
+    float b12 = a12*a34*a43 + a13*a32*a44 + a14*a33*a42 - a12*a33*a44 - a13*a34*a42 - a14*a32*a43;
+    float b13 = a12*a23*a44 + a13*a24*a42 + a14*a22*a43 - a12*a24*a43 - a13*a22*a44 - a14*a23*a42;
+    float b14 = a12*a24*a33 + a13*a22*a34 + a14*a23*a32 - a12*a23*a34 - a13*a24*a32 - a14*a22*a33;
+    float b21 = a21*a34*a43 + a23*a31*a44 + a24*a33*a41 - a21*a33*a44 - a23*a34*a41 - a24*a31*a43;
+    float b22 = a11*a33*a44 + a13*a34*a41 + a14*a31*a43 - a11*a34*a43 - a13*a31*a44 - a14*a33*a41;
+    float b23 = a11*a24*a43 + a13*a21*a44 + a14*a23*a41 - a11*a23*a44 - a13*a24*a41 - a14*a21*a43;
+    float b24 = a11*a23*a34 + a13*a24*a31 + a14*a21*a33 - a11*a24*a33 - a13*a21*a34 - a14*a32*a31;
+    float b31 = a21*a32*a44 + a22*a34*a41 + a24*a31*a42 - a21*a34*a42 - a22*a31*a44 - a24*a32*a41;
+    float b32 = a11*a34*a42 + a12*a31*a44 + a14*a32*a41 - a11*a32*a34 - a12*a34*a41 - a14*a31*a42;
+    float b33 = a11*a22*a44 + a12*a24*a41 + a14*a21*a42 - a11*a24*a42 - a12*a21*a44 - a14*a22*a41;
+    float b34 = a11*a24*a32 + a12*a21*a34 + a14*a22*a31 - a11*a22*a34 - a12*a24*a31 - a14*a21*a32;
+    float b41 = a21*a33*a42 + a22*a31*a43 + a23*a32*a41 - a21*a32*a43 - a22*a33*a41 - a23*a31*a42;
+    float b42 = a11*a32*a43 + a12*a33*a41 + a13*a31*a42 - a11*a33*a42 - a13*a31*a43 - a13*a32*a41;
+    float b43 = a11*a23*a42 + a12*a21*a43 + a13*a22*a41 - a11*a22*a43 - a12*a23*a41 - a13*a21*a42;
+    float b44 = a11*a22*a33 + a12*a23*a31 + a13*a21*a32 - a11*a23*a32 - a12*a21*a33 - a13*a22*a31;
+    
+    return new XMatrix3D(b11/det, b12/det, b13/det, b14/det, b21/det, b22/det, b23/det, b24/det, b31/det, b32/det, b33/det, b34/det, b41/det, b42/det, b43/det, b44/det);
   }
 }

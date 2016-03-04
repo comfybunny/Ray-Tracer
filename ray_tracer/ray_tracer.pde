@@ -141,7 +141,7 @@ void interpreter(String filename) {
         currentScene.add_named_object(token[1], newInstance);
       }
       else if(token[0].equals("instance")){
-        currentScene.addInstance(currentScene.getInstance(token[1]));
+        currentScene.addInstance(new Instance(currentScene.getInstance(token[1]),currentScene.getMatrixStack().getCTM()));
       }
       else if(token[0].equals("push")){
         currentScene.getMatrixStack().push();

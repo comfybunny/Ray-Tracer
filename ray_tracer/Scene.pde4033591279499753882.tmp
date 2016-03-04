@@ -94,8 +94,8 @@ public class Scene{
     return instances;
   }
   
-  public Shape getInstance(String string){
-    return named_objects.get(string);
+  public Instance getInstance(String string){
+    return named_objects.get();
   }
   public void addInstance(Instance instance){
     instances.add(instance);

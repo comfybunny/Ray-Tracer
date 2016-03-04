@@ -3,9 +3,9 @@ public class Instance extends Shape{
   Shape shape;
   XMatrix3D transformation_matrix_inverse;
   
-  public Instance(Shape shape, XMatrix3D transformation_matrix_inverse){
+  public Instance(Shape shape, XMatrix3D ctm){
     this.shape = shape;
-    this.transformation_matrix_inverse = transformation_matrix_inverse;
+    this.transformation_matrix_inverse = ctm;
   }
   
   public String debug(){
