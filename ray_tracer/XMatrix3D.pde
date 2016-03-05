@@ -139,12 +139,19 @@ public class XMatrix3D{
     return toReturn;
   }
   
+  public PVector PVectorMultiply(PVector toMultiply){
+    PVector toReturn = new PVector();
+    toReturn.x = matrix[0][0]*toMultiply.x + matrix[0][1]*toMultiply.y + matrix[0][2]*toMultiply.z; 
+    toReturn.y = matrix[1][0]*toMultiply.x + matrix[1][1]*toMultiply.y + matrix[1][2]*toMultiply.z;
+    toReturn.z = matrix[2][0]*toMultiply.x + matrix[2][1]*toMultiply.y + matrix[2][2]*toMultiply.z;
+    return toReturn;
+  }
   
   public PVector multiplyAdjoint(PVector toMultiply){
     PVector toReturn = new PVector();
-    toReturn.x = matrix[0][0]*toMultiply.x + matrix[1][0]*toMultiply.y + matrix[2][0]*toMultiply.z + matrix[0][3]; 
-    toReturn.y = matrix[0][1]*toMultiply.x + matrix[1][1]*toMultiply.y + matrix[2][1]*toMultiply.z + matrix[1][3];
-    toReturn.z = matrix[0][2]*toMultiply.x + matrix[1][2]*toMultiply.y + matrix[2][2]*toMultiply.z + matrix[2][3];
+    toReturn.x = matrix[0][0]*toMultiply.x + matrix[1][0]*toMultiply.y + matrix[2][0]*toMultiply.z; 
+    toReturn.y = matrix[0][1]*toMultiply.x + matrix[1][1]*toMultiply.y + matrix[2][1]*toMultiply.z;
+    toReturn.z = matrix[0][2]*toMultiply.x + matrix[1][2]*toMultiply.y + matrix[2][2]*toMultiply.z;
     return toReturn;
   }
   

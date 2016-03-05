@@ -255,7 +255,7 @@ public Color recursive(Ray ray, Shape lastHit){
     
     // Point intersectionPoint = ray.hitPoint(minTime);
     PVector firstShapeSurfaceNormal = intersectionInfo.getSurfaceNormal();
-    firstShapeSurfaceNormal.div(firstShapeSurfaceNormal.mag());
+    //firstShapeSurfaceNormal.div(firstShapeSurfaceNormal.mag());
     
     // if reflective then recurse
     if(firstShape.getSurface().getReflectiveCoefficient() > 0){

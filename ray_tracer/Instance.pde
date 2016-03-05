@@ -22,10 +22,9 @@ public class Instance extends Shape{
     PVector old_direction = tempRay.getDirection();
     //first transform the ray by this stored matrix
     float[] transformed_origin = transformation_matrix_inverse.vectorMultiply(new float[]{old_origin.getX(), old_origin.getY(), old_origin.getZ(), 1});
-    float[] direction = transformation_matrix_inverse.vectorMultiply(new float[]{old_direction.x, old_direction.y, old_direction.z, 1});
-    PVector new_direction = new PVector(direction[0], direction[1], direction[2]);
-    new_direction = new_direction.div(new_direction.mag());
-    Ray transformed_ray = new Ray(new Point(transformed_origin[0], transformed_origin[1], transformed_origin[2]), old_direction);
+    //float[] direction = transformation_matrix_inverse.vectorMultiply(new float[]{old_direction.x, old_direction.y, old_direction.z, 1});
+    PVector new_direction = transformation_matrix_inverse.PVectorMultiply(old_direction);
+    Ray transformed_ray = new Ray(new Point(transformed_origin[0], transformed_origin[1], transformed_origin[2]), new_direction);
     
     /**
     transformation_matrix_inverse.printDebug();
