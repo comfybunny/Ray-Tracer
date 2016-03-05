@@ -12,4 +12,7 @@ public class IntersectionObject{
   public PVector getSurfaceNormal(){
     return surfaceNormal;
   }
+  public void setSurfaceNormal(PVector newNormal){
+    surfaceNormal = newNormal;
+  }
 }

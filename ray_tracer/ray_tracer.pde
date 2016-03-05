@@ -141,7 +141,8 @@ void interpreter(String filename) {
         currentScene.add_named_object(token[1], newInstance);
       }
       else if(token[0].equals("instance")){
-        currentScene.addInstance(new Instance(currentScene.getInstance(token[1]),currentScene.getMatrixStack().getCTM()));
+        currentScene.addShape(new Instance(currentScene.getInstance(token[1]),currentScene.getMatrixStack().getCTM()));
+        //currentScene.getMatrixStack().getCTM().printDebug();
       }
       else if(token[0].equals("push")){
         currentScene.getMatrixStack().push();

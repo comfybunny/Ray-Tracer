@@ -1,7 +1,7 @@
 public abstract class Shape{
   
   private Surface surface;
-  private XMatrix3D ctm;
+  //private Box box;
   
   abstract IntersectionObject intersects(Ray tempRay);
     
@@ -15,9 +15,5 @@ public abstract class Shape{
   
   public Surface getSurface(){
     return surface;
-  }
-  
-  public void addCTM(XMatrix3D toAdd){
-    
   }
 }
