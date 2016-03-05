@@ -143,7 +143,7 @@ void interpreter(String filename) {
       else if(token[0].equals("instance")){
         currentScene.addShape(new Instance(currentScene.getInstance(token[1]),currentScene.getMatrixStack().getCTM()));
         //currentScene.getMatrixStack().getCTM().printDebug();
-        println(currentScene.getAllObjects().size());
+        //println(currentScene.getAllObjects().size());
       }
       else if(token[0].equals("push")){
         currentScene.getMatrixStack().push();
@@ -240,6 +240,7 @@ public Color recursive(Ray ray, Shape lastHit){
   }
   
   if(firstShape!=null && intersectionInfo!=null){
+    //println(minTime);
     Surface currentShapeSurface = firstShape.getSurface();
     Color diffuseColor = currentShapeSurface.getDiffuseColor();
     Color ambientColor = currentShapeSurface.getAmbientColor();
@@ -250,9 +251,6 @@ public Color recursive(Ray ray, Shape lastHit){
     Point intersectionPoint = intersectionInfo.getIntersectionPoint();
     if(intersectionPoint == null){
       intersectionPoint = ray.hitPoint(minTime);
-    }
-    else{
-     return new Color(.2, .2, 1);
     }
     
     // Point intersectionPoint = ray.hitPoint(minTime);
