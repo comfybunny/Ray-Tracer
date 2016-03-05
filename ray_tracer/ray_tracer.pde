@@ -143,6 +143,7 @@ void interpreter(String filename) {
       else if(token[0].equals("instance")){
         currentScene.addShape(new Instance(currentScene.getInstance(token[1]),currentScene.getMatrixStack().getCTM()));
         //currentScene.getMatrixStack().getCTM().printDebug();
+        println(currentScene.getAllObjects().size());
       }
       else if(token[0].equals("push")){
         currentScene.getMatrixStack().push();
@@ -226,7 +227,7 @@ public Color recursive(Ray ray, Shape lastHit){
   Point origin = ray.getOrigin();
   float minTime = MAX_FLOAT;
   Shape firstShape = null;
-  IntersectionObject intersectionInfo= null;
+  IntersectionObject intersectionInfo = null;
   for(Shape a : allObjects){
     if(lastHit != a){
       IntersectionObject currIntersectionInfo = a.intersects(ray);
@@ -239,7 +240,6 @@ public Color recursive(Ray ray, Shape lastHit){
   }
   
   if(firstShape!=null && intersectionInfo!=null){
-
     Surface currentShapeSurface = firstShape.getSurface();
     Color diffuseColor = currentShapeSurface.getDiffuseColor();
     Color ambientColor = currentShapeSurface.getAmbientColor();
@@ -247,7 +247,11 @@ public Color recursive(Ray ray, Shape lastHit){
     if(lastHit == null){
       totalColor.add(ambientColor);
     }
-    Point intersectionPoint = ray.hitPoint(minTime);
+    Point intersectionPoint = intersectionInfo.getIntersectionPoint();
+    if(intersectionPoint == null){
+      intersectionPoint = ray.hitPoint(minTime);
+    }
+    // Point intersectionPoint = ray.hitPoint(minTime);
     PVector firstShapeSurfaceNormal = intersectionInfo.getSurfaceNormal();
     firstShapeSurfaceNormal.div(firstShapeSurfaceNormal.mag());
     
@@ -289,6 +293,7 @@ public Color recursive(Ray ray, Shape lastHit){
       float distLightToBlocker = 0;
       float shadeTime = MAX_FLOAT;
       Shape shadeShapeIntersect = null;
+      IntersectionObject shadeIntersection = null;
       lightRay.setDirection(shapeToLight);
       lightRay.setOrigin(intersectionPoint);
       for(Shape b : allObjects){
@@ -296,10 +301,22 @@ public Color recursive(Ray ray, Shape lastHit){
        if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && b!=firstShape){
          shadeShapeIntersect = b;
          shadeTime = currIntersectionInfo.getTime();
+         shadeIntersection = currIntersectionInfo;
        }
       }
+      
+      Point blockerLocation = null;
+      if(shadeIntersection != null){
+        blockerLocation = shadeIntersection.getIntersectionPoint();
+      }
       if(shadeShapeIntersect != null){
-       Point blockerLocation = lightRay.hitPoint(shadeTime);
+       // TODO REVIEW INSTANCE THING HeREs
+       // Point blockerLocation = lightRay.hitPoint(shadeTime);
+       
+       if(blockerLocation == null){
+         blockerLocation = lightRay.hitPoint(shadeTime);
+         
+       }
        distLightToBlocker = blockerLocation.euclideanDistance(lightLocation);
        if(intersectionPoint.euclideanDistance(lightLocation) > distLightToBlocker){
          //return totalColor;

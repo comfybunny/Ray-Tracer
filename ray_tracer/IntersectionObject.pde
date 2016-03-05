@@ -1,9 +1,18 @@
 public class IntersectionObject{
+  
   float time;
   PVector surfaceNormal;
+  Point intersectionPoint;
+  
   public IntersectionObject(float time, PVector surfaceNormal){
     this.time = time;
     this.surfaceNormal = surfaceNormal;
+  }
+  
+  public IntersectionObject(float time, PVector surfaceNormal, Point intersectionPoint){
+    this.time = time;
+    this.surfaceNormal = surfaceNormal;
+    this.intersectionPoint = intersectionPoint;
   }
   
   public float getTime(){
@@ -14,5 +23,13 @@ public class IntersectionObject{
   }
   public void setSurfaceNormal(PVector newNormal){
     surfaceNormal = newNormal;
+  }
+  
+  public Point getIntersectionPoint(){
+    return intersectionPoint;
+  }
+  
+  public void setIntersectionPoint(Point point){
+    intersectionPoint = point;
   }
 }

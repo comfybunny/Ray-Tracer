@@ -28,6 +28,9 @@ public class Instance extends Shape{
     if(intersection.getSurfaceNormal() != null){
       intersection.setSurfaceNormal(transformation_matrix_inverse.multiplyAdjoint(intersection.getSurfaceNormal()));
     }
+    if(intersection.getTime()!=-1){
+      intersection.setIntersectionPoint(transformed_ray.hitPoint(intersection.getTime()));
+    }
     return intersection;
   }
   
