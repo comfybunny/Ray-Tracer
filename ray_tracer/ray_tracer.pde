@@ -251,6 +251,10 @@ public Color recursive(Ray ray, Shape lastHit){
     if(intersectionPoint == null){
       intersectionPoint = ray.hitPoint(minTime);
     }
+    else{
+     return new Color(.2, .2, 1);
+    }
+    
     // Point intersectionPoint = ray.hitPoint(minTime);
     PVector firstShapeSurfaceNormal = intersectionInfo.getSurfaceNormal();
     firstShapeSurfaceNormal.div(firstShapeSurfaceNormal.mag());

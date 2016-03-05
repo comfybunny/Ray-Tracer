@@ -21,15 +21,26 @@ public class Instance extends Shape{
     Point old_origin = tempRay.getOrigin();
     PVector old_direction = tempRay.getDirection();
     //first transform the ray by this stored matrix
-    float[] transformed_origin = transformation_matrix_inverse.vectorMultiply(new float[]{old_origin.getX(), old_origin.getY(), old_origin.getZ()});
-    PVector direction = transformation_matrix_inverse.PVectorMultiply(old_direction);
-    Ray transformed_ray = new Ray(new Point(transformed_origin[0], transformed_origin[1], transformed_origin[2]), direction);
+    float[] transformed_origin = transformation_matrix_inverse.vectorMultiply(new float[]{old_origin.getX(), old_origin.getY(), old_origin.getZ(), 1});
+    float[] direction = transformation_matrix_inverse.vectorMultiply(new float[]{old_direction.x, old_direction.y, old_direction.z, 1});
+    Ray transformed_ray = new Ray(new Point(transformed_origin[0], transformed_origin[1], transformed_origin[2]), new PVector(direction[0], direction[1], direction[2]));
+    
+    /**
+    transformation_matrix_inverse.printDebug();
+    println();
+    println(tempRay.debug());
+    println(transformed_ray.debug());
+    println();
+    **/
+    
     IntersectionObject intersection =  shape.intersects(transformed_ray);
-    if(intersection.getSurfaceNormal() != null){
+    if(intersection.getTime() > 0){
       intersection.setSurfaceNormal(transformation_matrix_inverse.multiplyAdjoint(intersection.getSurfaceNormal()));
-    }
-    if(intersection.getTime()!=-1){
+      // println(transformed_ray.hitPoint(intersection.getTime()).toString());
       intersection.setIntersectionPoint(transformed_ray.hitPoint(intersection.getTime()));
+    }
+    else{
+      println("test");
     }
     return intersection;
   }

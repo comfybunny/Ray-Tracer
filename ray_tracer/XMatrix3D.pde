@@ -132,33 +132,19 @@ public class XMatrix3D{
   
   public float[] vectorMultiply(float[] toMultiply){
     float[] toReturn = new float[4];
-    try{
-      toReturn[0] = matrix[0][0]*toMultiply[0] + matrix[0][1]*toMultiply[1] + matrix[0][2]*toMultiply[2] + matrix[0][3]*toMultiply[3]; 
-      toReturn[1] = matrix[1][0]*toMultiply[0] + matrix[1][1]*toMultiply[1] + matrix[1][2]*toMultiply[2] + matrix[1][3]*toMultiply[3]; 
-      toReturn[2] = matrix[2][0]*toMultiply[0] + matrix[2][1]*toMultiply[1] + matrix[2][2]*toMultiply[2] + matrix[2][3]*toMultiply[3]; 
-      toReturn[3] = matrix[3][0]*toMultiply[0] + matrix[3][1]*toMultiply[1] + matrix[3][2]*toMultiply[2] + matrix[3][3]*toMultiply[3]; 
-    }
-    catch(ArrayIndexOutOfBoundsException e){
-      toReturn[0] = matrix[0][0]*toMultiply[0] + matrix[0][1]*toMultiply[1] + matrix[0][2]*toMultiply[2]; 
-      toReturn[1] = matrix[1][0]*toMultiply[0] + matrix[1][1]*toMultiply[1] + matrix[1][2]*toMultiply[2]; 
-      toReturn[2] = matrix[2][0]*toMultiply[0] + matrix[2][1]*toMultiply[1] + matrix[2][2]*toMultiply[2]; 
-    }
+    toReturn[0] = matrix[0][0]*toMultiply[0] + matrix[0][1]*toMultiply[1] + matrix[0][2]*toMultiply[2] + matrix[0][3]*toMultiply[3]; 
+    toReturn[1] = matrix[1][0]*toMultiply[0] + matrix[1][1]*toMultiply[1] + matrix[1][2]*toMultiply[2] + matrix[1][3]*toMultiply[3]; 
+    toReturn[2] = matrix[2][0]*toMultiply[0] + matrix[2][1]*toMultiply[1] + matrix[2][2]*toMultiply[2] + matrix[2][3]*toMultiply[3]; 
+    toReturn[3] = matrix[3][0]*toMultiply[0] + matrix[3][1]*toMultiply[1] + matrix[3][2]*toMultiply[2] + matrix[3][3]*toMultiply[3]; 
     return toReturn;
   }
   
-  public PVector PVectorMultiply(PVector toMultiply){
-    PVector toReturn = new PVector();
-    toReturn.x = matrix[0][0]*toMultiply.x + matrix[0][1]*toMultiply.y + matrix[0][2]*toMultiply.z;
-    toReturn.y = matrix[1][0]*toMultiply.x + matrix[1][1]*toMultiply.y + matrix[1][2]*toMultiply.z;
-    toReturn.z = matrix[2][0]*toMultiply.x + matrix[2][1]*toMultiply.y + matrix[2][2]*toMultiply.z;
-    return toReturn;
-  }
   
   public PVector multiplyAdjoint(PVector toMultiply){
     PVector toReturn = new PVector();
-    toReturn.x = matrix[0][0]*toMultiply.x + matrix[1][0]*toMultiply.y + matrix[2][0]*toMultiply.z;
-    toReturn.y = matrix[0][1]*toMultiply.x + matrix[1][1]*toMultiply.y + matrix[2][1]*toMultiply.z;
-    toReturn.z = matrix[0][2]*toMultiply.x + matrix[1][2]*toMultiply.y + matrix[2][2]*toMultiply.z;
+    toReturn.x = matrix[0][0]*toMultiply.x + matrix[1][0]*toMultiply.y + matrix[2][0]*toMultiply.z + matrix[0][3]; 
+    toReturn.y = matrix[0][1]*toMultiply.x + matrix[1][1]*toMultiply.y + matrix[2][1]*toMultiply.z + matrix[1][3];
+    toReturn.z = matrix[0][2]*toMultiply.x + matrix[1][2]*toMultiply.y + matrix[2][2]*toMultiply.z + matrix[2][3];
     return toReturn;
   }
   

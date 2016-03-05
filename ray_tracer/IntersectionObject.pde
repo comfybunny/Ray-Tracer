@@ -7,6 +7,7 @@ public class IntersectionObject{
   public IntersectionObject(float time, PVector surfaceNormal){
     this.time = time;
     this.surfaceNormal = surfaceNormal;
+    intersectionPoint = null;
   }
   
   public IntersectionObject(float time, PVector surfaceNormal, Point intersectionPoint){
