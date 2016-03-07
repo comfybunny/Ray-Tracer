@@ -44,7 +44,8 @@ public class Triangle extends Shape {
     if(P2P0.cross(P2inter).dot(planeNormal)<0){
      return new IntersectionObject(-1, null);
     }
-    return new IntersectionObject(intersectionTime, shapeNormal(tempRay.hitPoint(intersectionTime)));
+    Point intersectionPoint = tempRay.hitPoint(intersectionTime);
+    return new IntersectionObject(intersectionTime, shapeNormal(intersectionPoint), intersectionPoint);
   }
 
   public PVector shapeNormal(Point hitPoint){

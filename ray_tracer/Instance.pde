@@ -37,9 +37,10 @@ public class Instance extends Shape{
     IntersectionObject intersection =  shape.intersects(transformed_ray);
     //println(intersection.getTime());
     if(intersection.getTime() > 0){
-      intersection.setSurfaceNormal(transformation_matrix_inverse.multiplyAdjoint(intersection.getSurfaceNormal()));
+      PVector surfaceNormal = transformation_matrix_inverse.multiplyAdjoint(intersection.getSurfaceNormal());
+      intersection.setSurfaceNormal(surfaceNormal.div(surfaceNormal.mag()));
       // println(transformed_ray.hitPoint(intersection.getTime()).toString());
-      intersection.setIntersectionPoint(transformed_ray.hitPoint(intersection.getTime()));
+      intersection.setIntersectionPoint(tempRay.hitPoint(intersection.getTime()));
       //println(intersection.getIntersectionPoint().toString());
     }
     

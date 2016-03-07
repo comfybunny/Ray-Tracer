@@ -249,9 +249,6 @@ public Color recursive(Ray ray, Shape lastHit){
       totalColor.add(ambientColor);
     }
     Point intersectionPoint = intersectionInfo.getIntersectionPoint();
-    if(intersectionPoint == null){
-      intersectionPoint = ray.hitPoint(minTime);
-    }
     
     // Point intersectionPoint = ray.hitPoint(minTime);
     PVector firstShapeSurfaceNormal = intersectionInfo.getSurfaceNormal();
@@ -300,29 +297,17 @@ public Color recursive(Ray ray, Shape lastHit){
       lightRay.setOrigin(intersectionPoint);
       for(Shape b : allObjects){
         IntersectionObject currIntersectionInfo = b.intersects(lightRay);
-       if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && b!=firstShape){
-         shadeShapeIntersect = b;
-         shadeTime = currIntersectionInfo.getTime();
-         shadeIntersection = currIntersectionInfo;
-       }
+        if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && b!=firstShape){
+          shadeShapeIntersect = b;
+          shadeTime = currIntersectionInfo.getTime();
+          shadeIntersection = currIntersectionInfo;
+        }
       }
-      
-      Point blockerLocation = null;
+
       if(shadeIntersection != null){
-        blockerLocation = shadeIntersection.getIntersectionPoint();
-      }
-      if(shadeShapeIntersect != null){
-       // TODO REVIEW INSTANCE THING HeREs
-       // Point blockerLocation = lightRay.hitPoint(shadeTime);
-       
-       if(blockerLocation == null){
-         blockerLocation = lightRay.hitPoint(shadeTime);
-         
-       }
-       distLightToBlocker = blockerLocation.euclideanDistance(lightLocation);
-       if(intersectionPoint.euclideanDistance(lightLocation) > distLightToBlocker){
-         //return totalColor;
-       }
+        if(shadeIntersection.getIntersectionPoint() != null){
+          distLightToBlocker = shadeIntersection.getIntersectionPoint().euclideanDistance(lightLocation);
+        }
       }
       if(tempSpecularColor!=null){
         Color specularColor = new Color(tempSpecularColor.getR(), tempSpecularColor.getG(), tempSpecularColor.getB());
@@ -339,8 +324,6 @@ public Color recursive(Ray ray, Shape lastHit){
       if(intersectionPoint.euclideanDistance(lightLocation) < distLightToBlocker || shadeShapeIntersect == null){
          totalColor.add(tempToAdd);
        }
-      
-      
     }    
     return totalColor;
   }
@@ -357,9 +340,11 @@ void rayTrace(){
   float half_x = k/width;
   float half_y = k/height;
   
+  //for(int x = 200; x < 202; x+=refine){
   for(int x = 0; x < width; x+=refine){
     float xPrime = ((2.0*k/width)*x)-k;
     for(int y = 0; y < height; y+=refine){
+    //for(int y = 170; y < 172; y+=refine){
       Color totalColor = new Color();
       float yPrime = ((-2.0*k/height)*y)+k;
       

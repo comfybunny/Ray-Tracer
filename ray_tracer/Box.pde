@@ -34,8 +34,8 @@ public class Box extends Shape{
     if(tmax < 0 || tmin > tmax){
       return new IntersectionObject(-1, null);
     }
-    
-    return new IntersectionObject(tmin, shapeNormal(tempRay.hitPoint(tmin)));
+    Point intersection_point = tempRay.hitPoint(tmin);
+    return new IntersectionObject(tmin, shapeNormal(intersection_point), intersection_point);
   }
   
   public PVector shapeNormal(Point hitPoint){

@@ -1,4 +1,29 @@
-fov 60
-point_light 0 0 0 1 1 1
-background 0.6 0.6 0.9
+# instancing of four spheres
 
+fov 60
+point_light 5 5 5 1 1 1
+
+diffuse   0.5 0 0  0.2 0 0   
+
+
+push
+translate 0.5 0 -3
+sphere 0.5  0 0 0
+pop
+
+push
+translate -0.5 0 -3
+sphere 0.5  0 0 0
+pop
+
+push
+translate 0 0.5 -3
+sphere 0.5  0 0 0
+pop
+
+push
+translate 0 -0.5 -3
+sphere 0.5  0 0 0
+pop
+
+write t01.png

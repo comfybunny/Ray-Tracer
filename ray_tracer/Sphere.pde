@@ -42,10 +42,14 @@ public class Sphere extends Shape {
     }
     float retValPlus = ((-1*b+sqrt(discriminant))/(2.0f*a));
     float retValMinus = ((-1*b-sqrt(discriminant))/(2.0f*a));
+    
+    Point intersectionPoint = ray.hitPoint(retValMinus);
+    
     if(retValPlus > retValMinus && retValMinus>0){
-      return new IntersectionObject(retValMinus, shapeNormal(ray.hitPoint(retValMinus)));
+      return new IntersectionObject(retValMinus, shapeNormal(intersectionPoint), intersectionPoint);
     }
-    return new IntersectionObject(retValPlus, shapeNormal(ray.hitPoint(retValPlus)));
+    intersectionPoint = ray.hitPoint(retValPlus);
+    return new IntersectionObject(retValPlus, shapeNormal(intersectionPoint), intersectionPoint);
   }
   
   public PVector shapeNormal(Point hitPoint){
