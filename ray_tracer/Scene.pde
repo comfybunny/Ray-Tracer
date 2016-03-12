@@ -9,15 +9,16 @@ public class Scene{
   private Lens lens;
   private MatrixStack stack;
   private HashMap<String, Shape> named_objects;
-  private ArrayList<Instance> instances;
+  private int start_list;
   
   private int rays_per_pixel;
-  
+    
   public Scene(){
     background = new Color();
     fov = 0;
     lights = new ArrayList<Light>();
     allObjects = new ArrayList<Shape>();
+    
     stack = new MatrixStack();
     rays_per_pixel = 1;
     lens = null;
@@ -90,11 +91,16 @@ public class Scene{
     named_objects.put(object_name, object);
   }
   
-  public ArrayList<Instance> getInstances(){
-    return instances;
-  }
   
   public Shape getInstance(String string){
     return named_objects.get(string);
+  }
+  
+  public int getListStartIndex(){
+    return start_list;
+  }
+  
+  public void setListStartIndex(int index){
+    start_list = index;
   }
 }

@@ -179,6 +179,12 @@ void interpreter(String filename) {
         
       }
       
+      else if(token[0].equals("begin_list")){
+      }
+      
+      else if(token[0].equals("end_list")){
+      }
+      
       else if (token[0].equals("rays_per_pixel")){
         currentScene.setRaysPerPixel(Integer.parseInt(token[1]));
       }

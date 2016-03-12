@@ -9,9 +9,10 @@ public class Scene{
   private Lens lens;
   private MatrixStack stack;
   private HashMap<String, Shape> named_objects;
-  private ArrayList<Instance> instances;
   
   private int rays_per_pixel;
+  
+  private ArrayList<Shape> tempList;
   
   public Scene(){
     background = new Color();
@@ -90,14 +91,8 @@ public class Scene{
     named_objects.put(object_name, object);
   }
   
-  public ArrayList<Instance> getInstances(){
-    return instances;
-  }
   
-  public Instance getInstance(String string){
-    return named_objects.get();
-  }
-  public void addInstance(Instance instance){
-    instances.add(instance);
+  public Shape getInstance(String string){
+    return named_objects.get(string);
   }
 }
