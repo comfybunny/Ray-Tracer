@@ -61,6 +61,9 @@ public class Scene{
     return allObjects;
   }
   
+  public int numberOfObjects(){
+    return allObjects.size();
+  }
   public ArrayList<Light> getLights(){
     return lights;
   }

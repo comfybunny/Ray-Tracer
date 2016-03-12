@@ -1,3 +1,5 @@
+import java.util.List;
+
 ///////////////////////////////////////////////////////////////////////
 //
 //  Ray Tracing Shell
@@ -180,9 +182,20 @@ void interpreter(String filename) {
       }
       
       else if(token[0].equals("begin_list")){
+        currentScene.setListStartIndex(currentScene.numberOfObjects());
       }
       
       else if(token[0].equals("end_list")){
+        ArrayList<Shape> shapeListObjects = new ArrayList<Shape>();
+        ArrayList<Shape> allObjects = currentScene.getAllObjects();
+        // List<Shape> shapeListObjects = currentScene.getAllObjects().subList(currentScene.getListStartIndex(), currentScene.numberOfObjects());
+        int begin_list_index = currentScene.getListStartIndex();
+        int end_list_index = currentScene.numberOfObjects();
+        for(int currShapeIndex = begin_list_index; currShapeIndex < end_list_index; currShapeIndex++){
+          shapeListObjects.add(allObjects.get(begin_list_index));
+          allObjects.remove(begin_list_index);
+        }
+        
       }
       
       else if (token[0].equals("rays_per_pixel")){
