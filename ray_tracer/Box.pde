@@ -33,6 +33,16 @@ public class Box extends Shape{
     this.zmax = zmax;
   }
   
+  // constructor for bounding box boxes
+  public Box(Point point){
+    xmin = point.getX();
+    xmax = point.getX();
+    ymin = point.getY();
+    ymax = point.getY();
+    zmin = point.getZ();
+    zmax = point.getZ();
+    
+  }
   
   public IntersectionObject intersects(Ray tempRay){
     PVector direction = tempRay.getDirection();
@@ -117,9 +127,9 @@ public class Box extends Shape{
       }
     }
     
-    if(!(zmin <= z && z <= zmax)){
+    if(!(zmin >= z && z <= zmax)){
       // bigger than the curr max
-      if(z > zmax){
+      if(z < zmax){
         zmax = z;
       }
       // smaller than the curr min

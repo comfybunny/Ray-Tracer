@@ -16,4 +16,12 @@ public abstract class Shape{
   public Surface getSurface(){
     return surface;
   }
+  
+  public Point minPoint(){
+    return new Point();
+  }
+  
+  public Point maxPoint(){
+    return new Point();
+  }
 }
