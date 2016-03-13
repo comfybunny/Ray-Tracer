@@ -65,13 +65,13 @@ public class Triangle extends Shape {
   public Point minPoint(){
     float xmin = min(P0.getX(), P1.getX(), P2.getX());
     float ymin = min(P0.getY(), P1.getY(), P2.getY());
-    float zmin = min(P0.getZ(), P1.getZ(), P2.getZ());
+    float zmin = max(P0.getZ(), P1.getZ(), P2.getZ());
     return new Point(xmin, ymin, zmin);
   }
   
   public Point maxPoint(){
-    float xmax = min(P0.getX(), P1.getX(), P2.getX());
-    float ymax = min(P0.getY(), P1.getY(), P2.getY());
+    float xmax = max(P0.getX(), P1.getX(), P2.getX());
+    float ymax = max(P0.getY(), P1.getY(), P2.getY());
     float zmax = min(P0.getZ(), P1.getZ(), P2.getZ());
     return new Point(xmax, ymax, zmax);
   }

@@ -18,6 +18,9 @@ public class ShapeList extends Shape{
     if(boundingBox.intersects(ray).getTime() < 0){
       return new IntersectionObject(-1, null);
     }
+    
+    return boundingBox.intersects(ray);
+    /**
     float minTime = MAX_FLOAT;
     IntersectionObject intersectionInfo = null;
     for(Shape a : shapes){
@@ -33,6 +36,7 @@ public class ShapeList extends Shape{
       return intersectionInfo;
     }
     return new IntersectionObject(-1, null);
+    **/
   }
     
   public PVector shapeNormal(Point hitPoint){

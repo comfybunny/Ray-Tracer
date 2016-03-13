@@ -191,7 +191,8 @@ void interpreter(String filename) {
         // List<Shape> shapeListObjects = currentScene.getAllObjects().subList(currentScene.getListStartIndex(), currentScene.numberOfObjects());
         int begin_list_index = currentScene.getListStartIndex();
         int end_list_index = currentScene.numberOfObjects();
-        Box box = new Box(allObjects.get(begin_list_index).minPoint());
+        // Box box = new Box(allObjects.get(begin_list_index).minPoint());
+        Box box = new Box(allObjects.get(begin_list_index).minPoint(), currSurface);
         for(int currShapeIndex = begin_list_index; currShapeIndex < end_list_index; currShapeIndex++){
           box.includePoint(allObjects.get(begin_list_index).minPoint());
           box.includePoint(allObjects.get(begin_list_index).maxPoint());
@@ -318,9 +319,10 @@ public Color recursive(Ray ray, Shape lastHit){
       IntersectionObject shadeIntersection = null;
       lightRay.setDirection(shapeToLight);
       lightRay.setOrigin(intersectionPoint);
+      
       for(Shape b : allObjects){
         IntersectionObject currIntersectionInfo = b.intersects(lightRay);
-        if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && b!=firstShape){
+        if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && currIntersectionInfo.getShape()!=firstShape && currIntersectionInfo.getShape()!=null){
           shadeShapeIntersect = b;
           shadeTime = currIntersectionInfo.getTime();
           shadeIntersection = currIntersectionInfo;

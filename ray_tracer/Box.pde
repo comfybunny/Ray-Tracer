@@ -41,7 +41,16 @@ public class Box extends Shape{
     ymax = point.getY();
     zmin = point.getZ();
     zmax = point.getZ();
-    
+  }
+  
+  public Box(Point point, Surface surface){
+    xmin = point.getX();
+    xmax = point.getX();
+    ymin = point.getY();
+    ymax = point.getY();
+    zmin = point.getZ();
+    zmax = point.getZ();
+    addSurface(surface);
   }
   
   public IntersectionObject intersects(Ray tempRay){
