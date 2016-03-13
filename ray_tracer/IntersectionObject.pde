@@ -3,6 +3,7 @@ public class IntersectionObject{
   float time;
   PVector surfaceNormal;
   Point intersectionPoint;
+  Shape shapePointer = null;
   
   public IntersectionObject(float time, PVector surfaceNormal){
     this.time = time;
@@ -14,6 +15,13 @@ public class IntersectionObject{
     this.time = time;
     this.surfaceNormal = surfaceNormal;
     this.intersectionPoint = intersectionPoint;
+  }
+  
+  public IntersectionObject(float time, PVector surfaceNormal, Point intersectionPoint, Shape shapePointer){
+    this.time = time;
+    this.surfaceNormal = surfaceNormal;
+    this.intersectionPoint = intersectionPoint;
+    this.shapePointer = shapePointer;
   }
   
   public float getTime(){
@@ -32,5 +40,13 @@ public class IntersectionObject{
   
   public void setIntersectionPoint(Point point){
     intersectionPoint = point;
+  }
+  
+  public void setShape(Shape shape){
+    shapePointer = shape;
+  }
+  
+  public Shape getShape(){
+    return shapePointer;
   }
 }

@@ -45,7 +45,7 @@ public class Triangle extends Shape {
      return new IntersectionObject(-1, null);
     }
     Point intersectionPoint = tempRay.hitPoint(intersectionTime);
-    return new IntersectionObject(intersectionTime, shapeNormal(intersectionPoint), intersectionPoint);
+    return new IntersectionObject(intersectionTime, shapeNormal(intersectionPoint), intersectionPoint, this);
   }
 
   public PVector shapeNormal(Point hitPoint){

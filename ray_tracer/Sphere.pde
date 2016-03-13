@@ -46,10 +46,10 @@ public class Sphere extends Shape {
     Point intersectionPoint = ray.hitPoint(retValMinus);
     
     if(retValPlus > retValMinus && retValMinus>0){
-      return new IntersectionObject(retValMinus, shapeNormal(intersectionPoint), intersectionPoint);
+      return new IntersectionObject(retValMinus, shapeNormal(intersectionPoint), intersectionPoint, this);
     }
     intersectionPoint = ray.hitPoint(retValPlus);
-    return new IntersectionObject(retValPlus, shapeNormal(intersectionPoint), intersectionPoint);
+    return new IntersectionObject(retValPlus, shapeNormal(intersectionPoint), intersectionPoint, this);
   }
   
   public PVector shapeNormal(Point hitPoint){

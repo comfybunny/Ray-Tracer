@@ -39,11 +39,11 @@ public class MovingSphere extends Sphere{
     if(retValPlus > retValMinus && retValMinus>0){
       PVector sphereNormal = ray.hitPoint(retValMinus).subtract(movingCenter);
       sphereNormal.div(sphereNormal.mag());
-      return new IntersectionObject(retValMinus, sphereNormal, ray.hitPoint(retValMinus));
+      return new IntersectionObject(retValMinus, sphereNormal, ray.hitPoint(retValMinus), this);
     }
     PVector sphereNormal = ray.hitPoint(retValPlus).subtract(movingCenter);
     sphereNormal.div(sphereNormal.mag());
-    return new IntersectionObject(retValPlus, sphereNormal, ray.hitPoint(retValPlus));
+    return new IntersectionObject(retValPlus, sphereNormal, ray.hitPoint(retValPlus),this);
     
   }
 }

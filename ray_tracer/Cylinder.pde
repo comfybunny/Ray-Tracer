@@ -84,7 +84,7 @@ public class Cylinder extends Shape{
       return new IntersectionObject(tMin, null);
     }
     Point intersection_point = tempRay.hitPoint(tMin);
-    return new IntersectionObject(tMin, shapeNormal(intersection_point), intersection_point);
+    return new IntersectionObject(tMin, shapeNormal(intersection_point), intersection_point, this);
   }
   
   

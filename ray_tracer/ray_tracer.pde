@@ -263,6 +263,7 @@ public Color recursive(Ray ray, Shape lastHit){
   
   if(firstShape!=null && intersectionInfo!=null){
     //println(minTime);
+    firstShape = intersectionInfo.getShape();
     Surface currentShapeSurface = firstShape.getSurface();
     Color diffuseColor = currentShapeSurface.getDiffuseColor();
     Color ambientColor = currentShapeSurface.getAmbientColor();
@@ -327,6 +328,7 @@ public Color recursive(Ray ray, Shape lastHit){
       }
 
       if(shadeIntersection != null){
+        shadeShapeIntersect = shadeIntersection.getShape();
         if(shadeIntersection.getIntersectionPoint() != null){
           distLightToBlocker = shadeIntersection.getIntersectionPoint().euclideanDistance(lightLocation);
         }
