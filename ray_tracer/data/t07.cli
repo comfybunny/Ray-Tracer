@@ -40,4 +40,3 @@ end_list
 reset_timer
 write t07.png
 print_timer
-

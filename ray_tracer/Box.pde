@@ -12,15 +12,12 @@ public class Box extends Shape{
   public Box(float xmin, float ymin, float zmin, float xmax, float ymax, float zmax, Surface surface){
     // closest_point = new Point(xmin, ymin, zmin);
     // furthest_point = new Point(xmax, ymax, zmax);
-    
     this.xmin = xmin;
     this.ymin = ymin;
     this.zmin = zmin;
     this.xmax = xmax;
     this.ymax = ymax;
     this.zmax = zmax;
-
-    // box_center = new Point((xmin+xmax)/2.0, (ymin+ymax)/2.0, (zmin+zmax)/2.0);
     addSurface(surface);
   }
   
@@ -42,7 +39,7 @@ public class Box extends Shape{
     zmin = min.getZ();
     zmax = max.getZ();
   }
-  
+  /**
   public IntersectionObject intersects(Ray tempRay){
     PVector direction = tempRay.getDirection();
     Point origin = tempRay.getOrigin();
@@ -60,6 +57,7 @@ public class Box extends Shape{
     float z_time = min(zmint, zmaxt);
     
     // ideally this tmin will be the time for example if it hits xmin first, it could his y or z later, but then the min of y will give a negative time
+    
     float tmin = max(x_time, y_time, z_time);
     float tmax = min(max(xmint, xmaxt), max(ymint, ymaxt), max(zmint, zmaxt));
     
@@ -67,7 +65,36 @@ public class Box extends Shape{
       return new IntersectionObject(-1, null);
     }
     Point intersection_point = tempRay.hitPoint(tmin);
-    return new IntersectionObject(tmin, shapeNormal(intersection_point), intersection_point);
+    return new IntersectionObject(tmin, shapeNormal(intersection_point), intersection_point, this);
+  }**/
+  
+  public IntersectionObject intersects(Ray tempRay){
+    float tmin = Float.NEGATIVE_INFINITY;
+    float tmax = Float.POSITIVE_INFINITY;
+    PVector direction = tempRay.getDirection();
+    Point origin = tempRay.getOrigin();
+    if(direction.x != 0.0){
+      float xmint = (xmin-origin.getX())/direction.x;
+      float xmaxt = (xmax-origin.getX())/direction.x;
+      tmin = max(tmin, min(xmint, xmaxt));
+      tmax = min(tmax, max(xmint, xmaxt));
+    }
+    if(direction.y != 0.0){
+      float ymint = (ymin-origin.getY())/direction.y;
+      float ymaxt = (ymax-origin.getY())/direction.y;
+      tmin = max(tmin, min(ymint, ymaxt));
+      tmax = min(tmax, max(ymint, ymaxt));
+    }
+    if(direction.z != 0.0){
+      float zmint = (zmin-origin.getZ())/direction.z;
+      float zmaxt = (zmax-origin.getZ())/direction.z;
+      tmin = max(tmin, min(zmint, zmaxt));
+      tmax = min(tmax, max(zmint, zmaxt));
+    }
+    if(tmax > 0 || tmax >= tmin){
+      return new IntersectionObject(tmax, shapeNormal(tempRay.hitPoint(tmax)), tempRay.hitPoint(tmax), this);
+    }
+    return new IntersectionObject(-1, null);
   }
   
   public PVector shapeNormal(Point hitPoint){

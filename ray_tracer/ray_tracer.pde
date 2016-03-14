@@ -5,8 +5,8 @@ import java.util.List;
 //  Ray Tracing Shell
 //
 ///////////////////////////////////////////////////////////////////////
-int debug_x = 50;
-int debug_y = 205;
+int debug_x = 125;
+int debug_y = 215;
 
 int screen_width = 300;
 int screen_height = 300;
@@ -24,7 +24,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t01.cli");
+  interpreter("t06.cli");
 }
 
 // Press key 1 to 9 and 0 to run different test cases.
@@ -323,9 +323,20 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
       IntersectionObject shadeIntersection = null;
       lightRay.setDirection(shapeToLight);
       lightRay.setOrigin(intersectionPoint);
-      //println("LIGHT RAY " + lightRay.debug());
+      
+      if(x == 125 && y == 215){
+        println("LIGHT RAY " + lightRay.debug());
+      }
+      
       for(Shape b : allObjects){
         IntersectionObject currIntersectionInfo = b.intersects(lightRay);
+        if(currIntersectionInfo.getShape()!=null && x == 125 && y == 215){
+            println(currIntersectionInfo.getShape().getClass());
+          }
+        if(b.getClass().equals(ShapeList.class) && x == 125 && y == 215){
+          println("outofshape");
+          println(b.getBox().intersects(lightRay).getTime());
+        }
         if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && currIntersectionInfo.getShape()!=firstShape && currIntersectionInfo.getShape()!=null){
           shadeShapeIntersect = b;
           shadeTime = currIntersectionInfo.getTime();
@@ -334,7 +345,15 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
       }
 
       if(shadeIntersection != null){
+        if(x == 125 && y == 215){
+        println(shadeIntersection.getShape().getClass());
+        }
         shadeShapeIntersect = shadeIntersection.getShape();
+        if(x == 125 && y == 215){
+        println(shadeShapeIntersect);
+        println(shadeShapeIntersect.debug());
+        println(shadeIntersection.getTime());
+        }
         if(shadeIntersection.getIntersectionPoint() != null){
           distLightToBlocker = shadeIntersection.getIntersectionPoint().euclideanDistance(lightLocation);
         }
