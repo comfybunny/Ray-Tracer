@@ -18,12 +18,12 @@ public class ShapeList extends Shape{
     //println("THYME : " + boundingBox.intersects(ray).getTime());
     
     if(boundingBox.intersects(ray).getTime() < 0){
-      // if(boundingBox.intersects(ray).getIntersectionPoint() == null){
       return new IntersectionObject(-1, null);
     }
     
     //return boundingBox.intersects(ray);
     ///**
+    Shape theShape = null;
     float minTime = MAX_FLOAT;
     IntersectionObject intersectionInfo = null;
     // println("BOUNDING BOX PASSED YEE : " + boundingBox);
@@ -32,11 +32,13 @@ public class ShapeList extends Shape{
       IntersectionObject currIntersectionInfo = a.intersects(ray);
       if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < minTime){
         //println("CHECKING " + a);
+        theShape = a;
         minTime = currIntersectionInfo.getTime();
         intersectionInfo = currIntersectionInfo;
       }
     }
     if(intersectionInfo != null){
+      intersectionInfo.setShape(theShape);
       return intersectionInfo;
     }
     return new IntersectionObject(-1, null);

@@ -5,8 +5,8 @@ import java.util.List;
 //  Ray Tracing Shell
 //
 ///////////////////////////////////////////////////////////////////////
-int debug_x = 148;
-int debug_y = 238;
+int debug_x = 150;
+int debug_y = 150;
 
 int screen_width = 300;
 int screen_height = 300;
@@ -200,7 +200,6 @@ void interpreter(String filename) {
           shapeListObjects.add(allObjects.get(begin_list_index));
           allObjects.remove(begin_list_index);
         }
-        println(box.debug());
         //currentScene.addShape(new ShapeList(shapeListObjects, new Box(-1.0,-0.988085,-3.776713, 1.0,0.988085,-2.223287)));
         currentScene.addShape(new ShapeList(shapeListObjects, box));
       }
@@ -266,7 +265,6 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
   
   Shape firstShape;
   if(intersectionInfo!=null){
-    //println(minTime);
     firstShape = intersectionInfo.getShape();
     Surface currentShapeSurface = firstShape.getSurface();
     Color diffuseColor = currentShapeSurface.getDiffuseColor();
@@ -324,40 +322,18 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
       lightRay.setDirection(shapeToLight);
       lightRay.setOrigin(intersectionPoint);
       lightRay.setOrigin(lightRay.hitPoint(0.0001));
-      
-      if(x == 125 && y == 215){
-        println("LIGHT RAY " + lightRay.debug());
-      }
-      
+
       for(Shape b : allObjects){
         IntersectionObject currIntersectionInfo = b.intersects(lightRay);
-        if(currIntersectionInfo.getShape()!=null && x == debug_x && y == debug_y){
-            println(currIntersectionInfo.getShape().getClass());
-          }
-        if(b.getClass().equals(ShapeList.class) && x == debug_x && y == debug_y){
-          println("outofshape");
-          println(b.getBox().intersects(lightRay).getTime());
-        }
-        if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && currIntersectionInfo.getShape()!=null){
-          if(currIntersectionInfo.getShape()!=firstShape){
-            shadeShapeIntersect = b;
-            shadeTime = currIntersectionInfo.getTime();
-            shadeIntersection = currIntersectionInfo;
-          }
-          
+        if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && currIntersectionInfo.getShape()!=firstShape && currIntersectionInfo.getShape()!=null){
+          shadeShapeIntersect = b;
+          shadeTime = currIntersectionInfo.getTime();
+          shadeIntersection = currIntersectionInfo;
         }
       }
 
       if(shadeIntersection != null){
-        if(x == 125 && y == 215){
-        println(shadeIntersection.getShape().getClass());
-        }
         shadeShapeIntersect = shadeIntersection.getShape();
-        if(x == 125 && y == 215){
-        println(shadeShapeIntersect);
-        println(shadeShapeIntersect.debug());
-        println(shadeIntersection.getTime());
-        }
         if(shadeIntersection.getIntersectionPoint() != null){
           distLightToBlocker = shadeIntersection.getIntersectionPoint().euclideanDistance(lightLocation);
         }
