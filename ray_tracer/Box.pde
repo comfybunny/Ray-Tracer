@@ -34,23 +34,13 @@ public class Box extends Shape{
   }
   
   // constructor for bounding box boxes
-  public Box(Point point){
-    xmin = point.getX();
-    xmax = point.getX();
-    ymin = point.getY();
-    ymax = point.getY();
-    zmin = point.getZ();
-    zmax = point.getZ();
-  }
-  
-  public Box(Point point, Surface surface){
-    xmin = point.getX();
-    xmax = point.getX();
-    ymin = point.getY();
-    ymax = point.getY();
-    zmin = point.getZ();
-    zmax = point.getZ();
-    addSurface(surface);
+  public Box(Point min, Point max){
+    xmin = min.getX();
+    xmax = max.getX();
+    ymin = min.getY();
+    ymax = max.getY();
+    zmin = min.getZ();
+    zmax = max.getZ();
   }
   
   public IntersectionObject intersects(Ray tempRay){
@@ -77,7 +67,7 @@ public class Box extends Shape{
       return new IntersectionObject(-1, null);
     }
     Point intersection_point = tempRay.hitPoint(tmin);
-    return new IntersectionObject(tmin, shapeNormal(intersection_point), intersection_point, this);
+    return new IntersectionObject(tmin, shapeNormal(intersection_point), intersection_point);
   }
   
   public PVector shapeNormal(Point hitPoint){
@@ -99,54 +89,41 @@ public class Box extends Shape{
     else if(StaticUtility.almost_equal(hitPoint.getZ(), zmin)){
       return new PVector(0, 0, 1);
     }
-    println("Uh you probably messed up, how do you hit this side of a box?");
+    // println("Uh you probably messed up, how do you hit this side of a box?");
     return new PVector(0, 0, -1);
   }
   
   public String debug(){
-    return "I AM A BOX.";
+    return "xmin: " + xmin + "\t\tymin: " + ymin + "\t\tzmin: " + zmin + "\t\txmax: " + xmax + "\t\tymax: " + ymax + "\t\tzmax: " + zmax;
   }
   
-  public void includePoint(Point point){
-    float x = point.getX();
-    float y = point.getY();
-    float z = point.getZ();
+  public void includePoint(Point minPoint, Point maxPoint){
+    float minx = minPoint.getX();
+    float miny = minPoint.getY();
+    float minz = minPoint.getZ();
     
-    // REMEMBER Z IS WEIRD AND BACKWARDS
+    float maxx = maxPoint.getX();
+    float maxy = maxPoint.getY();
+    float maxz = maxPoint.getZ();
     
-    if(!(xmin <= x && x <= xmax)){
-      // bigger than the curr max
-      if(x > xmax){
-        xmax = x;
-      }
-      // smaller than the curr min
-      else{
-        xmin = x;
-      }
-    }
-    
-    if(!(ymin <= y && y <= ymax)){
-      // bigger than the curr max
-      if(y > ymax){
-        ymax = y;
-      }
-      // smaller than the curr min
-      else{
-        ymin = y;
-      }
-    }
-    
-    if(!(zmin >= z && z <= zmax)){
-      // bigger than the curr max
-      if(z < zmax){
-        zmax = z;
-      }
-      // smaller than the curr min
-      else{
-        zmin = z;
-      }
-    }
-    
+   if(minx < xmin){
+     xmin = minx;
+   }
+   if(maxx > xmax){
+     xmax = maxx;
+   }
+   if(miny < ymin){
+     ymin = miny;
+   }
+   if(maxy > ymax){
+     ymax = maxy;
+   }
+   if(minz < zmin){
+     zmin = minz;
+   }
+   if(maxz > zmax){
+     zmax = maxz;
+   }
   }
 
 }

@@ -5,6 +5,8 @@ import java.util.List;
 //  Ray Tracing Shell
 //
 ///////////////////////////////////////////////////////////////////////
+int debug_x = 50;
+int debug_y = 205;
 
 int screen_width = 300;
 int screen_height = 300;
@@ -192,13 +194,14 @@ void interpreter(String filename) {
         int begin_list_index = currentScene.getListStartIndex();
         int end_list_index = currentScene.numberOfObjects();
         // Box box = new Box(allObjects.get(begin_list_index).minPoint());
-        Box box = new Box(allObjects.get(begin_list_index).minPoint(), currSurface);
+        Box box = new Box(allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
         for(int currShapeIndex = begin_list_index; currShapeIndex < end_list_index; currShapeIndex++){
-          box.includePoint(allObjects.get(begin_list_index).minPoint());
-          box.includePoint(allObjects.get(begin_list_index).maxPoint());
+          box.includePoint(allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
           shapeListObjects.add(allObjects.get(begin_list_index));
           allObjects.remove(begin_list_index);
         }
+        println(box.debug());
+        //currentScene.addShape(new ShapeList(shapeListObjects, new Box(-1.0,-0.988085,-3.776713, 1.0,0.988085,-2.223287)));
         currentScene.addShape(new ShapeList(shapeListObjects, box));
       }
       
@@ -242,27 +245,27 @@ void interpreter(String filename) {
     }
   }
 }
-public Color recursive(Ray ray, Shape lastHit){
+public Color recursive(Ray ray, Shape lastHit, int x, int y){
   
   Color totalColor = new Color();
   
   ArrayList<Shape> allObjects = currentScene.getAllObjects();
   Point origin = ray.getOrigin();
   float minTime = MAX_FLOAT;
-  Shape firstShape = null;
+  
   IntersectionObject intersectionInfo = null;
   for(Shape a : allObjects){
     if(lastHit != a){
       IntersectionObject currIntersectionInfo = a.intersects(ray);
       if(currIntersectionInfo.getTime() >= 0 && currIntersectionInfo.getTime() <minTime){
         minTime = currIntersectionInfo.getTime();
-        firstShape = a;
         intersectionInfo = currIntersectionInfo;
       }
     }
   }
   
-  if(firstShape!=null && intersectionInfo!=null){
+  Shape firstShape;
+  if(intersectionInfo!=null){
     //println(minTime);
     firstShape = intersectionInfo.getShape();
     Surface currentShapeSurface = firstShape.getSurface();
@@ -276,8 +279,9 @@ public Color recursive(Ray ray, Shape lastHit){
     
     // Point intersectionPoint = ray.hitPoint(minTime);
     PVector firstShapeSurfaceNormal = intersectionInfo.getSurfaceNormal();
-    //firstShapeSurfaceNormal.div(firstShapeSurfaceNormal.mag());
+    firstShapeSurfaceNormal.div(firstShapeSurfaceNormal.mag());
     
+    /**
     // if reflective then recurse
     if(firstShape.getSurface().getReflectiveCoefficient() > 0){
      PVector babyRay = intersectionPoint.subtract(origin);
@@ -288,10 +292,10 @@ public Color recursive(Ray ray, Shape lastHit){
      Point newOrigin = new Point(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ());
      newOrigin.movePoint(babyRay, 0.000001);
      Ray newRecurseRay = new Ray(newOrigin, babyRay);
-     Color returnColor = recursive(newRecurseRay, firstShape);
+     Color returnColor = recursive(newRecurseRay, firstShape, x, y);
      returnColor.multiply(firstShape.getSurface().getReflectiveCoefficient());
      totalColor.add(returnColor);
-    }
+    }**/
       
     ArrayList<Light> lights = currentScene.getLights();
     // assuming no refraction for now
@@ -319,7 +323,7 @@ public Color recursive(Ray ray, Shape lastHit){
       IntersectionObject shadeIntersection = null;
       lightRay.setDirection(shapeToLight);
       lightRay.setOrigin(intersectionPoint);
-      
+      //println("LIGHT RAY " + lightRay.debug());
       for(Shape b : allObjects){
         IntersectionObject currIntersectionInfo = b.intersects(lightRay);
         if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && currIntersectionInfo.getShape()!=firstShape && currIntersectionInfo.getShape()!=null){
@@ -359,18 +363,17 @@ public Color recursive(Ray ray, Shape lastHit){
 }
 
 void rayTrace(){
-  //println(currSurface.getSpecularColor().toString());
   loadPixels();
   Ray ray = new Ray();
   float k = tan(radians(currentScene.getFOV()/2.0));
   float half_x = k/width;
   float half_y = k/height;
   
-  //for(int x = 200; x < 202; x+=refine){
+  //for(int x = 50; x < 51; x+=refine){
   for(int x = 0; x < width; x+=refine){
     float xPrime = ((2.0*k/width)*x)-k;
     for(int y = 0; y < height; y+=refine){
-    //for(int y = 170; y < 172; y+=refine){
+    //for(int y = 205; y < 206; y+=refine){
       Color totalColor = new Color();
       float yPrime = ((-2.0*k/height)*y)+k;
       
@@ -385,10 +388,10 @@ void rayTrace(){
         // shoot from center
         // if lens do the following
         if(currLens != null){
-          totalColor.add(recursive(currLens.randomRayOnLens(ray), null));
+          totalColor.add(recursive(currLens.randomRayOnLens(ray), null, x, y));
         }
         else{
-          totalColor.add(recursive(ray, null));
+          totalColor.add(recursive(ray, null, x, y));
         }
       }
       
@@ -399,10 +402,10 @@ void rayTrace(){
           float rayMag = sqrt(sq(xlocation+randX-origin.getX()) + sq(ylocation+randY-origin.getY()) + 1);
           ray.setDirection((xlocation+randX-origin.getX())/rayMag, (ylocation+randY-origin.getY())/rayMag, -1/rayMag);
           if(currLens!=null){
-            totalColor.add(recursive(currLens.randomRayOnLens(ray), null));
+            totalColor.add(recursive(currLens.randomRayOnLens(ray), null, x, y));
           }
           else{
-            totalColor.add(recursive(ray, null));
+            totalColor.add(recursive(ray, null, x, y));
           }
         }
       }

@@ -24,4 +24,7 @@ public abstract class Shape{
   public Point maxPoint(){
     return new Point();
   }
+  public Box getBox(){
+    return null;
+  }
 }
