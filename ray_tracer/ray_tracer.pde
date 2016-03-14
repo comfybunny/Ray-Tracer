@@ -5,8 +5,8 @@ import java.util.List;
 //  Ray Tracing Shell
 //
 ///////////////////////////////////////////////////////////////////////
-int debug_x = 125;
-int debug_y = 215;
+int debug_x = 148;
+int debug_y = 238;
 
 int screen_width = 300;
 int screen_height = 300;
@@ -24,7 +24,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t06.cli");
+  interpreter("t07.cli");
 }
 
 // Press key 1 to 9 and 0 to run different test cases.
@@ -323,6 +323,7 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
       IntersectionObject shadeIntersection = null;
       lightRay.setDirection(shapeToLight);
       lightRay.setOrigin(intersectionPoint);
+      lightRay.setOrigin(lightRay.hitPoint(0.0001));
       
       if(x == 125 && y == 215){
         println("LIGHT RAY " + lightRay.debug());
@@ -330,17 +331,20 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
       
       for(Shape b : allObjects){
         IntersectionObject currIntersectionInfo = b.intersects(lightRay);
-        if(currIntersectionInfo.getShape()!=null && x == 125 && y == 215){
+        if(currIntersectionInfo.getShape()!=null && x == debug_x && y == debug_y){
             println(currIntersectionInfo.getShape().getClass());
           }
-        if(b.getClass().equals(ShapeList.class) && x == 125 && y == 215){
+        if(b.getClass().equals(ShapeList.class) && x == debug_x && y == debug_y){
           println("outofshape");
           println(b.getBox().intersects(lightRay).getTime());
         }
-        if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && currIntersectionInfo.getShape()!=firstShape && currIntersectionInfo.getShape()!=null){
-          shadeShapeIntersect = b;
-          shadeTime = currIntersectionInfo.getTime();
-          shadeIntersection = currIntersectionInfo;
+        if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && currIntersectionInfo.getShape()!=null){
+          if(currIntersectionInfo.getShape()!=firstShape){
+            shadeShapeIntersect = b;
+            shadeTime = currIntersectionInfo.getTime();
+            shadeIntersection = currIntersectionInfo;
+          }
+          
         }
       }
 
