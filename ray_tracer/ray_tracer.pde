@@ -24,7 +24,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t07.cli");
+  interpreter("t04.cli");
 }
 
 // Press key 1 to 9 and 0 to run different test cases.
