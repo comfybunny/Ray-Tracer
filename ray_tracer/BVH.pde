@@ -1,3 +1,5 @@
+import java.util.Collections;
+
 public class BVH extends Box{
   
   private ArrayList<Shape> shapes;
@@ -64,8 +66,20 @@ public class BVH extends Box{
       BVH rightBVH = null;
       int shapeSize = shapes.size();
       println("SHAPE SIZE: " + shapeSize);
+      ArrayList<Float> xs = new ArrayList<Float>();
+      ArrayList<Float> ys = new ArrayList<Float>();
+      ArrayList<Float> zs = new ArrayList<Float>();
+      for(int q = 0; q < shapeSize; q++){
+        Point curr = shapes.get(q).getCentroid();
+        xs.add(curr.getX());
+        ys.add(curr.getY());
+        zs.add(curr.getZ());
+      }
+      Collections.sort(xs);
+      Collections.sort(ys);
+      Collections.sort(zs);
       if(x_range == max(x_range, y_range, z_range)){
-        float centroid = xmin + x_range/2.0;
+        float centroid = xs.get(xs.size()/2);
         
         for(int i=0; i<shapeSize; i++){
           if(shapes.get(0).getCentroid().getX() < centroid){
@@ -92,7 +106,7 @@ public class BVH extends Box{
         
       }
       else if(y_range == max(x_range, y_range, z_range)){
-        float centroid = ymin + y_range/2.0;
+        float centroid = ys.get(ys.size()/2);;
         
         for(int i=0; i<shapeSize; i++){
           if(shapes.get(0).getCentroid().getY() < centroid){
@@ -118,7 +132,7 @@ public class BVH extends Box{
         }
       }
       else{
-        float centroid = zmin + z_range/2.0;
+        float centroid = zs.get(zs.size()/2);
         
         for(int i=0; i<shapeSize; i++){
           if(shapes.get(0).getCentroid().getZ() < centroid){
