@@ -27,4 +27,7 @@ public abstract class Shape{
   public Box getBox(){
     return null;
   }
+  public Point getCentroid(){
+    return null;
+  }
 }

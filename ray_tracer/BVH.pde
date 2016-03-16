@@ -68,7 +68,7 @@ public class BVH extends Box{
         float centroid = xmin + x_range/2.0;
         
         for(int i=0; i<shapeSize; i++){
-          if(shapes.get(0).maxPoint().getX() < centroid){
+          if(shapes.get(0).getCentroid().getX() < centroid){
             if(leftBVH == null){
               leftBVH = new BVH(left, shapes.get(0).minPoint(), shapes.get(0).maxPoint());
             }
@@ -95,7 +95,7 @@ public class BVH extends Box{
         float centroid = ymin + y_range/2.0;
         
         for(int i=0; i<shapeSize; i++){
-          if(shapes.get(0).maxPoint().getY() < centroid){
+          if(shapes.get(0).getCentroid().getY() < centroid){
             if(leftBVH == null){
               leftBVH = new BVH(left, shapes.get(0).minPoint(), shapes.get(0).maxPoint());
             }
@@ -121,7 +121,7 @@ public class BVH extends Box{
         float centroid = zmin + z_range/2.0;
         
         for(int i=0; i<shapeSize; i++){
-          if(shapes.get(0).maxPoint().getZ() < centroid){
+          if(shapes.get(0).getCentroid().getZ() < centroid){
             if(leftBVH == null){
               leftBVH = new BVH(left, shapes.get(0).minPoint(), shapes.get(0).maxPoint());
             }
@@ -143,7 +143,7 @@ public class BVH extends Box{
           }
         }
       }
-      
+
       leftChild = leftBVH;
       rightChild = rightBVH;
       
