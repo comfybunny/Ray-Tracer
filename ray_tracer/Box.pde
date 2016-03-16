@@ -1,11 +1,11 @@
 public class Box extends Shape{
 
-  private float xmin;
-  private float ymin;
-  private float zmin;
-  private float xmax;
-  private float ymax;
-  private float zmax;
+  public float xmin;
+  public float ymin;
+  public float zmin;
+  public float xmax;
+  public float ymax;
+  public float zmax;
   
   // private Point box_center;
   
