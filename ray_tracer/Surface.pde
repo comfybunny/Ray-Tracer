@@ -51,4 +51,8 @@ public class Surface{
     return indexOfRefraction;
   }
   
+  public String toString(){
+    return diffuseColor.toString();
+  }
+  
 }

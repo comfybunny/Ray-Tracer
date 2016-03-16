@@ -60,5 +60,17 @@ public class Sphere extends Shape {
   public String debug(){
     return "Location: (" + location.toString();
   }
+  
+  public Point getCentroid(){
+    return location;
+  }
+  
+  public Point minPoint(){
+    return new Point(location.getX()-radius, location.getY()-radius, location.getZ()-radius);
+  }
+  
+  public Point maxPoint(){
+    return new Point(location.getX()+radius, location.getY()+radius, location.getZ()+radius);
+  }
 
 }

@@ -30,4 +30,8 @@ public abstract class Shape{
   public Point getCentroid(){
     return null;
   }
+  
+  public IntersectionObject intersectPrint(Ray ray){
+    return null;
+  }
 }

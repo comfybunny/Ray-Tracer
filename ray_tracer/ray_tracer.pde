@@ -5,8 +5,8 @@ import java.util.List;
 //  Ray Tracing Shell
 //
 ///////////////////////////////////////////////////////////////////////
-int debug_x = 150;
-int debug_y = 150;
+int debug_x = 100;
+int debug_y = 135;
 
 int screen_width = 300;
 int screen_height = 300;
@@ -24,7 +24,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t04.cli");
+  interpreter("t08.cli");
 }
 
 // Press key 1 to 9 and 0 to run different test cases.
@@ -216,8 +216,25 @@ void interpreter(String filename) {
           allObjects.remove(begin_list_index);
         }
         bvh.balance();
-        bvh.printer();
-      }
+        currentScene.addShape(bvh);
+        /**
+        int total = 0;
+        ArrayList<BVH> pretendQ = new ArrayList<BVH>();
+        BVH temp = bvh;
+        while(temp != null){
+          if(bvh.getSize()!=0){
+            total+=bvh.getSize();
+            print(bvh.getSize()+"\t");
+          }
+          pretendQ.add(temp.getLeft());
+          pretendQ.add(temp.getRight());
+          temp = pretendQ.get(0);
+        }
+        
+        println();
+        println(total);
+        **/
+    }
       
       else if (token[0].equals("rays_per_pixel")){
         currentScene.setRaysPerPixel(Integer.parseInt(token[1]));
@@ -268,9 +285,11 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
   float minTime = MAX_FLOAT;
   
   IntersectionObject intersectionInfo = null;
+
   for(Shape a : allObjects){
     if(lastHit != a){
       IntersectionObject currIntersectionInfo = a.intersects(ray);
+      
       if(currIntersectionInfo.getTime() >= 0 && currIntersectionInfo.getTime() <minTime){
         minTime = currIntersectionInfo.getTime();
         intersectionInfo = currIntersectionInfo;
@@ -279,6 +298,7 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
   }
   
   Shape firstShape;
+  
   if(intersectionInfo!=null){
     firstShape = intersectionInfo.getShape();
     Surface currentShapeSurface = firstShape.getSurface();
@@ -371,7 +391,14 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
     }    
     return totalColor;
   }
-  else{          
+  else{
+    /**
+    if(x == debug_x && y == debug_y){
+      println("no intersection");
+      IntersectionObject intersection = allObjects.get(0).intersectPrint(ray);
+      println("intersection after \t" + intersection.getShape().debug());
+    }
+    **/
     return new Color(currentScene.getBackground().getR(), currentScene.getBackground().getG(), currentScene.getBackground().getB());
   }
 }

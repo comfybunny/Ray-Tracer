@@ -37,14 +37,65 @@ public class BVH extends Box{
       if(leftChild != null && rightChild != null){
         IntersectionObject leftIntersection = leftChild.intersects(tempRay);
         IntersectionObject rightIntersection = rightChild.intersects(tempRay);
-        if(leftIntersection.getTime() > 0 && leftIntersection.getTime() < rightIntersection.getTime()){
-          return leftIntersection;
+        if(leftIntersection.getTime() > 0 && (leftIntersection.getTime() < rightIntersection.getTime() || rightIntersection.getTime() < 0)){
+          return leftChild.intersects(tempRay);
         }
-        return rightIntersection;
+        return rightChild.intersects(tempRay);
       }
       else if(leftChild != null){
         return leftChild.intersects(tempRay);
       }
+      return rightChild.intersects(tempRay);
+
+    }
+    else{
+      return thisHit;
+    }
+  }
+  
+  public IntersectionObject intersectPrint(Ray tempRay){
+    IntersectionObject thisHit = super.intersects(tempRay);
+    println(thisHit.getTime());
+    if(thisHit.getTime() > 0){
+      if(leftChild == null && rightChild == null){
+        println("LEFT CHILD RIGHT CHILD BOTH NULL");
+        Shape theShape = null;
+        float minTime = MAX_FLOAT;
+        IntersectionObject intersectionInfo = null;
+        for(Shape a : shapes){
+          IntersectionObject currIntersectionInfo = a.intersects(tempRay);
+          if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < minTime){
+            theShape = a;
+            minTime = currIntersectionInfo.getTime();
+            intersectionInfo = currIntersectionInfo;
+          }
+        }
+       
+        if(intersectionInfo != null){
+           println("intersection forreal time  \t" + intersectionInfo.getTime());
+          intersectionInfo.setShape(theShape);
+          return intersectionInfo;
+        }
+        return new IntersectionObject(-1, null);
+      }
+      
+      if(leftChild != null && rightChild != null){
+        println("LEFT CHILD RIGHT CHILD BOTH NOT NULL");
+        IntersectionObject leftIntersection = leftChild.intersects(tempRay);
+        IntersectionObject rightIntersection = rightChild.intersects(tempRay);
+        println("leftIntersection \t" + leftIntersection.getTime());
+        println("rightIntersection \t" + rightIntersection.getTime());
+        if(leftIntersection.getTime() > 0 && (leftIntersection.getTime() < rightIntersection.getTime() || rightIntersection.getTime() < 0)){
+          println("GOING TO LEFT CHILD");
+          return leftChild.intersectPrint(tempRay);
+        }
+        return rightChild.intersectPrint(tempRay);
+      }
+      else if(leftChild != null){
+        println("LEFT CHILD NOT NULL");
+        return leftChild.intersects(tempRay);
+      }
+      println("RIGHT CHILD NOT NULL");
       return rightChild.intersects(tempRay);
 
     }
@@ -65,7 +116,7 @@ public class BVH extends Box{
       BVH leftBVH = null;
       BVH rightBVH = null;
       int shapeSize = shapes.size();
-      println("SHAPE SIZE: " + shapeSize);
+      // println("SHAPE SIZE: " + shapeSize);
       ArrayList<Float> xs = new ArrayList<Float>();
       ArrayList<Float> ys = new ArrayList<Float>();
       ArrayList<Float> zs = new ArrayList<Float>();
@@ -162,11 +213,11 @@ public class BVH extends Box{
       rightChild = rightBVH;
       
       if(leftChild != null){
-        println("LEFT SIZE: " + leftChild.getShapes().size());
+        // println("LEFT SIZE: " + leftChild.getShapes().size());
         leftChild.balance();
       }
       if(rightChild != null){
-        println("RIGHT SIZE: " + rightChild.getShapes().size());
+        // println("RIGHT SIZE: " + rightChild.getShapes().size());
         rightChild.balance();
       }
     }
@@ -176,13 +227,19 @@ public class BVH extends Box{
     return shapes;
   }
   
+  public int getSize(){
+    return shapes.size();
+  }
+  
   public String debug(){
     return "I AM A BVH";
   }
   
-  public void printer(){
-    println(shapes.size());
-    println(leftChild.getShapes().size());
-    println(rightChild.getShapes().size());
+  public BVH getLeft(){
+    return leftChild;
+  }
+  
+  public BVH getRight(){
+    return rightChild;
   }
 }
