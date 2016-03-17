@@ -303,11 +303,6 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
   IntersectionObject intersectionInfo = null;
 
   for(Shape a : allObjects){
-    /**if(x == debug_x && y == debug_y){
-      println("STARTBAD PIXEL TIME: \t" + millis());
-      IntersectionObject intersection = a.intersectPrint(ray);
-      println("ENDBAD PIXEL TIME: \t" + millis());
-    }**/
     if(lastHit != a){
       IntersectionObject currIntersectionInfo = a.intersects(ray);
       if(currIntersectionInfo.getTime() >= 0 && currIntersectionInfo.getTime() <minTime){

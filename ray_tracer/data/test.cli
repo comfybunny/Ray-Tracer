@@ -108,6 +108,6 @@ pop
 end_accel
 
 reset_timer
-write t08.png
+write test.png
 print_timer
 

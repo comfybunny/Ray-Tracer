@@ -17,20 +17,17 @@ public class BVH extends Shape{
     IntersectionObject thisHit = box.intersects(tempRay);
     if(thisHit.getTime() > 0){
       if(leftChild == null && rightChild == null){
-        Shape theShape = null;
         float minTime = MAX_FLOAT;
         IntersectionObject intersectionInfo = null;
         // println(shapes.size());
         for(Shape a : shapes){
           IntersectionObject currIntersectionInfo = a.intersects(tempRay);
           if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < minTime){
-            theShape = a;
             minTime = currIntersectionInfo.getTime();
             intersectionInfo = currIntersectionInfo;
           }
         }
         if(intersectionInfo != null){
-          intersectionInfo.setShape(theShape);
           return intersectionInfo;
         }
         return new IntersectionObject(-1, null);
@@ -39,6 +36,17 @@ public class BVH extends Shape{
       if(leftChild != null && rightChild != null){
         IntersectionObject leftIntersection = leftChild.getBox().intersects(tempRay);
         IntersectionObject rightIntersection = rightChild.getBox().intersects(tempRay);
+        if(leftIntersection.getTime() == rightIntersection.getTime()){
+          IntersectionObject left = leftChild.intersects(tempRay);
+          IntersectionObject right = rightChild.intersects(tempRay);
+          if(left.getTime() > 0 && (left.getTime() < right.getTime() || right.getTime() < 0)){
+            return left;
+          }
+          if(right.getTime() > 0){
+            return right;
+          }
+          return new IntersectionObject(-1, null);
+        }
         if(leftIntersection.getTime() > 0 && (leftIntersection.getTime() < rightIntersection.getTime() || rightIntersection.getTime() < 0)){
           return leftChild.intersects(tempRay);
         }
@@ -58,13 +66,14 @@ public class BVH extends Shape{
     }
   }
   
-  /**
+  
   public IntersectionObject intersectPrint(Ray tempRay){
+    println("THIS BOX: " + getBox().debug());
     IntersectionObject thisHit = getBox().intersects(tempRay);
-    output.write("\n"+thisHit.getTime());
+    println(thisHit.getTime());
     if(thisHit.getTime() > 0){
       if(leftChild == null && rightChild == null){
-        output.write("\n"+"LEFT CHILD RIGHT CHILD BOTH NULL");
+        println("LEFT CHILD RIGHT CHILD BOTH NULL");
         Shape theShape = null;
         float minTime = MAX_FLOAT;
         IntersectionObject intersectionInfo = null;
@@ -78,7 +87,7 @@ public class BVH extends Shape{
         }
        
         if(intersectionInfo != null){
-           output.write("\n"+"intersection forreal time  \t" + intersectionInfo.getTime());
+           println("intersection forreal time  \t" + intersectionInfo.getTime());
           intersectionInfo.setShape(theShape);
           return intersectionInfo;
         }
@@ -86,28 +95,42 @@ public class BVH extends Shape{
       }
       
       if(leftChild != null && rightChild != null){
-        output.write("\n"+"LEFT CHILD RIGHT CHILD BOTH NOT NULL");
+        println("LEFT CHILD RIGHT CHILD BOTH NOT NULL");
+        println("LEFT BOX: " + leftChild.getBox().debug());
         IntersectionObject leftIntersection = leftChild.getBox().intersects(tempRay);
+        println("RIGHT BOX: " + rightChild.getBox().debug());
         IntersectionObject rightIntersection = rightChild.getBox().intersects(tempRay);
-        output.write("\n"+"leftIntersection \t" + leftIntersection.getTime());
-        output.write("\n"+"rightIntersection \t" + rightIntersection.getTime());
+        println("leftIntersection \t" + leftIntersection.getTime());
+        println("rightIntersection \t" + rightIntersection.getTime());
+        if(leftIntersection.getTime() == rightIntersection.getTime()){
+          IntersectionObject leftOne = leftChild.intersectPrint(tempRay);
+          IntersectionObject rightOne = rightChild.intersectPrint(tempRay);
+          println("DONE");
+          if(leftOne.getTime() > 0 && (leftOne.getTime() < rightOne.getTime() || rightOne.getTime() < 0)){
+            return leftOne;
+          }
+          if(rightOne.getTime() > 0){
+            return rightOne;
+          }
+          return new IntersectionObject(-1, null);
+        }
         if(leftIntersection.getTime() > 0 && (leftIntersection.getTime() < rightIntersection.getTime() || rightIntersection.getTime() < 0)){
-          output.write("\n"+"GOING TO LEFT CHILD");
+          println("GOING TO LEFT CHILD");
           return leftChild.intersectPrint(tempRay);
         }
         
         if(rightIntersection.getTime() > 0){
-          output.write("\n"+"GOING TO RIGHT CHILD");
+          println("GOING TO RIGHT CHILD");
           return rightChild.intersectPrint(tempRay);
         }
         return new IntersectionObject(-1, null);
         
       }
       else if(leftChild != null){
-        output.write("\n"+"LEFT CHILD NOT NULL");
+        println("LEFT CHILD NOT NULL");
         return leftChild.intersects(tempRay);
       }
-      output.write("\n"+"RIGHT CHILD NOT NULL");
+      println("RIGHT CHILD NOT NULL");
       return rightChild.intersects(tempRay);
 
     }
@@ -115,7 +138,7 @@ public class BVH extends Shape{
       return thisHit;
     }
   }
-    **/
+  
   public void balance(){
     if(shapes.size() > 2){
       float x_range = box.xmax - box.xmin;

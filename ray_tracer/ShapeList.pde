@@ -8,6 +8,11 @@ public class ShapeList extends Shape{
     this.boundingBox = boundingBox;
   }
   
+  public ShapeList(Shape shape){
+    shapes = new ArrayList<Shape>();
+    shapes.add(shape);
+  }
+  
   public String debug(){
     return "I am an out of shape list";
   }
@@ -51,5 +56,9 @@ public class ShapeList extends Shape{
   
   public Box getBox(){
     return boundingBox;
+  }
+  
+  public ArrayList<Shape> getShapes(){
+    return shapes;
   }
 }
