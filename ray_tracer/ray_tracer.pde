@@ -6,16 +6,13 @@ import java.util.List;
 //
 ///////////////////////////////////////////////////////////////////////
 
-PrintWriter output = createWriter("C:\\Users\\comfybunny\\Documents\\Ray Tracer\\ray_tracer\\debugger.txt");
-float max_time = -1;
-float max_pixel_x = 0;
-float max_pixel_y = 0;
+//PrintWriter output = createWriter("C:\\Users\\comfybunny\\Documents\\Ray Tracer\\ray_tracer\\debugger.txt");
 
-int debug_x = 125;
-int debug_y = 165;
+int debug_x = 190;
+int debug_y = 149;
 
-int screen_width = 600;
-int screen_height = 600;
+int screen_width = 300;
+int screen_height = 300;
 int timer = 0;
 int refine = 1;
 boolean refineBoolean = false;
@@ -224,15 +221,35 @@ void interpreter(String filename) {
         }
         bvh.balance();
         currentScene.addShape(bvh);
-        
+        /**
         println("BASE: " + bvh.getSize());
         println("LEFT CHILD: " + bvh.getLeft().getSize());
         println("RIGHT CHILD: " + bvh.getRight().getSize());
-        println("LEFT LEFT CHILD: " + bvh.getLeft().getLeft().getSize());
-        println("LEFT RIGHT CHILD: " + bvh.getLeft().getRight().getSize());
-        println("RIGHT LEFT CHILD: " + bvh.getRight().getLeft().getSize());
-        println("RIGHT RIGHT CHILD: " + bvh.getRight().getRight().getSize());
-        
+        if(bvh.getLeft().getLeft() == null){
+          println("good");
+        }
+        else{
+          println("bad");
+        }
+        if(bvh.getLeft().getRight() == null){
+          println("good");
+        }
+        else{
+          println("bad");
+        }
+        if(bvh.getRight().getLeft() == null){
+          println("good");
+        }
+        else{
+          println("bad");
+        }
+        if(bvh.getRight().getRight() == null){
+          println("good");
+        }
+        else{
+          println("bad");
+        }
+        **/
     }
       
       else if (token[0].equals("rays_per_pixel")){
@@ -275,7 +292,6 @@ void interpreter(String filename) {
     }
   }
 }
-
 public Color recursive(Ray ray, Shape lastHit, int x, int y){
   
   Color totalColor = new Color();
@@ -285,9 +301,13 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
   float minTime = MAX_FLOAT;
   
   IntersectionObject intersectionInfo = null;
-  
 
   for(Shape a : allObjects){
+    /**if(x == debug_x && y == debug_y){
+      println("STARTBAD PIXEL TIME: \t" + millis());
+      IntersectionObject intersection = a.intersectPrint(ray);
+      println("ENDBAD PIXEL TIME: \t" + millis());
+    }**/
     if(lastHit != a){
       IntersectionObject currIntersectionInfo = a.intersects(ray);
       if(currIntersectionInfo.getTime() >= 0 && currIntersectionInfo.getTime() <minTime){
@@ -394,6 +414,13 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
     
   }
   else{
+    /**
+    if(x == debug_x && y == debug_y){
+      println("no intersection");
+      IntersectionObject intersection = allObjects.get(0).intersectPrint(ray);
+      println("intersection after \t" + intersection.getShape().debug());
+    }
+    **/
     return new Color(currentScene.getBackground().getR(), currentScene.getBackground().getG(), currentScene.getBackground().getB());
   }
   
@@ -411,7 +438,6 @@ void rayTrace(){
   for(int x = 0; x < width; x+=refine){
     float xPrime = ((2.0*k/width)*x)-k;
     for(int y = 0; y < height; y+=refine){
-      float startTime = millis();
     //for(int y = 205; y < 206; y+=refine){
       Color totalColor = new Color();
       float yPrime = ((-2.0*k/height)*y)+k;
@@ -457,34 +483,17 @@ void rayTrace(){
           }
         }
       }
-    
-    float elapsedTime = millis()-startTime;
-    output.println("pixel_x: " + x + "\tpixel_y: " + y + "\t time: " + elapsedTime);
-    if(elapsedTime > max_time){
-      max_time = elapsedTime;
-      max_pixel_x = x;
-      max_pixel_y = y;
-    }
-    
+
     }
   }
-  
   updatePixels();
-  
-  ///**
-  output.println("max time: " + max_time + "\tmax x pixel: " + max_pixel_x + "\tmax y pixel: " + max_pixel_y);
-  println("max time: " + max_time + "\tmax x pixel: " + max_pixel_x + "\tmax y pixel: " + max_pixel_y);
-  output.flush();  // Writes the remaining data to the file
-  output.close();  // Finishes the file
-  //**/
+
 }
 
 void draw() {
-    //noLoop();
 }
 
 // when mouse is pressed, print the cursor location
 void mousePressed() {
-  //currentScene.getMatrixStack().getCTM().printDebug();
   println ("mouse: " + mouseX + " " + mouseY);
 }

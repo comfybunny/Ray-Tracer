@@ -1,19 +1,20 @@
 import java.util.Collections;
 
-public class BVH extends Box{
+public class BVH extends Shape{
   
   private ArrayList<Shape> shapes;
   
+  private Box box;
   private BVH leftChild = null;
   private BVH rightChild = null;
   
   public BVH(ArrayList<Shape> shapes, Point min, Point max){
-    super(min, max);
+    box = new Box(min, max);
     this.shapes = shapes;
   }
   
-  public IntersectionObject intersectPrint(Ray tempRay){
-    IntersectionObject thisHit = super.intersects(tempRay);
+  public IntersectionObject intersects(Ray tempRay){
+    IntersectionObject thisHit = box.intersects(tempRay);
     if(thisHit.getTime() > 0){
       if(leftChild == null && rightChild == null){
         Shape theShape = null;
@@ -36,8 +37,8 @@ public class BVH extends Box{
       }
       
       if(leftChild != null && rightChild != null){
-        IntersectionObject leftIntersection = leftChild.intersects(tempRay);
-        IntersectionObject rightIntersection = rightChild.intersects(tempRay);
+        IntersectionObject leftIntersection = leftChild.getBox().intersects(tempRay);
+        IntersectionObject rightIntersection = rightChild.getBox().intersects(tempRay);
         if(leftIntersection.getTime() > 0 && (leftIntersection.getTime() < rightIntersection.getTime() || rightIntersection.getTime() < 0)){
           return leftChild.intersects(tempRay);
         }
@@ -57,8 +58,9 @@ public class BVH extends Box{
     }
   }
   
-  public IntersectionObject intersects(Ray tempRay){
-    IntersectionObject thisHit = super.intersects(tempRay);
+  /**
+  public IntersectionObject intersectPrint(Ray tempRay){
+    IntersectionObject thisHit = getBox().intersects(tempRay);
     output.write("\n"+thisHit.getTime());
     if(thisHit.getTime() > 0){
       if(leftChild == null && rightChild == null){
@@ -78,7 +80,6 @@ public class BVH extends Box{
         if(intersectionInfo != null){
            output.write("\n"+"intersection forreal time  \t" + intersectionInfo.getTime());
           intersectionInfo.setShape(theShape);
-          output.write("\n"+"FOUND SOMETHING RETURNING");
           return intersectionInfo;
         }
         return new IntersectionObject(-1, null);
@@ -86,8 +87,8 @@ public class BVH extends Box{
       
       if(leftChild != null && rightChild != null){
         output.write("\n"+"LEFT CHILD RIGHT CHILD BOTH NOT NULL");
-        IntersectionObject leftIntersection = leftChild.intersects(tempRay);
-        IntersectionObject rightIntersection = rightChild.intersects(tempRay);
+        IntersectionObject leftIntersection = leftChild.getBox().intersects(tempRay);
+        IntersectionObject rightIntersection = rightChild.getBox().intersects(tempRay);
         output.write("\n"+"leftIntersection \t" + leftIntersection.getTime());
         output.write("\n"+"rightIntersection \t" + rightIntersection.getTime());
         if(leftIntersection.getTime() > 0 && (leftIntersection.getTime() < rightIntersection.getTime() || rightIntersection.getTime() < 0)){
@@ -114,12 +115,12 @@ public class BVH extends Box{
       return thisHit;
     }
   }
-    
+    **/
   public void balance(){
     if(shapes.size() > 2){
-      float x_range = xmax - xmin;
-      float y_range = ymax - ymin;
-      float z_range = zmax - zmin;
+      float x_range = box.xmax - box.xmin;
+      float y_range = box.ymax - box.ymin;
+      float z_range = box.zmax - box.zmin;
       // we want to split on the max ranged-box
       
       ArrayList<Shape> left = new ArrayList<Shape>();
@@ -252,5 +253,17 @@ public class BVH extends Box{
   
   public BVH getRight(){
     return rightChild;
+  }
+  
+  public Box getBox(){
+    return box;
+  }
+
+  public void includePoint(Point minPoint, Point maxPoint){
+    box.includePoint(minPoint, maxPoint);
+  }
+  
+  public PVector shapeNormal(Point hitPoint){
+    return box.shapeNormal(hitPoint);
   }
 }
