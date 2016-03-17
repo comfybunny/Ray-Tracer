@@ -11,11 +11,11 @@ float max_time = -1;
 float max_pixel_x = 0;
 float max_pixel_y = 0;
 
-int debug_x = 190;
-int debug_y = 149;
+int debug_x = 125;
+int debug_y = 165;
 
-int screen_width = 300;
-int screen_height = 300;
+int screen_width = 600;
+int screen_height = 600;
 int timer = 0;
 int refine = 1;
 boolean refineBoolean = false;
@@ -30,7 +30,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t08.cli");
+  interpreter("test.cli");
   
 }
 
@@ -224,35 +224,15 @@ void interpreter(String filename) {
         }
         bvh.balance();
         currentScene.addShape(bvh);
-        /**
+        
         println("BASE: " + bvh.getSize());
         println("LEFT CHILD: " + bvh.getLeft().getSize());
         println("RIGHT CHILD: " + bvh.getRight().getSize());
-        if(bvh.getLeft().getLeft() == null){
-          println("good");
-        }
-        else{
-          println("bad");
-        }
-        if(bvh.getLeft().getRight() == null){
-          println("good");
-        }
-        else{
-          println("bad");
-        }
-        if(bvh.getRight().getLeft() == null){
-          println("good");
-        }
-        else{
-          println("bad");
-        }
-        if(bvh.getRight().getRight() == null){
-          println("good");
-        }
-        else{
-          println("bad");
-        }
-        **/
+        println("LEFT LEFT CHILD: " + bvh.getLeft().getLeft().getSize());
+        println("LEFT RIGHT CHILD: " + bvh.getLeft().getRight().getSize());
+        println("RIGHT LEFT CHILD: " + bvh.getRight().getLeft().getSize());
+        println("RIGHT RIGHT CHILD: " + bvh.getRight().getRight().getSize());
+        
     }
       
       else if (token[0].equals("rays_per_pixel")){
@@ -295,6 +275,7 @@ void interpreter(String filename) {
     }
   }
 }
+
 public Color recursive(Ray ray, Shape lastHit, int x, int y){
   
   Color totalColor = new Color();
@@ -304,13 +285,9 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
   float minTime = MAX_FLOAT;
   
   IntersectionObject intersectionInfo = null;
+  
 
   for(Shape a : allObjects){
-    /**if(x == debug_x && y == debug_y){
-      println("STARTBAD PIXEL TIME: \t" + millis());
-      IntersectionObject intersection = a.intersectPrint(ray);
-      println("ENDBAD PIXEL TIME: \t" + millis());
-    }**/
     if(lastHit != a){
       IntersectionObject currIntersectionInfo = a.intersects(ray);
       if(currIntersectionInfo.getTime() >= 0 && currIntersectionInfo.getTime() <minTime){
@@ -417,13 +394,6 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
     
   }
   else{
-    /**
-    if(x == debug_x && y == debug_y){
-      println("no intersection");
-      IntersectionObject intersection = allObjects.get(0).intersectPrint(ray);
-      println("intersection after \t" + intersection.getShape().debug());
-    }
-    **/
     return new Color(currentScene.getBackground().getR(), currentScene.getBackground().getG(), currentScene.getBackground().getB());
   }
   
@@ -480,9 +450,6 @@ void rayTrace(){
       }
       
       totalColor.divide(currentScene.getRaysPerPixel());
-      /**if(x==debug_x && y==debug_y){
-        println("END TIME: \t" + millis());
-      }**/
       for(int i = x; i < x + refine; i++){
         for(int j = y; j< y + refine; j++){
           if(j*width+i < width*height){
@@ -497,24 +464,22 @@ void rayTrace(){
       max_time = elapsedTime;
       max_pixel_x = x;
       max_pixel_y = y;
-    }  
+    }
+    
     }
   }
   
-  //println("POST FOR LOOP: \t" + millis());
-  output.println("max time: " + max_time + "\tmax x pixel: " + max_pixel_x + "\tmax y pixel: " + max_pixel_y);
-  println("max time: " + max_time + "\tmax x pixel: " + max_pixel_x + "\tmax y pixel: " + max_pixel_y);
   updatePixels();
   
-  println("MEOW");
-  output.println("YEOW");
+  ///**
+  output.println("max time: " + max_time + "\tmax x pixel: " + max_pixel_x + "\tmax y pixel: " + max_pixel_y);
+  println("max time: " + max_time + "\tmax x pixel: " + max_pixel_x + "\tmax y pixel: " + max_pixel_y);
   output.flush();  // Writes the remaining data to the file
   output.close();  // Finishes the file
-  exit();
+  //**/
 }
 
 void draw() {
-    
     //noLoop();
 }
 
