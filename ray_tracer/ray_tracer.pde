@@ -5,8 +5,14 @@ import java.util.List;
 //  Ray Tracing Shell
 //
 ///////////////////////////////////////////////////////////////////////
-int debug_x = 100;
-int debug_y = 135;
+
+PrintWriter output = createWriter("C:\\Users\\comfybunny\\Documents\\Ray Tracer\\ray_tracer\\debugger.txt");
+float max_time = -1;
+float max_pixel_x = 0;
+float max_pixel_y = 0;
+
+int debug_x = 190;
+int debug_y = 149;
 
 int screen_width = 300;
 int screen_height = 300;
@@ -25,6 +31,7 @@ void setup(){
   background (0, 0, 0);
   currentScene = new Scene();
   interpreter("t08.cli");
+  
 }
 
 // Press key 1 to 9 and 0 to run different test cases.
@@ -218,21 +225,33 @@ void interpreter(String filename) {
         bvh.balance();
         currentScene.addShape(bvh);
         /**
-        int total = 0;
-        ArrayList<BVH> pretendQ = new ArrayList<BVH>();
-        BVH temp = bvh;
-        while(temp != null){
-          if(bvh.getSize()!=0){
-            total+=bvh.getSize();
-            print(bvh.getSize()+"\t");
-          }
-          pretendQ.add(temp.getLeft());
-          pretendQ.add(temp.getRight());
-          temp = pretendQ.get(0);
+        println("BASE: " + bvh.getSize());
+        println("LEFT CHILD: " + bvh.getLeft().getSize());
+        println("RIGHT CHILD: " + bvh.getRight().getSize());
+        if(bvh.getLeft().getLeft() == null){
+          println("good");
         }
-        
-        println();
-        println(total);
+        else{
+          println("bad");
+        }
+        if(bvh.getLeft().getRight() == null){
+          println("good");
+        }
+        else{
+          println("bad");
+        }
+        if(bvh.getRight().getLeft() == null){
+          println("good");
+        }
+        else{
+          println("bad");
+        }
+        if(bvh.getRight().getRight() == null){
+          println("good");
+        }
+        else{
+          println("bad");
+        }
         **/
     }
       
@@ -287,9 +306,13 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
   IntersectionObject intersectionInfo = null;
 
   for(Shape a : allObjects){
+    /**if(x == debug_x && y == debug_y){
+      println("STARTBAD PIXEL TIME: \t" + millis());
+      IntersectionObject intersection = a.intersectPrint(ray);
+      println("ENDBAD PIXEL TIME: \t" + millis());
+    }**/
     if(lastHit != a){
       IntersectionObject currIntersectionInfo = a.intersects(ray);
-      
       if(currIntersectionInfo.getTime() >= 0 && currIntersectionInfo.getTime() <minTime){
         minTime = currIntersectionInfo.getTime();
         intersectionInfo = currIntersectionInfo;
@@ -328,7 +351,8 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
      Color returnColor = recursive(newRecurseRay, firstShape, x, y);
      returnColor.multiply(firstShape.getSurface().getReflectiveCoefficient());
      totalColor.add(returnColor);
-    }**/
+    }
+    **/
       
     ArrayList<Light> lights = currentScene.getLights();
     // assuming no refraction for now
@@ -388,8 +412,9 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
       if(intersectionPoint.euclideanDistance(lightLocation) < distLightToBlocker || shadeShapeIntersect == null){
          totalColor.add(tempToAdd);
        }
-    }    
+    }
     return totalColor;
+    
   }
   else{
     /**
@@ -401,6 +426,7 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
     **/
     return new Color(currentScene.getBackground().getR(), currentScene.getBackground().getG(), currentScene.getBackground().getB());
   }
+  
 }
 
 void rayTrace(){
@@ -411,9 +437,11 @@ void rayTrace(){
   float half_y = k/height;
   
   //for(int x = 50; x < 51; x+=refine){
+    //println("PRE FOR LOOP: \t" + millis());
   for(int x = 0; x < width; x+=refine){
     float xPrime = ((2.0*k/width)*x)-k;
     for(int y = 0; y < height; y+=refine){
+      float startTime = millis();
     //for(int y = 205; y < 206; y+=refine){
       Color totalColor = new Color();
       float yPrime = ((-2.0*k/height)*y)+k;
@@ -452,7 +480,9 @@ void rayTrace(){
       }
       
       totalColor.divide(currentScene.getRaysPerPixel());
-
+      /**if(x==debug_x && y==debug_y){
+        println("END TIME: \t" + millis());
+      }**/
       for(int i = x; i < x + refine; i++){
         for(int j = y; j< y + refine; j++){
           if(j*width+i < width*height){
@@ -460,10 +490,27 @@ void rayTrace(){
           }
         }
       }
-      
+    
+    float elapsedTime = millis()-startTime;
+    output.println("pixel_x: " + x + "\tpixel_y: " + y + "\t time: " + elapsedTime);
+    if(elapsedTime > max_time){
+      max_time = elapsedTime;
+      max_pixel_x = x;
+      max_pixel_y = y;
+    }  
     }
   }
+  
+  //println("POST FOR LOOP: \t" + millis());
+  output.println("max time: " + max_time + "\tmax x pixel: " + max_pixel_x + "\tmax y pixel: " + max_pixel_y);
+  println("max time: " + max_time + "\tmax x pixel: " + max_pixel_x + "\tmax y pixel: " + max_pixel_y);
   updatePixels();
+  
+  println("MEOW");
+  output.println("YEOW");
+  output.flush();  // Writes the remaining data to the file
+  output.close();  // Finishes the file
+  exit();
 }
 
 void draw() {
