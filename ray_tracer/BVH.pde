@@ -103,14 +103,19 @@ public class BVH extends Shape{
         println("leftIntersection \t" + leftIntersection.getTime());
         println("rightIntersection \t" + rightIntersection.getTime());
         if(leftIntersection.getTime() == rightIntersection.getTime()){
-          IntersectionObject leftOne = leftChild.intersectPrint(tempRay);
-          IntersectionObject rightOne = rightChild.intersectPrint(tempRay);
-          println("DONE");
-          if(leftOne.getTime() > 0 && (leftOne.getTime() < rightOne.getTime() || rightOne.getTime() < 0)){
-            return leftOne;
+          println("EQUAL TIME CHECKING BOTH");
+          println("EQUAL TIME CHECKING LEFT CHILD");
+          IntersectionObject left = leftChild.intersectPrint(tempRay);
+          println("EQUAL TIME CHECKING RIGHT CHILD");
+          IntersectionObject right = rightChild.intersectPrint(tempRay);
+          println("EQUAL TIME DONE CHECKING CHILDREN");
+          
+          println("left.getTime(): " + left.getTime() + "\tright.getTime(): " + right.getTime());
+          if(left.getTime() > 0 && (left.getTime() < right.getTime() || right.getTime() < 0)){
+            return left;
           }
-          if(rightOne.getTime() > 0){
-            return rightOne;
+          if(right.getTime() > 0){
+            return right;
           }
           return new IntersectionObject(-1, null);
         }
@@ -140,7 +145,7 @@ public class BVH extends Shape{
   }
   
   public void balance(){
-    if(shapes.size() > 2){
+    if(shapes.size() > 16){
       float x_range = box.xmax - box.xmin;
       float y_range = box.ymax - box.ymin;
       float z_range = box.zmax - box.zmin;

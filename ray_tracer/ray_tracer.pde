@@ -27,7 +27,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("test.cli");
+  interpreter("t08.cli");
   
 }
 
@@ -221,35 +221,6 @@ void interpreter(String filename) {
         }
         bvh.balance();
         currentScene.addShape(bvh);
-        /**
-        println("BASE: " + bvh.getSize());
-        println("LEFT CHILD: " + bvh.getLeft().getSize());
-        println("RIGHT CHILD: " + bvh.getRight().getSize());
-        if(bvh.getLeft().getLeft() == null){
-          println("good");
-        }
-        else{
-          println("bad");
-        }
-        if(bvh.getLeft().getRight() == null){
-          println("good");
-        }
-        else{
-          println("bad");
-        }
-        if(bvh.getRight().getLeft() == null){
-          println("good");
-        }
-        else{
-          println("bad");
-        }
-        if(bvh.getRight().getRight() == null){
-          println("good");
-        }
-        else{
-          println("bad");
-        }
-        **/
     }
       
       else if (token[0].equals("rays_per_pixel")){
@@ -304,6 +275,10 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
 
   for(Shape a : allObjects){
     if(lastHit != a){
+      if((x==159 && y==195) || (x==162 && y==201)){
+        println("X: " + x + "\tY: " + y);
+        a.intersectPrint(ray);
+      }
       IntersectionObject currIntersectionInfo = a.intersects(ray);
       if(currIntersectionInfo.getTime() >= 0 && currIntersectionInfo.getTime() <minTime){
         minTime = currIntersectionInfo.getTime();
