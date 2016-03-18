@@ -153,7 +153,7 @@ public class BVH extends Shape{
   
   public void balance(){
     int shapeSize = shapes.size();
-    if(shapeSize > 2){
+    if(shapeSize > 16){
       float x_range = box.xmax - box.xmin;
       float y_range = box.ymax - box.ymin;
       float z_range = box.zmax - box.zmin;

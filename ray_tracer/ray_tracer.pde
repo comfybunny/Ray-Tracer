@@ -6,7 +6,7 @@ import java.util.List;
 //
 ///////////////////////////////////////////////////////////////////////
 
-//PrintWriter output = createWriter("C:\\Users\\comfybunny\\Documents\\Ray Tracer\\ray_tracer\\debugger.txt");
+PrintWriter output = createWriter("C:\\Users\\comfybunny\\Documents\\Ray Tracer\\ray_tracer\\debugger.txt");
 boolean printer = false;
 int debug_x = 190;
 int debug_y = 149;
@@ -214,17 +214,20 @@ void interpreter(String filename) {
         int begin_list_index = currentScene.getListStartIndex();
         int end_list_index = currentScene.numberOfObjects();
         Box box = new Box(allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint(), currSurface);
-        //BVH bvh = new BVH(shapeListObjects, allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
+        BVH bvh = new BVH(shapeListObjects, allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
         for(int currShapeIndex = begin_list_index; currShapeIndex < end_list_index; currShapeIndex++){
           box.includePoint(allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
+          bvh.includePoint(allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
           shapeListObjects.add(allObjects.get(begin_list_index));
           allObjects.remove(begin_list_index);
         }
         Grids grid = new Grids(shapeListObjects, box);
         
+        bvh.balance();
+        currentScene.addShape(bvh);
         
-        currentScene.addShape(grid);
-        println("YIPPIIEEE");
+        //currentScene.addShape(grid);
+        //println("add accel structure");
         /**
         bvh.balance();
         currentScene.addShape(bvh);
@@ -308,12 +311,12 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
 
   for(Shape a : allObjects){
     if(lastHit != a){
-      if((x==159 && y==195) || (x==162 && y==201)){
-        printer = true;
-        println("X: " + x + "\tY: " + y);
-        println();
+      //if((x==159 && y==195) || (x==162 && y==201)){
+      //  printer = true;
+      //  println("X: " + x + "\tY: " + y);
+      //  println();
         
-      }
+      //}
       IntersectionObject currIntersectionInfo = a.intersects(ray);
       if(currIntersectionInfo.getTime() >= 0 && currIntersectionInfo.getTime() <minTime){
         minTime = currIntersectionInfo.getTime();

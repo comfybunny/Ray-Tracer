@@ -27,74 +27,45 @@ public class Grids extends Shape{
       Point minPoint = shapes.get(i).minPoint();
       Point maxPoint = shapes.get(i).maxPoint();
       
-      float xmin = 0;
-      float xmax = 0;
-      float ymin = 0;
-      float ymax = 0;
-      float zmin = 0;
-      float zmax = 0;
       
-      for(float x = box.xmin; x <=box.xmax; x+=delta_x){
-        println("x ITERATE" + x);
-        if(minPoint.getX() <= x){
-          xmin = x-delta_x;
-          break;
-        }
-      }
-      for(float x = box.xmin; x <=box.xmax; x += delta_x){
-        
-        if(maxPoint.getX() <= x){
-          xmax = x;
-          break;
-        }
-      }
-      for(float y = box.ymin; y <=box.ymax; y+=delta_y){
-        if(minPoint.getY() <= y){
-          ymin = y-delta_y;
-          break;
-        }
-      }
-      for(float y = box.ymin; y <=box.ymax; y += delta_y){
-        if(maxPoint.getY() <= y){
-          ymax = y;
-          break;
-        }
-      }
-      for(float z = box.zmax; z >=box.zmin; z-=delta_z){
-        if(minPoint.getZ() >= z){
-          zmin = z;
-          break;
-        }
-      }
-      for(float z = box.zmax; z >=box.zmin; z -= delta_z){
-        if(maxPoint.getZ() >= z){
-          zmax = z+delta_z;
-          break;
-        }
-      }
+      PVector minIndex = getGridIndicies(minPoint, new Point(box.xmin, box.ymin, box.zmin));
+      PVector maxIndex = getGridIndicies(maxPoint, new Point(box.xmin, box.ymin, box.zmin));
       
-      for(float a = xmin; a < xmax; a += delta_x){
-        for(float b = ymin; b < ymax; b += delta_y){
-          for(float c = zmax; c > zmin; c -= delta_z){
-            println(a);
-            println(b);
-            println(c);
-            println(box.debug());
-            println(delta_x);
-            println(delta_y);
-            println(delta_z);
-            println(((a-box.xmin)/delta_x));
-            println(((b-box.ymin)/delta_y));
-            println(((box.zmax-c)/delta_z));
-            println(minPoint.toString());
-            println(maxPoint.toString());
-            ShapeList currGrid = grid[(int)((a-box.xmin)/delta_x)][(int)((b-box.ymin)/delta_y)][(int)((box.zmax-c)/delta_z)];
-            if(currGrid == null){
-              //println("A THING");
-              currGrid = new ShapeList(shapes.get(i));
+      /**
+      int xmin = floor((minPoint.getX()-box.xmin)/delta_x);
+      int xmax = ceil((maxPoint.getX()-box.xmin)/delta_x);
+      int ymin = floor((minPoint.getY()-box.ymin)/delta_y);
+      int ymax = min(ceil((maxPoint.getY()-box.ymin)/delta_y), sideLength);
+      // z is weird the xmin is actually the farthest away point
+      //int zmin = floor((box.zmax - maxPoint.getZ())/delta_z);
+      //int zmax = ceil((box.zmax - minPoint.getZ())/delta_z);
+      
+      int zmin = 0;
+      int zmax = sideLength;
+      **/
+      
+      //if(i==100){
+      //  println(minIndex);
+      //  println(maxIndex);
+      //}
+
+      for(int a = (int)minIndex.x; a < (int)maxIndex.x; a += 1){
+        for(int b = (int)minIndex.y; b < (int)maxIndex.y; b += 1){
+          for(int c = (int)minIndex.z; c < (int)maxIndex.z; c += 1){
+            try{
+              ShapeList currGrid = grid[a][b][c];
+              if(currGrid == null){
+                currGrid = new ShapeList(shapes.get(i));
+              }
+              else{
+                currGrid.addShape(shapes.get(i));
+              }
             }
-            else{
-              currGrid.addShape(shapes.get(i));
+            catch(ArrayIndexOutOfBoundsException e){
+              //println("box dim: " + sideLength);
+              //println(a);
+              //println(b);
+              //println(c);
             }
 
           }
