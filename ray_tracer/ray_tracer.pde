@@ -7,7 +7,7 @@ import java.util.List;
 ///////////////////////////////////////////////////////////////////////
 
 //PrintWriter output = createWriter("C:\\Users\\comfybunny\\Documents\\Ray Tracer\\ray_tracer\\debugger.txt");
-
+boolean printer = false;
 int debug_x = 190;
 int debug_y = 149;
 
@@ -213,14 +213,46 @@ void interpreter(String filename) {
         ArrayList<Shape> allObjects = currentScene.getAllObjects();
         int begin_list_index = currentScene.getListStartIndex();
         int end_list_index = currentScene.numberOfObjects();
-        BVH bvh = new BVH(shapeListObjects, allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
+        Box box = new Box(allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
+        //BVH bvh = new BVH(shapeListObjects, allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
         for(int currShapeIndex = begin_list_index; currShapeIndex < end_list_index; currShapeIndex++){
-          bvh.includePoint(allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
+          box.includePoint(allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
           shapeListObjects.add(allObjects.get(begin_list_index));
           allObjects.remove(begin_list_index);
         }
+        Grids grid = new Grids(shapeListObjects, box);
+        
+        currentScene.addShape(grid);
+        println("YIPPIIEEE");
+        /**
         bvh.balance();
         currentScene.addShape(bvh);
+        
+        
+        int counter = 0;
+        ArrayList<BVH> bfq = new ArrayList<BVH>();
+        bfq.add(bvh);
+        while(bfq.size() > 0){
+          BVH temp = bfq.remove(0);
+          if(temp.getSize() != 0){
+            counter += temp.getSize();
+            for(Shape a : temp.getShapes()){
+              if(a.P0X() == 0.0608976 && a.P1X() == 0.113795){
+                println(temp.getBox().debug());
+              }
+            }
+          }
+          else{
+            if(temp.getRight()!=null){
+              bfq.add(temp.getLeft());
+            }
+            if(temp.getRight()!=null){
+              bfq.add(temp.getRight());
+            }
+          }
+        }
+        println("COUNTER: " + counter);
+        **/
     }
       
       else if (token[0].equals("rays_per_pixel")){
@@ -276,8 +308,13 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
   for(Shape a : allObjects){
     if(lastHit != a){
       if((x==159 && y==195) || (x==162 && y==201)){
+        printer = true;
         println("X: " + x + "\tY: " + y);
-        a.intersectPrint(ray);
+        println();
+        println();
+        println();
+        IntersectionObject meow = a.intersects(ray);
+        println(meow.getIntersectionPoint().toString());
       }
       IntersectionObject currIntersectionInfo = a.intersects(ray);
       if(currIntersectionInfo.getTime() >= 0 && currIntersectionInfo.getTime() <minTime){

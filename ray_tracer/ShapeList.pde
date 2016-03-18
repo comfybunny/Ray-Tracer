@@ -61,4 +61,8 @@ public class ShapeList extends Shape{
   public ArrayList<Shape> getShapes(){
     return shapes;
   }
+  
+  public void addShape(Shape shape){
+    shapes.add(shape);
+  }
 }

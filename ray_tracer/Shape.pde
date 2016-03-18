@@ -32,4 +32,12 @@ public abstract class Shape{
   public IntersectionObject intersectPrint(Ray ray){
     return null;
   }
+  
+  public float P0X(){
+    return -100;
+  }
+  public float P1X(){
+    return -100;
+  }
+  
 }

@@ -79,4 +79,12 @@ public class Triangle extends Shape {
   public Point getCentroid(){
     return new Point((P0.getX() + P1.getX() + P2.getX())/3.0, (P0.getY() + P1.getY() + P2.getY())/3.0, (P0.getZ() + P1.getZ() + P2.getZ())/3.0);
   }
+  
+  public float P0X(){
+    return P0.x;
+  }
+  
+  public float P1X(){
+    return P1.x;
+  }
 }

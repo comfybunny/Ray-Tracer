@@ -77,8 +77,15 @@ public class BVH extends Shape{
         Shape theShape = null;
         float minTime = MAX_FLOAT;
         IntersectionObject intersectionInfo = null;
+        println("NUM SHAPES: " + shapes.size());
         for(Shape a : shapes){
-          IntersectionObject currIntersectionInfo = a.intersects(tempRay);
+          if(a.getClass().equals(Triangle.class)){
+            println();
+            println(tempRay.debug());
+          }
+          IntersectionObject currIntersectionInfo = ((Triangle)a).intersects(tempRay);
+          println(currIntersectionInfo.getTime());
+          println(a.debug());
           if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < minTime){
             theShape = a;
             minTime = currIntersectionInfo.getTime();
@@ -145,7 +152,8 @@ public class BVH extends Shape{
   }
   
   public void balance(){
-    if(shapes.size() > 16){
+    int shapeSize = shapes.size();
+    if(shapeSize > 2){
       float x_range = box.xmax - box.xmin;
       float y_range = box.ymax - box.ymin;
       float z_range = box.zmax - box.zmin;
@@ -155,7 +163,7 @@ public class BVH extends Shape{
       ArrayList<Shape> right = new ArrayList<Shape>();
       BVH leftBVH = null;
       BVH rightBVH = null;
-      int shapeSize = shapes.size();
+      
       // println("SHAPE SIZE: " + shapeSize);
       ArrayList<Float> xs = new ArrayList<Float>();
       ArrayList<Float> ys = new ArrayList<Float>();
@@ -170,34 +178,32 @@ public class BVH extends Shape{
       Collections.sort(ys);
       Collections.sort(zs);
       if(x_range == max(x_range, y_range, z_range)){
-        float centroid = xs.get(xs.size()/2);
+        float centroid = xs.get(shapeSize/2);
         
         for(int i=0; i<shapeSize; i++){
-          if(shapes.get(0).getCentroid().getX() < centroid){
+          Triangle curr = (Triangle)shapes.remove(0);
+          if(curr.getCentroid().getX() < centroid){
             if(leftBVH == null){
-              leftBVH = new BVH(left, shapes.get(0).minPoint(), shapes.get(0).maxPoint());
+              leftBVH = new BVH(left, curr.minPoint(), curr.maxPoint());
             }
             else{
-              leftBVH.includePoint(shapes.get(0).minPoint(), shapes.get(0).maxPoint());
+              leftBVH.includePoint(curr.minPoint(), curr.maxPoint());
             }
-            left.add(shapes.get(0));
-            shapes.remove(0);
+            left.add(curr);
           }
           else{
             if(rightBVH == null){
-              rightBVH = new BVH(right, shapes.get(0).minPoint(), shapes.get(0).maxPoint());
+              rightBVH = new BVH(right, curr.minPoint(), curr.maxPoint());
             }
             else{
-              rightBVH.includePoint(shapes.get(0).minPoint(), shapes.get(0).maxPoint());
+              rightBVH.includePoint(curr.minPoint(), curr.maxPoint());
             }
-            right.add(shapes.get(0));
-            shapes.remove(0);
+            right.add(curr);
           }
         }
-        
       }
       else if(y_range == max(x_range, y_range, z_range)){
-        float centroid = ys.get(ys.size()/2);;
+        float centroid = ys.get(shapeSize/2);;
         
         for(int i=0; i<shapeSize; i++){
           if(shapes.get(0).getCentroid().getY() < centroid){
@@ -223,7 +229,7 @@ public class BVH extends Shape{
         }
       }
       else{
-        float centroid = zs.get(zs.size()/2);
+        float centroid = zs.get(shapeSize/2);
         
         for(int i=0; i<shapeSize; i++){
           if(shapes.get(0).getCentroid().getZ() < centroid){
