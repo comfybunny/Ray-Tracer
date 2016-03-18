@@ -15,17 +15,6 @@ point_light -3 4  0  .2 .2 .2
 
 diffuse  .8 .8 .8  .2 .2 .2
 
-begin
-vertex -100 -1 -100
-vertex  100 -1 -100
-vertex  100 -1  100
-end
-
-begin
-vertex  100 -1  100
-vertex -100 -1  100
-vertex -100 -1 -100
-end
 
 # the bunny
 

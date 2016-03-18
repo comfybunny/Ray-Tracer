@@ -213,7 +213,7 @@ void interpreter(String filename) {
         ArrayList<Shape> allObjects = currentScene.getAllObjects();
         int begin_list_index = currentScene.getListStartIndex();
         int end_list_index = currentScene.numberOfObjects();
-        Box box = new Box(allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
+        Box box = new Box(allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint(), currSurface);
         //BVH bvh = new BVH(shapeListObjects, allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
         for(int currShapeIndex = begin_list_index; currShapeIndex < end_list_index; currShapeIndex++){
           box.includePoint(allObjects.get(begin_list_index).minPoint(), allObjects.get(begin_list_index).maxPoint());
@@ -221,6 +221,7 @@ void interpreter(String filename) {
           allObjects.remove(begin_list_index);
         }
         Grids grid = new Grids(shapeListObjects, box);
+        
         
         currentScene.addShape(grid);
         println("YIPPIIEEE");
@@ -311,10 +312,7 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
         printer = true;
         println("X: " + x + "\tY: " + y);
         println();
-        println();
-        println();
-        IntersectionObject meow = a.intersects(ray);
-        println(meow.getIntersectionPoint().toString());
+        
       }
       IntersectionObject currIntersectionInfo = a.intersects(ray);
       if(currIntersectionInfo.getTime() >= 0 && currIntersectionInfo.getTime() <minTime){
@@ -323,7 +321,7 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
       }
     }
   }
-  
+  printer = false;
   Shape firstShape;
   
   if(intersectionInfo!=null){

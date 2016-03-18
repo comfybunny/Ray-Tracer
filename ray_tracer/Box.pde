@@ -40,6 +40,17 @@ public class Box extends Shape{
     zmax = max.getZ();
   }
   
+  public Box(Point min, Point max, Surface currSurface){
+    xmin = min.getX();
+    xmax = max.getX();
+    ymin = min.getY();
+    ymax = max.getY();
+    zmin = min.getZ();
+    zmax = max.getZ();
+    addSurface(currSurface);
+    
+  }
+  
   public IntersectionObject intersects(Ray tempRay){
     PVector direction = tempRay.getDirection();
     Point origin = tempRay.getOrigin();

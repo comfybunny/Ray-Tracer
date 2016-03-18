@@ -1,9 +1,9 @@
 import java.lang.Math.*;
+
 public class Grids extends Shape{
   
   ShapeList[][][] grid;
   Box box;
-  
   float delta_x;
   float delta_y;
   float delta_z;
@@ -18,91 +18,83 @@ public class Grids extends Shape{
     this.box = box;
     int sideLength = (int)Math.cbrt(shapes.size()/2);
     
-    float delta_x = (box.xmax-box.xmin)/(float)sideLength;
-    float delta_y = (box.ymax-box.ymin)/(float)sideLength;
-    float delta_z = (box.zmax-box.zmin)/(float)sideLength;
-
+    float cell_x = (box.xmax-box.xmin)/(float)sideLength;
+    float cell_y = (box.ymax-box.ymin)/(float)sideLength;
+    float cell_z = (box.zmax-box.zmin)/(float)sideLength;
+    
+    delta_x = cell_x;
+    delta_y = cell_y;
+    delta_z = cell_z;
+    
+    boolean setX = true;
+    boolean setY = true;
+    boolean setZ = true;
+    
     grid = new ShapeList[sideLength][sideLength][sideLength];
     for(int i=0; i<shapes.size(); i++){
       Point minPoint = shapes.get(i).minPoint();
       Point maxPoint = shapes.get(i).maxPoint();
-      
       float xmin = 0;
       float xmax = 0;
       float ymin = 0;
       float ymax = 0;
       float zmin = 0;
       float zmax = 0;
-      
-      for(float x = box.xmin; x <=box.xmax; x+=delta_x){
-        println("x ITERATE" + x);
-        if(minPoint.getX() <= x){
-          xmin = x-delta_x;
-          break;
+      for(float x = box.xmin; x <=box.xmax; x+=cell_x){
+        if(minPoint.getX() >= x && setX){
+          xmin = x;
+          setX = false;
         }
-      }
-      for(float x = box.xmin; x <=box.xmax; x += delta_x){
-        
         if(maxPoint.getX() <= x){
           xmax = x;
           break;
         }
       }
-      for(float y = box.ymin; y <=box.ymax; y+=delta_y){
-        if(minPoint.getY() <= y){
-          ymin = y-delta_y;
-          break;
+      for(float y = box.ymin; y <= box.ymax; y+=cell_y){
+        if(minPoint.getY() >= y && setY){
+          ymin = y;
+          setY = false;
         }
-      }
-      for(float y = box.ymin; y <=box.ymax; y += delta_y){
         if(maxPoint.getY() <= y){
           ymax = y;
           break;
         }
       }
-      for(float z = box.zmax; z >=box.zmin; z-=delta_z){
-        if(minPoint.getZ() >= z){
-          zmin = z;
+      for(float z = box.zmin; z <= box.zmax; z+=cell_z){
+        if(minPoint.getZ() >= z && setZ){
+          zmin = z + cell_z;
+          setZ = false;
+        }
+        if(maxPoint.getZ() <= z){
+          zmax = z;
           break;
         }
       }
-      for(float z = box.zmax; z >=box.zmin; z -= delta_z){
-        if(maxPoint.getZ() >= z){
-          zmax = z+delta_z;
-          break;
-        }
+      if(printer){
+        println(xmin);
+        println(xmax);
+        println(ymin);
+        println(ymax);
+        println(zmin);
+        println(zmax);
       }
-      
-      for(float a = xmin; a < xmax; a += delta_x){
-        for(float b = ymin; b < ymax; b += delta_y){
-          for(float c = zmax; c > zmin; c -= delta_z){
-            println(a);
-            println(b);
-            println(c);
-            println(box.debug());
-            println(delta_x);
-            println(delta_y);
-            println(delta_z);
-            println(((a-box.xmin)/delta_x));
-            println(((b-box.ymin)/delta_y));
-            println(((box.zmax-c)/delta_z));
-            println(minPoint.toString());
-            println(maxPoint.toString());
-            ShapeList currGrid = grid[(int)((a-box.xmin)/delta_x)][(int)((b-box.ymin)/delta_y)][(int)((box.zmax-c)/delta_z)];
-            if(currGrid == null){
-              //println("A THING");
-              currGrid = new ShapeList(shapes.get(i));
+      for(float a = xmin; a < xmax; a += cell_x){
+        for(float b = ymin; b < ymax; b += cell_y){
+          for(float c = zmax; c > zmin; c -= cell_z){
+            ShapeList currGrid = 
+            if(grid[(int)((a-xmin)/cell_x)][(int)((b-ymin)/cell_y)][(int)((c-zmin)/cell_z)] == null){
+              println("A THING");
+              grid[(int)((a-xmin)/cell_x)][(int)((b-ymin)/cell_y)][(int)((c-zmin)/cell_z)] = new ShapeList(shapes.get(i));
             }
             else{
-              currGrid.addShape(shapes.get(i));
+              grid[(int)((a-xmin)/cell_x)][(int)((b-ymin)/cell_y)][(int)((c-zmin)/cell_z)].addShape(shapes.get(i));
             }
-
           }
         }
       }
+      
     }
   }
-  
   public String debug(){
     return "GRID";
   }
