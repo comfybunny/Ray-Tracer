@@ -22,7 +22,7 @@ Scene currentScene;
 Surface currSurface;
 
 void setup(){
-  size (300, 300);  // use P3D environment so that matrix commands work properly
+  size (600, 600);  // use P3D environment so that matrix commands work properly
   noStroke();
   colorMode (RGB, 1.0);
   background (0, 0, 0);
@@ -221,9 +221,9 @@ void interpreter(String filename) {
           shapeListObjects.add(allObjects.get(begin_list_index));
           allObjects.remove(begin_list_index);
         }
-        Grids grid = new Grids(shapeListObjects, box);
+        //Grids grid = new Grids(shapeListObjects, box);
         
-        bvh.balance();
+        bvh.balance(0);
         currentScene.addShape(bvh);
         
         //currentScene.addShape(grid);
@@ -233,21 +233,26 @@ void interpreter(String filename) {
         currentScene.addShape(bvh);
         
         
+        **/
+        
         int counter = 0;
         ArrayList<BVH> bfq = new ArrayList<BVH>();
+        //BVH what = null;
         bfq.add(bvh);
         while(bfq.size() > 0){
           BVH temp = bfq.remove(0);
+          //println(temp.getSize());
           if(temp.getSize() != 0){
-            counter += temp.getSize();
-            for(Shape a : temp.getShapes()){
-              if(a.P0X() == 0.0608976 && a.P1X() == 0.113795){
-                println(temp.getBox().debug());
-              }
+            ArrayList<Shape> shapes = temp.getShapes();
+            for(int s=0; s < shapes.size(); s++){
+              //if(shapes.get(s).P0X() == -0.0361699 && shapes.get(s).P1X() == 0.0779682){
+              //  what = temp;
+              //}
             }
+            counter += temp.getSize();
           }
           else{
-            if(temp.getRight()!=null){
+            if(temp.getLeft()!=null){
               bfq.add(temp.getLeft());
             }
             if(temp.getRight()!=null){
@@ -256,7 +261,18 @@ void interpreter(String filename) {
           }
         }
         println("COUNTER: " + counter);
-        **/
+        
+        //if(what != null){
+        //  println("FOUND TRIANGLE");
+        //  println(what.getBox().debug());
+        //  while(what.getParentBVH()!=null){
+        //    what = what.getParentBVH();
+        //    println("PARENT TRIANGLE");
+        //    println(what.getBox().debug());
+        //  }
+        //}
+        
+        
     }
       
       else if (token[0].equals("rays_per_pixel")){
@@ -311,12 +327,12 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
 
   for(Shape a : allObjects){
     if(lastHit != a){
-      //if((x==159 && y==195) || (x==162 && y==201)){
-      //  printer = true;
+      if((x==151 && y==181)){
+       //printer = true;
       //  println("X: " + x + "\tY: " + y);
-      //  println();
-        
-      //}
+       println("a shape thing here ~~~~~~~~~~~");
+      //a.intersectPrint(ray);
+      }
       IntersectionObject currIntersectionInfo = a.intersects(ray);
       if(currIntersectionInfo.getTime() >= 0 && currIntersectionInfo.getTime() <minTime){
         minTime = currIntersectionInfo.getTime();
@@ -328,6 +344,11 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
   Shape firstShape;
   
   if(intersectionInfo!=null){
+    if(x==151 && y==181){
+      //println(intersectionInfo.getShape().getClass());
+      //println(intersectionInfo.getShape().debug());
+      //println(intersectionInfo.getIntersectionPoint().toString());
+    }
     firstShape = intersectionInfo.getShape();
     Surface currentShapeSurface = firstShape.getSurface();
     Color diffuseColor = currentShapeSurface.getDiffuseColor();

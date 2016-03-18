@@ -3,13 +3,15 @@ import java.util.Collections;
 public class BVH extends Shape{
   
   private ArrayList<Shape> shapes;
+  private int size;
   private Box box;
-  private BVH leftChild = null;
-  private BVH rightChild = null;
+  private Shape leftChild = null;
+  private Shape rightChild = null;
   
   public BVH(ArrayList<Shape> shapes, Point min, Point max){
     box = new Box(min, max);
     this.shapes = shapes;
+    size = shapes.size();
   }
   
   public IntersectionObject intersects(Ray tempRay){
@@ -151,16 +153,15 @@ public class BVH extends Shape{
   }
   
   public void balance(int axis){
-    int size = shapes.size();
+    if(size > 0){
     
-    if(size > 32){
+      Shape leftShape = null;
+      Shape rightShape = null;
       ArrayList<Shape> leftArray = new ArrayList<Shape>();
       ArrayList<Shape> rightArray = new ArrayList<Shape>();
-      
       float centroid_x = (box.xmin+box.xmax)/2.0;
       float centroid_y = (box.ymin+box.ymax)/2.0;
       float centroid_z = (box.zmin+box.zmax)/2.0;
-      
       
       for(int i=0; i<size; i++){
         
@@ -168,56 +169,19 @@ public class BVH extends Shape{
         Point centroid = curr.getCentroid();
         
         if(axis == 0){
-          if(centroid.getX() < centroid_x){
-            leftArray.add(curr);
-          }
-          else{
-            rightArray.add(curr);
-          }
+          
         }
         else if(axis == 1){
-          if(centroid.getY() < centroid_y){
-            leftArray.add(curr);
-          }
-          else{
-            rightArray.add(curr);
-          }
         }
         else if(axis == 2){
-          if(centroid.getZ() < centroid_z){
-            leftArray.add(curr);
-          }
-          else{
-            rightArray.add(curr);
-          }
         }
         else{
           println("BAD AXIS");
         }
-        
       }
       
       if(shapes.size() != 0){
         println("YOU DONE GOOFED");
-      }
-      
-      int leftArraySize = leftArray.size();      
-      if(leftArraySize > 0){
-        leftChild = new BVH(leftArray, leftArray.get(0).minPoint(), leftArray.get(0).maxPoint());
-        for(int q = 1; q < leftArraySize; q++){
-          leftChild.includePoint(leftArray.get(q).minPoint(), leftArray.get(q).maxPoint());
-        }
-        leftChild.balance((axis+1)%3);
-      }
-      
-      int rightArraySize = rightArray.size();
-      if(rightArraySize > 0){
-        rightChild = new BVH(rightArray, rightArray.get(0).minPoint(), rightArray.get(0).maxPoint());
-        for(int q = 1; q < rightArraySize; q++){
-          //println("q: " + q + "\trightArraySize: " + rightArraySize);
-          rightChild.includePoint(rightArray.get(q).minPoint(), rightArray.get(q).maxPoint());
-        }
-        rightChild.balance((axis+1)%3);
       }
     }
     
@@ -235,11 +199,11 @@ public class BVH extends Shape{
     return "I AM A BVH";
   }
   
-  public BVH getLeft(){
+  public Shape getLeft(){
     return leftChild;
   }
   
-  public BVH getRight(){
+  public Shape getRight(){
     return rightChild;
   }
 

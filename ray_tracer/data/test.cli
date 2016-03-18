@@ -65,43 +65,51 @@ translate 1.5 1 0
 sphere 0.3  0 0 0
 pop
 
+
+
+
+
+
+
+
+
 push
-translate -1.5 -.1 0
+translate -1.5 -.1 -1
 sphere 0.3  0 0 0
 pop
 
 push
-translate -.5 -.1 0
+translate -.5 -.1 -1
 sphere 0.3  0 0 0
 pop
 
 push
-translate .5 -.1 0
+translate .5 -.1 -1
 sphere 0.3  0 0 0
 pop
 
 push
-translate 1.5 -.1 0
+translate 1.5 .3 -1.5
 sphere 0.3  0 0 0
 pop
 
 push
-translate -1.5 .1 0
+translate -1.5 .1 -1
 sphere 0.3  0 0 0
 pop
 
 push
-translate -.5 .1 0
+translate -.5 .1 -1
 sphere 0.3  0 0 0
 pop
 
 push
-translate .5 .1 0
+translate .5 .1 -1
 sphere 0.3  0 0 0
 pop
 
 push
-translate 1.5 .5 0
+translate 1.5 .5 -1
 sphere 0.3  0 0 0
 pop
 
