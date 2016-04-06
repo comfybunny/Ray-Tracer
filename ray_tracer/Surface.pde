@@ -6,10 +6,14 @@ public class Surface{
   private float reflectiveCoefficient;
   private float refractiveCoefficient;
   private float indexOfRefraction;
+  private int noise;
+  ProceduralTexture texture;
   
   public Surface(Color diffuseColor, Color ambientColor){
     this.diffuseColor = diffuseColor;
     this.ambientColor = ambientColor;
+    noise = 0;
+    texture = NO_NOISE;
   }
   public Surface(Color diffuseColor, Color ambientColor, Color specularColor, 
                   float specularHighlightExponent, float reflectiveCoefficient, float refractiveCoefficient, float indexOfRefraction){
@@ -21,6 +25,7 @@ public class Surface{
     this.reflectiveCoefficient = reflectiveCoefficient;
     this.refractiveCoefficient = refractiveCoefficient;
     this.indexOfRefraction = indexOfRefraction;
+    noise = 0;
   }
   
   public Color getDiffuseColor(){
@@ -55,4 +60,17 @@ public class Surface{
     return diffuseColor.toString();
   }
   
+  public void setNoise(int noise){
+    this.noise = noise;
+  }
+  
+  public int getNoise(){
+    return noise;
+  }
+  
+  
+}
+
+public enum ProceduralTexture{
+  NOISE, NO_NOISE, WOOD, MARBLE, STONE;
 }

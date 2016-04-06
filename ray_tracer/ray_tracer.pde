@@ -22,12 +22,12 @@ Scene currentScene;
 Surface currSurface;
 
 void setup(){
-  size (600, 600);  // use P3D environment so that matrix commands work properly
+  size (300, 300);  // use P3D environment so that matrix commands work properly
   noStroke();
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t08.cli");
+  interpreter("t01.cli");
   
 }
 
@@ -234,22 +234,16 @@ void interpreter(String filename) {
         
         
         **/
-        
+        println("yay?");
         int counter = 0;
-        ArrayList<BVH> bfq = new ArrayList<BVH>();
+        ArrayList<Shape> bfq = new ArrayList<Shape>();
         //BVH what = null;
         bfq.add(bvh);
         while(bfq.size() > 0){
-          BVH temp = bfq.remove(0);
+          Shape temp = bfq.remove(0);
           //println(temp.getSize());
-          if(temp.getSize() != 0){
-            ArrayList<Shape> shapes = temp.getShapes();
-            for(int s=0; s < shapes.size(); s++){
-              //if(shapes.get(s).P0X() == -0.0361699 && shapes.get(s).P1X() == 0.0779682){
-              //  what = temp;
-              //}
-            }
-            counter += temp.getSize();
+          if(!temp.getClass().equals(BVH.class)){
+            counter += 1;
           }
           else{
             if(temp.getLeft()!=null){
@@ -272,8 +266,11 @@ void interpreter(String filename) {
         //  }
         //}
         
-        
-    }
+      }
+      
+      else if(token[0].equals("noise")){
+        currSurface.setNoise(Integer.parseInt(token[1]));
+      }
       
       else if (token[0].equals("rays_per_pixel")){
         currentScene.setRaysPerPixel(Integer.parseInt(token[1]));
@@ -327,12 +324,6 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
 
   for(Shape a : allObjects){
     if(lastHit != a){
-      if((x==151 && y==181)){
-       //printer = true;
-      //  println("X: " + x + "\tY: " + y);
-       println("a shape thing here ~~~~~~~~~~~");
-      //a.intersectPrint(ray);
-      }
       IntersectionObject currIntersectionInfo = a.intersects(ray);
       if(currIntersectionInfo.getTime() >= 0 && currIntersectionInfo.getTime() <minTime){
         minTime = currIntersectionInfo.getTime();
@@ -363,7 +354,6 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
     PVector firstShapeSurfaceNormal = intersectionInfo.getSurfaceNormal();
     firstShapeSurfaceNormal.div(firstShapeSurfaceNormal.mag());
     
-    /**
     // if reflective then recurse
     if(firstShape.getSurface().getReflectiveCoefficient() > 0){
      PVector babyRay = intersectionPoint.subtract(origin);
@@ -378,7 +368,6 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
      returnColor.multiply(firstShape.getSurface().getReflectiveCoefficient());
      totalColor.add(returnColor);
     }
-    **/
       
     ArrayList<Light> lights = currentScene.getLights();
     // assuming no refraction for now
@@ -398,7 +387,13 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
       }
       float diffuse = max(0, lightAndShapeNormalAlignment);
       Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
-
+      
+      if(firstShape.getSurface().getNoise() != 0){
+        float scalarNoise = firstShape.getSurface().getNoise();
+        float noise = (1.0 + noise_3d(intersectionPoint.getX()*scalarNoise, intersectionPoint.getY()*scalarNoise, intersectionPoint.getZ()*scalarNoise))/2.0;
+        diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse*noise, diffuseColor.getG()*diffuse*noise, diffuseColor.getB()*diffuse*noise);
+      }
+      
       // shading stuff below
       float distLightToBlocker = 0;
       float shadeTime = MAX_FLOAT;

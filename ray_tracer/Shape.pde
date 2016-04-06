@@ -40,4 +40,28 @@ public abstract class Shape{
     return -100;
   }
   
+  public void includePoint(Point min, Point max){
+  }
+  
+  public void balance(int lols){
+  }
+  
+  public Box getBox(){
+    return null;
+  }
+  
+  public int getSize(){
+    return 0;
+  }
+  
+  public ArrayList<Shape> getShapes(){
+    return null;
+  }
+  
+  public Shape getLeft(){
+    return null;
+  }
+  public Shape getRight(){
+    return null;
+  }
 }

@@ -10,7 +10,6 @@ public class Scene{
   private MatrixStack stack;
   private HashMap<String, Shape> named_objects;
   private int start_list;
-  
   private int rays_per_pixel;
     
   public Scene(){

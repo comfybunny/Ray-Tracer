@@ -72,5 +72,7 @@ public class Sphere extends Shape {
   public Point maxPoint(){
     return new Point(location.getX()+radius, location.getY()+radius, location.getZ()+radius);
   }
+  
+  
 
 }
