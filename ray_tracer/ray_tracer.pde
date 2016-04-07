@@ -420,11 +420,12 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
         float _y = intersectionPoint.getY()*1.5*2;
         float _z = intersectionPoint.getZ()*1.5*2;
         
-        float turb = 15.0; //makes twists
-        float xyValue = x / 255.0 + y / 255.0 + (turb * turbulence(_x, _y, _z, 8.0)) / 255.0;
-        float c = 90.0*abs(sin(xyValue*PI/2.0));
+        //float turb = 15.0; //makes twists
+        //float xyValue = x / 255.0 + y / 255.0 + (turb * turbulence(_x, _y, _z, 8.0)) / 255.0;
+        //float c = 90.0*abs(sin(xyValue*PI/2.0));
         //float c = 180.0*abs(sin(_x+turbulence(_x,_y,_z,30.0)));
-        diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*(100 + c)/255.0, diffuseSurfaceColor.getG()*(100 + c)/255.0, diffuseSurfaceColor.getB()*(100 + c)/255.0);
+        float c = abs(sin(_x + turbulence(_x, _y, _z, 8.0)))*255;
+        diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*(50 + c)/255.0, diffuseSurfaceColor.getG()*(50 + c)/255.0, diffuseSurfaceColor.getB()*(50 + c)/255.0);
                 
       }
       

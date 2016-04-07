@@ -120,10 +120,9 @@ double fade(double t) {
 
 float turbulence(float x, float y, float z, float size){
   float value = 0.0;
-  float initSize = size;
   while(size >= 1){
     value += abs(noise_3d(x/size, y/size, z/size))*size;
     size /= 2.0;
   }
-  return (128*value/initSize);
+  return value;
 }
