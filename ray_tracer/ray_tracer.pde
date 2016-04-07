@@ -27,7 +27,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t01.cli");
+  interpreter("t03.cli");
   
 }
 
@@ -270,6 +270,15 @@ void interpreter(String filename) {
       
       else if(token[0].equals("noise")){
         currSurface.setNoise(Integer.parseInt(token[1]));
+        currSurface.setTexture(ProceduralTexture.NOISE);
+      }
+      
+      else if(token[0].equals("wood")){
+        currSurface.setTexture(ProceduralTexture.WOOD);
+      }
+      
+      else if(token[0].equals("marble")){
+        currSurface.setTexture(ProceduralTexture.MARBLE);
       }
       
       else if (token[0].equals("rays_per_pixel")){
@@ -388,10 +397,39 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
       float diffuse = max(0, lightAndShapeNormalAlignment);
       Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
       
-      if(firstShape.getSurface().getNoise() != 0){
+      if(firstShape.getSurface().getTexture() == ProceduralTexture.NOISE){
         float scalarNoise = firstShape.getSurface().getNoise();
         float noise = (1.0 + noise_3d(intersectionPoint.getX()*scalarNoise, intersectionPoint.getY()*scalarNoise, intersectionPoint.getZ()*scalarNoise))/2.0;
-        diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse*noise, diffuseColor.getG()*diffuse*noise, diffuseColor.getB()*diffuse*noise);
+        diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*noise, diffuseSurfaceColor.getG()*noise, diffuseSurfaceColor.getB()*noise);
+      }
+      else if(firstShape.getSurface().getTexture() == ProceduralTexture.WOOD){
+        float _x = intersectionPoint.getX()*1.5*2;
+        float _y = intersectionPoint.getY()*1.5*2;
+        float _z = intersectionPoint.getZ()*1.5*2;
+
+        float turbPow = 3.0;
+        float turbSize = 8.0;
+        
+        float distVal = sqrt(_x*_x + _y*_y) + turbPow*turbulence(_x, _y, _z, turbSize)/256.0;
+        float sinVal = 128.0*abs(sin(1.3*distVal*PI));
+        diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*(80 + sinVal)/255.0, diffuseSurfaceColor.getG()*(30 + sinVal)/255.0, diffuseSurfaceColor.getB()*(30)/255.0);
+      }
+      
+      else if(firstShape.getSurface().getTexture() == ProceduralTexture.MARBLE){
+        float _x = intersectionPoint.getX()*1.5*2;
+        float _y = intersectionPoint.getY()*1.5*2;
+        float _z = intersectionPoint.getZ()*1.5*2;
+        
+        float turb = 15.0; //makes twists
+        float xyValue = x / 255.0 + y / 255.0 + (turb * turbulence(_x, _y, _z, 8.0)) / 255.0;
+        float c = 90.0*abs(sin(xyValue*PI/2.0));
+        //float c = 180.0*abs(sin(_x+turbulence(_x,_y,_z,30.0)));
+        diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*(100 + c)/255.0, diffuseSurfaceColor.getG()*(100 + c)/255.0, diffuseSurfaceColor.getB()*(100 + c)/255.0);
+                
+      }
+      
+      else if(firstShape.getSurface().getTexture() == ProceduralTexture.STONE){
+      
       }
       
       // shading stuff below
@@ -438,13 +476,6 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
     
   }
   else{
-    /**
-    if(x == debug_x && y == debug_y){
-      println("no intersection");
-      IntersectionObject intersection = allObjects.get(0).intersectPrint(ray);
-      println("intersection after \t" + intersection.getShape().debug());
-    }
-    **/
     return new Color(currentScene.getBackground().getR(), currentScene.getBackground().getG(), currentScene.getBackground().getB());
   }
   
