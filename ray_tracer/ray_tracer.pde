@@ -6,6 +6,7 @@ import java.util.List;
 //
 ///////////////////////////////////////////////////////////////////////
 
+
 PrintWriter output = createWriter("C:\\Users\\comfybunny\\Documents\\Ray Tracer\\ray_tracer\\debugger.txt");
 boolean printer = false;
 int debug_x = 190;
@@ -22,7 +23,7 @@ Scene currentScene;
 Surface currSurface;
 
 void setup(){
-  size (300, 300);  // use P3D environment so that matrix commands work properly
+  size (600, 600);  // use P3D environment so that matrix commands work properly
   noStroke();
   colorMode (RGB, 1.0);
   background (0, 0, 0);
@@ -281,6 +282,10 @@ void interpreter(String filename) {
         currSurface.setTexture(ProceduralTexture.MARBLE);
       }
       
+      else if(token[0].equals("stone")){
+        currSurface.setTexture(ProceduralTexture.STONE);
+      }
+      
       else if (token[0].equals("rays_per_pixel")){
         currentScene.setRaysPerPixel(Integer.parseInt(token[1]));
       }
@@ -344,11 +349,7 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
   Shape firstShape;
   
   if(intersectionInfo!=null){
-    if(x==151 && y==181){
-      //println(intersectionInfo.getShape().getClass());
-      //println(intersectionInfo.getShape().debug());
-      //println(intersectionInfo.getIntersectionPoint().toString());
-    }
+    
     firstShape = intersectionInfo.getShape();
     Surface currentShapeSurface = firstShape.getSurface();
     Color diffuseColor = currentShapeSurface.getDiffuseColor();
@@ -358,6 +359,7 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
       totalColor.add(ambientColor);
     }
     Point intersectionPoint = intersectionInfo.getIntersectionPoint();
+    
     
     // Point intersectionPoint = ray.hitPoint(minTime);
     PVector firstShapeSurfaceNormal = intersectionInfo.getSurfaceNormal();
@@ -407,10 +409,7 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
         float _y = intersectionPoint.getY()*1.5*2;
         float _z = intersectionPoint.getZ()*1.5*2;
 
-        float turbPow = 3.0;
-        float turbSize = 8.0;
-        
-        float distVal = sqrt(_x*_x + _y*_y) + turbPow*turbulence(_x, _y, _z, turbSize)/256.0;
+        float distVal = sqrt(_x*_x + _y*_y) + 3.0*wood(_x, _y, _z, 8.0)/256.0;
         float sinVal = 128.0*abs(sin(1.3*distVal*PI));
         diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*(80 + sinVal)/255.0, diffuseSurfaceColor.getG()*(30 + sinVal)/255.0, diffuseSurfaceColor.getB()*(30)/255.0);
       }
@@ -420,17 +419,71 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
         float _y = intersectionPoint.getY()*1.5*2;
         float _z = intersectionPoint.getZ()*1.5*2;
         
-        //float turb = 15.0; //makes twists
-        //float xyValue = x / 255.0 + y / 255.0 + (turb * turbulence(_x, _y, _z, 8.0)) / 255.0;
-        //float c = 90.0*abs(sin(xyValue*PI/2.0));
-        //float c = 180.0*abs(sin(_x+turbulence(_x,_y,_z,30.0)));
-        float c = abs(sin(_x + turbulence(_x, _y, _z, 8.0)))*255;
+        float c = abs(sin(_x + turbulence(_x, _y, _z, 32.0)))*255;
         diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*(50 + c)/255.0, diffuseSurfaceColor.getG()*(50 + c)/255.0, diffuseSurfaceColor.getB()*(50 + c)/255.0);
-                
       }
       
       else if(firstShape.getSurface().getTexture() == ProceduralTexture.STONE){
-      
+        float _x = intersectionPoint.getX();
+        float _y = intersectionPoint.getY();
+        float _z = intersectionPoint.getZ();
+        
+        int floor_x = floor(_x);
+        int floor_y = floor(_y);
+        int floor_z = floor(_z);
+        
+        long poor_hash = 541*floor_x + 79*floor_y + 31*floor_z;
+        randomSeed(poor_hash);
+        
+        float feature_num = random(1);
+        
+        float k = 2.5; // average number features per cell
+        int feature = 0;
+        double cumulative_prob = 1.0/Math.E;
+        while(feature_num > cumulative_prob){
+          feature += 1;
+          float m = feature;
+          for(int a=feature-1; a > 1; a--){
+            m*=a;
+          }
+          cumulative_prob+=pow(k,feature)/(pow((float)Math.E,k)*m);
+        }
+        
+        randomSeed(poor_hash);
+        
+        // Find the feature point closest to the evaluation point
+        float closest_distance = Float.POSITIVE_INFINITY;
+        // check all neighboring cells
+        for (int xx = -1; xx <= 1; xx++){
+          for (int yy = -1; yy <=1; yy++){
+            for (int zz = -1; zz <=1; zz++){
+              randomSeed(541*(floor_x+xx) + 79*(floor_y+yy) + 31*(floor_z+zz));
+              feature = 0;
+              cumulative_prob = 1.0/Math.E;
+              float num_feature = random(1);
+              while(num_feature > cumulative_prob){
+                feature += 1;
+                float m = feature;
+                for(int a=feature-1; a > 1; a--){
+                  m*=a;
+                }
+                cumulative_prob+=pow(k,feature)/(pow((float)Math.E,k)*m);
+              }
+              
+              randomSeed(poor_hash);
+              for(int aa=0; aa<feature-1; aa++){
+                Point currPoint = new Point(random(1), random(1), random(1));
+                float currDist = currPoint.getX()*currPoint.getX() + currPoint.getY()*currPoint.getY() + currPoint.getZ()*currPoint.getZ();
+                if(currDist < closest_distance){
+                  closest_distance = currDist;
+                }
+              }
+              
+            }
+          }
+        }
+        
+        
       }
       
       // shading stuff below
