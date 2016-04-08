@@ -475,14 +475,17 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
             }
           }
         }
-        float scalarNoise = 1;
-        float noise = (((1.0 + noise_3d(intersectionPoint.getX()*scalarNoise, intersectionPoint.getY()*scalarNoise, intersectionPoint.getZ()*scalarNoise))/2.0)*0.05)+0.7;
+        float scalarNoise = 5;
+        float noise = (((1.0 + noise_3d(intersectionPoint.getX()*scalarNoise, intersectionPoint.getY()*scalarNoise, intersectionPoint.getZ()*scalarNoise))/2.0)*0.2);
+        
+        float crack_noise_scalar = 50;
+        float crack_noise = (((1.0 + noise_3d(intersectionPoint.getX()*crack_noise_scalar, intersectionPoint.getY()*crack_noise_scalar, intersectionPoint.getZ()*crack_noise_scalar))/2.0)*0.2);
         
         if(abs(f2-closest_distance) < 0.05){
-          diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*0.7*noise,diffuseSurfaceColor.getG()*0.7*noise,diffuseSurfaceColor.getB()*0.7*noise);
+          diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*(0.5+crack_noise),diffuseSurfaceColor.getG()*(0.5+crack_noise),diffuseSurfaceColor.getB()*(0.5+crack_noise));
         }
         else{
-          diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*(.7+closest_color.getR())*noise, diffuseSurfaceColor.getG()*(.4+closest_color.getG())*noise, diffuseSurfaceColor.getB()*(.4+closest_color.getB())*noise);
+          diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*(.7+closest_color.getR()+noise), diffuseSurfaceColor.getG()*(.4+closest_color.getG()+noise), diffuseSurfaceColor.getB()*(.4+closest_color.getB()+noise));
         }
       }
       
