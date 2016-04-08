@@ -28,7 +28,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t03.cli");
+  interpreter("t04.cli");
   
 }
 
@@ -432,10 +432,11 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
         int floor_y = floor(_y);
         int floor_z = floor(_z);
         
-        float k = 5; // average number features per cell
+        float k = 4; // average number features per cell
         
         int feature_count = 0;
         double cumulative_prob;
+        
         // Find the feature point closest to the evaluation point
         float closest_distance = Float.POSITIVE_INFINITY;
         Color closest_color = new Color();
@@ -446,20 +447,20 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
               randomSeed(541*(floor_x+xx) + 79*(floor_y+yy) + 31*(floor_z+zz));
               feature_count = 0;
               cumulative_prob = 1.0/Math.E;
-              float num_feature = random(1);
-              while(num_feature > cumulative_prob){
+              float feature_probability = random(1);
+              while(feature_probability > cumulative_prob){
                 feature_count += 1;
-                float m = feature_count;
-                for(int a=feature_count-1; a > 1; a--){
-                  m*=a;
-                }
-                cumulative_prob+=pow(k,feature_count)/(pow((float)Math.E,k)*m);
+                cumulative_prob+=pow(k,feature_count)/(float)((pow((float)Math.E,k)*factorial(feature_count)));
               }
-              
-              for(int aa=0; aa<feature_count-1; aa++){
+              feature_count -= 1;
+              if(feature_count < 1){
+                feature_count = 1;
+              }
+              for(int aa=0; aa<=feature_count; aa++){
                 Point currPoint = new Point(random(1), random(1), random(1));
                 Color temp_color = new Color(random(1), random(1), random(1));
-                float currDist = currPoint.getX()*currPoint.getX() + currPoint.getY()*currPoint.getY() + currPoint.getZ()*currPoint.getZ();
+                //float currDist = currPoint.getX()*currPoint.getX() + currPoint.getY()*currPoint.getY() + currPoint.getZ()*currPoint.getZ();
+                float currDist = pow((currPoint.getX()-_x),2) + pow((currPoint.getY()-_y),2) + pow((currPoint.getZ()-_z),2);
                 if(currDist < closest_distance){
                   closest_distance = currDist;
                   closest_color = temp_color;
@@ -469,7 +470,6 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
             }
           }
         }
-        
         diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*closest_color.getR(), diffuseSurfaceColor.getG()*closest_color.getG(), diffuseSurfaceColor.getB()*closest_color.getB());
         
       }

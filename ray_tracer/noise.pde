@@ -139,3 +139,11 @@ float turbulence(float x, float y, float z, float size){
   }
   return value;
 }
+
+long factorial(int m){
+  long total = 1;
+  for(int i=2; i<=m; i+=1){
+    total*=i;
+  }
+  return total;
+}
