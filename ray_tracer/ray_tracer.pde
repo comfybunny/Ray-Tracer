@@ -6,6 +6,7 @@ import java.util.List;
 //
 ///////////////////////////////////////////////////////////////////////
 
+float[] distribution = new float[10];
 
 PrintWriter output = createWriter("C:\\Users\\comfybunny\\Documents\\Ray Tracer\\ray_tracer\\debugger.txt");
 boolean printer = false;
@@ -284,6 +285,10 @@ void interpreter(String filename) {
       
       else if(token[0].equals("stone")){
         currSurface.setTexture(ProceduralTexture.STONE);
+        //distribution[0] = 1.0/(float)((pow((float)Math.E,4.0)));
+        //for(int iii=1; iii<10; iii++){
+        //  distribution[iii] = distribution[iii-1] + pow(4.0,iii)/(float)((pow((float)Math.E,4.0)*factorial(iii)));
+        //}
       }
       
       else if (token[0].equals("rays_per_pixel")){
@@ -434,44 +439,51 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
         
         float k = 4; // average number features per cell
         
-        int feature_count = 0;
-        double cumulative_prob;
-        
         // Find the feature point closest to the evaluation point
         float closest_distance = Float.POSITIVE_INFINITY;
+        float f2 = Float.POSITIVE_INFINITY;
         Color closest_color = new Color();
         // check all neighboring cells
         for (int xx = -1; xx <= 1; xx++){
           for (int yy = -1; yy <=1; yy++){
             for (int zz = -1; zz <=1; zz++){
-              randomSeed(541*(floor_x+xx) + 79*(floor_y+yy) + 31*(floor_z+zz));
-              feature_count = 0;
-              cumulative_prob = 1.0/Math.E;
+              int poor_hash = 541*(floor_x+xx) + 79*(floor_y+yy) + 31*(floor_z+zz);
+              randomSeed(poor_hash);
+              int feature_count = 0;
+              float cumulative_prob = 0;
               float feature_probability = random(1);
               while(feature_probability > cumulative_prob){
-                feature_count += 1;
                 cumulative_prob+=pow(k,feature_count)/(float)((pow((float)Math.E,k)*factorial(feature_count)));
+                feature_count += 1;
               }
-              feature_count -= 1;
-              if(feature_count < 1){
-                feature_count = 1;
-              }
+              //feature_count -= 1;
+              //if(feature_count < 2){
+              //  feature_count = 1;
+              //}
               for(int aa=0; aa<=feature_count; aa++){
-                Point currPoint = new Point(random(1), random(1), random(1));
-                Color temp_color = new Color(random(1), random(1), random(1));
-                //float currDist = currPoint.getX()*currPoint.getX() + currPoint.getY()*currPoint.getY() + currPoint.getZ()*currPoint.getZ();
-                float currDist = pow((currPoint.getX()-_x),2) + pow((currPoint.getY()-_y),2) + pow((currPoint.getZ()-_z),2);
+                Color temp_color = new Color(random(.3), random(.3), random(.3));
+                temp_color = new Color(random(.3), random(.3), random(.3));
+                Point currPoint = new Point(floor_x + xx + random(1), floor_y + yy + random(1), floor_z + zz + random(1));
+                
+                float currDist = pow((currPoint.getX()-(_x)),2) + pow((currPoint.getY()-(_y)),2) + pow((currPoint.getZ()-(_z)),2);
                 if(currDist < closest_distance){
+                  f2 = closest_distance;
                   closest_distance = currDist;
                   closest_color = temp_color;
                 }
               }
-              
             }
           }
         }
-        diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*closest_color.getR(), diffuseSurfaceColor.getG()*closest_color.getG(), diffuseSurfaceColor.getB()*closest_color.getB());
+        float scalarNoise = 1;
+        float noise = (((1.0 + noise_3d(intersectionPoint.getX()*scalarNoise, intersectionPoint.getY()*scalarNoise, intersectionPoint.getZ()*scalarNoise))/2.0)*0.05)+0.7;
         
+        if(abs(f2-closest_distance) < 0.05){
+          diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*0.7*noise,diffuseSurfaceColor.getG()*0.7*noise,diffuseSurfaceColor.getB()*0.7*noise);
+        }
+        else{
+          diffuseSurfaceColor = new Color(diffuseSurfaceColor.getR()*(.7+closest_color.getR())*noise, diffuseSurfaceColor.getG()*(.4+closest_color.getG())*noise, diffuseSurfaceColor.getB()*(.4+closest_color.getB())*noise);
+        }
       }
       
       // shading stuff below
