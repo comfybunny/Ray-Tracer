@@ -13,24 +13,60 @@ boolean printer = false;
 int debug_x = 190;
 int debug_y = 149;
 
-int screen_width = 300;
-int screen_height = 300;
+
 int timer = 0;
 int refine = 1;
 boolean refineBoolean = false;
+
+int screen_width = 850;
+int screen_height = 850;
+
+// debug drawing stuff
+int num_photons = 8000;    // number of photons to draw (small number)
+float photon_radius = 8;   // drawing of photons
+
+//int num_photons = 400000;   // number of photons to draw (large number)
+//float photon_radius = 2;    // drawing of photons
+
+float old_mouseX,old_mouseY;
+boolean first_draw = true;
+
+kd_tree photons;
+
 
 // Some initializations for the scene.
 Scene currentScene;
 Surface currSurface;
 
 void setup(){
-  size (300, 300);  // use P3D environment so that matrix commands work properly
+  size (850, 850);  // use P3D environment so that matrix commands work properly
   noStroke();
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t01.cli");
+  interpreter("t03.cli");
   
+  int i;
+  
+  // initialize kd-tree
+  photons = new kd_tree();
+  
+  // create random list of "photons"
+  for (i = 0; i < num_photons; i++) {
+    float x,y;
+    // pick random positions, with variable density in x
+    do {
+      x = random (0.0, screen_width);
+      y = random (0.0, screen_height);
+    } while (x > random (0.0, screen_width));
+    float z = 0.0;
+    Photon p = new Photon (x, y, z);
+    photons.add_photon (p);
+  }
+  
+  // build the kd-tree
+  photons.build_tree();
+  println ("finished building tree");
 }
 
 // Press key 1 to 9 and 0 to run different test cases.
@@ -110,6 +146,10 @@ void interpreter(String filename) {
                                   new Color(Float.parseFloat(token[4]), Float.parseFloat(token[5]), Float.parseFloat(token[6])),
                                   new Color(Float.parseFloat(token[7]), Float.parseFloat(token[8]), Float.parseFloat(token[9])),
                                   Float.parseFloat(token[10]), Float.parseFloat(token[11]), Float.parseFloat(token[12]), Float.parseFloat(token[13]));
+      }
+      else if(token[0].equals("reflective")){
+        currSurface = new Surface(new Color(Float.parseFloat(token[1]), Float.parseFloat(token[2]), Float.parseFloat(token[3])), 
+                                  new Color(Float.parseFloat(token[4]), Float.parseFloat(token[5]), Float.parseFloat(token[6])), Float.parseFloat(token[7]));
       }
       else if (token[0].equals("sphere")) {
         Point fileCenter = new Point(Float.parseFloat(token[2]), Float.parseFloat(token[3]), Float.parseFloat(token[4]));
@@ -227,15 +267,7 @@ void interpreter(String filename) {
         
         bvh.balance(0);
         currentScene.addShape(bvh);
-        
-        //currentScene.addShape(grid);
-        //println("add accel structure");
-        /**
-        bvh.balance();
-        currentScene.addShape(bvh);
-        
-        
-        **/
+
         println("yay?");
         int counter = 0;
         ArrayList<Shape> bfq = new ArrayList<Shape>();
@@ -258,15 +290,6 @@ void interpreter(String filename) {
         }
         println("COUNTER: " + counter);
         
-        //if(what != null){
-        //  println("FOUND TRIANGLE");
-        //  println(what.getBox().debug());
-        //  while(what.getParentBVH()!=null){
-        //    what = what.getParentBVH();
-        //    println("PARENT TRIANGLE");
-        //    println(what.getBox().debug());
-        //  }
-        //}
         
       }
       
@@ -285,10 +308,7 @@ void interpreter(String filename) {
       
       else if(token[0].equals("stone")){
         currSurface.setTexture(ProceduralTexture.STONE);
-        //distribution[0] = 1.0/(float)((pow((float)Math.E,4.0)));
-        //for(int iii=1; iii<10; iii++){
-        //  distribution[iii] = distribution[iii-1] + pow(4.0,iii)/(float)((pow((float)Math.E,4.0)*factorial(iii)));
-        //}
+
       }
       
       else if (token[0].equals("rays_per_pixel")){
@@ -360,9 +380,7 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
     Color diffuseColor = currentShapeSurface.getDiffuseColor();
     Color ambientColor = currentShapeSurface.getAmbientColor();
     Color tempSpecularColor = currentShapeSurface.getSpecularColor();
-    if(lastHit == null){
-      totalColor.add(ambientColor);
-    }
+    totalColor.add(ambientColor);
     Point intersectionPoint = intersectionInfo.getIntersectionPoint();
     
     
@@ -372,17 +390,17 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
     
     // if reflective then recurse
     if(firstShape.getSurface().getReflectiveCoefficient() > 0){
-     PVector babyRay = intersectionPoint.subtract(origin);
-     babyRay.div(babyRay.mag());
-     babyRay.sub(PVector.mult(firstShapeSurfaceNormal,(2*(babyRay.dot(firstShapeSurfaceNormal)))));
-     babyRay.div(babyRay.mag());
+       PVector babyRay = intersectionPoint.subtract(origin);
+       babyRay.div(babyRay.mag());
+       babyRay.sub(PVector.mult(firstShapeSurfaceNormal,(2*(babyRay.dot(firstShapeSurfaceNormal)))));
+       babyRay.div(babyRay.mag());
       
-     Point newOrigin = new Point(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ());
-     newOrigin.movePoint(babyRay, 0.000001);
-     Ray newRecurseRay = new Ray(newOrigin, babyRay);
-     Color returnColor = recursive(newRecurseRay, firstShape, x, y);
-     returnColor.multiply(firstShape.getSurface().getReflectiveCoefficient());
-     totalColor.add(returnColor);
+       Point newOrigin = new Point(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ());
+       newOrigin.movePoint(babyRay, 0.000001);
+       Ray newRecurseRay = new Ray(newOrigin, babyRay);
+       Color returnColor = recursive(newRecurseRay, firstShape, x, y);
+       //returnColor.multiply(firstShape.getSurface().getReflectiveCoefficient());
+       totalColor.add(returnColor);
     }
       
     ArrayList<Light> lights = currentScene.getLights();
@@ -456,10 +474,6 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
                 cumulative_prob+=pow(k,feature_count)/(float)((pow((float)Math.E,k)*factorial(feature_count)));
                 feature_count += 1;
               }
-              //feature_count -= 1;
-              //if(feature_count < 2){
-              //  feature_count = 1;
-              //}
               for(int aa=0; aa<=feature_count; aa++){
                 Color temp_color = new Color(random(.3), random(.3), random(.3));
                 temp_color = new Color(random(.3), random(.3), random(.3));
@@ -602,10 +616,54 @@ void rayTrace(){
 
 }
 
-void draw() {
-}
+//void draw() {
+//  int num_near = 40;
+//  boolean fast = false;
+  
+//  // draw all the "photons" in black only once
+//  if (first_draw) {
+//    // get ready to draw
+//    background (255, 255, 255);
+//    noStroke();
+//    fill (0, 0, 0);
+  
+//    // draw the initial photons
+//    photons.draw(photons.root);
+    
+//    first_draw = false;
+//  }
+  
+//  noStroke();
+  
+//  ArrayList<Photon> plist;
+  
+//  // re-draw the last frame's photons in black
+//  fill (0, 0, 0);
+//  plist = photons.find_near ((float) old_mouseX, (float) old_mouseY, 0.0, num_near, 200.0);
+//  draw_photon_list (plist);
+   
+//  // draw the new near photons in red
+//  fill (255, 0, 0);
+//  plist = photons.find_near ((float) mouseX, (float) mouseY, 0.0, num_near, 200.0);
+//  draw_photon_list (plist);
+
+//  // save these mouse positions for next frame
+//  old_mouseX = mouseX;
+//  old_mouseY = mouseY;
+//}
 
 // when mouse is pressed, print the cursor location
 void mousePressed() {
   println ("mouse: " + mouseX + " " + mouseY);
+}
+
+
+
+// draw a list of photons
+void draw_photon_list(ArrayList<Photon> plist)
+{
+  for (int i = 0; i < plist.size(); i++) {
+    Photon photon = plist.get(i);
+    ellipse (photon.pos[0], photon.pos[1], photon_radius, photon_radius);
+  }
 }

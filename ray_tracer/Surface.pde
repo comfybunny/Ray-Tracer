@@ -15,6 +15,13 @@ public class Surface{
     noise = 0;
     texture = ProceduralTexture.NO_NOISE;
   }
+  public Surface(Color diffuseColor, Color ambientColor, float reflectiveCoefficient){
+    this.diffuseColor = diffuseColor;
+    this.ambientColor = ambientColor;
+    noise = 0;
+    texture = ProceduralTexture.NO_NOISE;
+    this.reflectiveCoefficient = reflectiveCoefficient;
+  }
   public Surface(Color diffuseColor, Color ambientColor, Color specularColor, 
                   float specularHighlightExponent, float reflectiveCoefficient, float refractiveCoefficient, float indexOfRefraction){
     this.diffuseColor = diffuseColor;
