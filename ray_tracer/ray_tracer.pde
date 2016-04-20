@@ -24,12 +24,12 @@ Scene currentScene;
 Surface currSurface;
 
 void setup(){
-  size (600, 600);  // use P3D environment so that matrix commands work properly
+  size (300, 300);  // use P3D environment so that matrix commands work properly
   noStroke();
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t04.cli");
+  interpreter("t01.cli");
   
 }
 
