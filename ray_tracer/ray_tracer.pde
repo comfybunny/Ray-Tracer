@@ -44,7 +44,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t03.cli");
+  interpreter("t06.cli");
   
   int i;
   
@@ -178,6 +178,11 @@ void interpreter(String filename) {
       }
       else if(token[0].equals("cylinder")){
         Cylinder newShape = new Cylinder(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[4]), Float.parseFloat(token[3])), Float.parseFloat(token[5]), currSurface);
+        currentScene.addShape(newShape);
+      }
+      
+      else if(token[0].equals("hollow_cylinder")){
+        Hollow_Cylinder newShape = new Hollow_Cylinder(Float.parseFloat(token[1]), new Point(Float.parseFloat(token[2]), Float.parseFloat(token[4]), Float.parseFloat(token[3])), Float.parseFloat(token[5]), currSurface);
         currentScene.addShape(newShape);
       }
       else if(token[0].equals("box")){
@@ -416,6 +421,10 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
       
       float lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
       if(lightAndShapeNormalAlignment < 0 && firstShape.getClass().equals(Triangle.class)){
+        firstShapeSurfaceNormal = firstShapeSurfaceNormal.mult(-1);
+        lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
+      }
+      if(lightAndShapeNormalAlignment < 0 && firstShape.getClass().equals(Hollow_Cylinder.class)){
         firstShapeSurfaceNormal = firstShapeSurfaceNormal.mult(-1);
         lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
       }
