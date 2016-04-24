@@ -8,14 +8,18 @@ int sort_axis;  // for building the kD-tree
 public class Photon implements Comparable<Photon>{
   float[] pos;  // 3D position of photon, plus one extra value for nearest neighbor queries
   // YOU WILL WANT TO MODIFY THIS CLASS TO RECORD THE POWER OF A PHOTON
-  float power;
-  Photon (float x, float y, float z, float power) {
+  float power_r;
+  float power_g;
+  float power_b;
+  Photon (float x, float y, float z, float power_r, float power_g, float power_b) {
     pos = new float[5];  // x,y,z position, plus fourth value that is used for nearest neighbor queries
     pos[0] = x;
     pos[1] = y;
     pos[2] = z;
     pos[3] = 0;  // distance squared, used for nearby photon queries
-    this.power = power;
+    this.power_r = power_r;
+    this.power_g = power_g;
+    this.power_b = power_b;
   }
   Photon (float x, float y, float z) {
     pos = new float[5];  // x,y,z position, plus fourth value that is used for nearest neighbor queries

@@ -39,12 +39,12 @@ Scene currentScene;
 Surface currSurface;
 
 void setup(){
-  size (850, 850);  // use P3D environment so that matrix commands work properly
+  size (600, 600);  // use P3D environment so that matrix commands work properly
   noStroke();
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t01.cli");
+  interpreter("t04.cli");
     
   // initialize kd-tree
   photons = new kd_tree();
@@ -357,10 +357,12 @@ void interpreter(String filename) {
       else if (token[0].equals("write")) {
         // save the current image to a .png file
         if(currentScene.caustic){
+          photons = new kd_tree();
           float rand_x;
           float rand_y;
           float rand_z;
           Point lightLocation = currentScene.getLights().get(0).getPoint();
+          Color lightColor = currentScene.getLights().get(0).getColor();
           Ray ray = new Ray(lightLocation);
           for(int emitted=0; emitted < currentScene.num_cast; emitted++){
             rand_x = random(2)-1.0;
@@ -372,10 +374,11 @@ void interpreter(String filename) {
               rand_z = random(2)-1.0;
             }
             ray.setDirection(rand_x, rand_y, rand_z);
-            shootPhoton(false, ray, 1.0);
+            shootPhoton(false, ray, lightColor.getR()*10, lightColor.getG()*10, lightColor.getB()*10);
           }
           photons.build_tree();
           println("tree built");
+          println(currentScene.num_cast);
         }
         rayTrace();
         if(refine > 1 && refineBoolean){
@@ -415,6 +418,9 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
     Color diffuseColor = currentShapeSurface.getDiffuseColor();
     Color ambientColor = currentShapeSurface.getAmbientColor();
     Color tempSpecularColor = currentShapeSurface.getSpecularColor();
+    if(firstShape.getSurface().getReflectiveCoefficient()==0){
+      
+    }
     totalColor.add(ambientColor);
     Point intersectionPoint = intersectionInfo.getIntersectionPoint();
     
@@ -434,7 +440,7 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
        newOrigin.movePoint(babyRay, 0.000001);
        Ray newRecurseRay = new Ray(newOrigin, babyRay);
        Color returnColor = recursive(newRecurseRay, firstShape, x, y);
-       //returnColor.multiply(firstShape.getSurface().getReflectiveCoefficient());
+       returnColor.multiply(firstShape.getSurface().getReflectiveCoefficient());
        totalColor.add(returnColor);
     }
       
@@ -583,6 +589,25 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
          totalColor.add(tempToAdd);
        }
     }
+   
+    if(currentScene.caustic){
+      ArrayList<Photon> plist = photons.find_near(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ(), currentScene.num_near, currentScene.max_near_dist);
+      float max_r = currentScene.max_near_dist;
+      float flux = 0;
+      if(plist != null){
+        for(Photon p : plist){
+          if(p!=null){
+            flux+=p.power_r;
+            float curr_dist = sqrt((pow(intersectionPoint.getX()-p.pos[0],2))+(pow(intersectionPoint.getY()-p.pos[1],2))+(pow(intersectionPoint.getZ()-p.pos[2],2)));
+            if(curr_dist < max_r){
+              max_r = curr_dist;
+            }
+          }
+        }
+        float irradiance = flux/(2*(float)Math.PI*max_r*max_r);
+        totalColor.add(new Color(irradiance, irradiance, irradiance));
+      }
+    }
     return totalColor;
     
   }
@@ -707,7 +732,7 @@ void draw_photon_list(ArrayList<Photon> plist)
 }
 
 
-boolean shootPhoton(boolean fromReflective, Ray ray, float photon_power){
+boolean shootPhoton(boolean fromReflective, Ray ray, float photon_r, float photon_g, float photon_b){
   //println(ray.getOrigin().toString());
   //println(ray.getDirection());
   ArrayList<Shape> allObjects = currentScene.getAllObjects();
@@ -734,11 +759,11 @@ boolean shootPhoton(boolean fromReflective, Ray ray, float photon_power){
        newOrigin.movePoint(babyRay, 0.00001);
        Ray newRecurseRay = new Ray(newOrigin, babyRay);
        // TODO Math here to see if we will shoot this new recurse ray
-       return shootPhoton(true, newRecurseRay, photon_power*reflective_coeff);
+       return shootPhoton(true, newRecurseRay, photon_r*reflective_coeff, photon_g*reflective_coeff, photon_b*reflective_coeff);
     }
     // if it came from a reflective surface and current is diffuse, then store it
     else if(fromReflective && reflective_coeff == 0){
-      photons.add_photon(new Photon (intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ(), photon_power*10.0/currentScene.num_cast));
+      photons.add_photon(new Photon (intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ(), photon_r/currentScene.num_cast, photon_g/currentScene.num_cast, photon_b/currentScene.num_cast));
       return true;
     }
     // else it came from eye and hit the diffuse surface first
