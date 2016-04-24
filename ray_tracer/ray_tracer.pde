@@ -44,7 +44,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t06.cli");
+  interpreter("t09.cli");
   
   int i;
   
@@ -533,7 +533,7 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
       if(shadeIntersection != null){
         shadeShapeIntersect = shadeIntersection.getShape();
         if(shadeIntersection.getIntersectionPoint() != null){
-          distLightToBlocker = shadeIntersection.getIntersectionPoint().euclideanDistance(lightLocation);
+          distLightToBlocker = shadeIntersection.getIntersectionPoint().euclideanDistance(intersectionPoint);
         }
       }
       if(tempSpecularColor!=null){
