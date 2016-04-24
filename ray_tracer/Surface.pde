@@ -3,7 +3,7 @@ public class Surface{
   private Color ambientColor;
   private Color specularColor;
   private float specularHighlightExponent;
-  private float reflectiveCoefficient;
+  private float reflectiveCoefficient = 0;
   private float refractiveCoefficient;
   private float indexOfRefraction;
   private int noise;
@@ -14,6 +14,7 @@ public class Surface{
     this.ambientColor = ambientColor;
     noise = 0;
     texture = ProceduralTexture.NO_NOISE;
+    reflectiveCoefficient = 0;
   }
   public Surface(Color diffuseColor, Color ambientColor, float reflectiveCoefficient){
     this.diffuseColor = diffuseColor;

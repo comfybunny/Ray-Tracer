@@ -8,9 +8,17 @@ int sort_axis;  // for building the kD-tree
 public class Photon implements Comparable<Photon>{
   float[] pos;  // 3D position of photon, plus one extra value for nearest neighbor queries
   // YOU WILL WANT TO MODIFY THIS CLASS TO RECORD THE POWER OF A PHOTON
-  
+  float power;
+  Photon (float x, float y, float z, float power) {
+    pos = new float[5];  // x,y,z position, plus fourth value that is used for nearest neighbor queries
+    pos[0] = x;
+    pos[1] = y;
+    pos[2] = z;
+    pos[3] = 0;  // distance squared, used for nearby photon queries
+    this.power = power;
+  }
   Photon (float x, float y, float z) {
-    pos = new float[4];  // x,y,z position, plus fourth value that is used for nearest neighbor queries
+    pos = new float[5];  // x,y,z position, plus fourth value that is used for nearest neighbor queries
     pos[0] = x;
     pos[1] = y;
     pos[2] = z;
@@ -79,8 +87,8 @@ class kd_tree {
    float[] maxs = new float[3];
    
    // initialized min's and max's
-   mins[0] = mins[1] = mins[2] =  1e20;
-   maxs[0] = maxs[1] = maxs[2] = -1e20;
+   mins[0] = mins[1] = mins[2] =  (float)1e20;
+   maxs[0] = maxs[1] = maxs[2] = (float)-1e20;
    
    // now find min and max values for each axis
    for (i = 0; i < plist.size(); i++) {

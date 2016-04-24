@@ -18,10 +18,12 @@ public class Grids extends Shape{
     this.box = box;
     int sideLength = (int)Math.cbrt(shapes.size()/2);
     
+    /**
     float delta_x = (box.xmax-box.xmin)/(float)sideLength;
     float delta_y = (box.ymax-box.ymin)/(float)sideLength;
     float delta_z = (box.zmax-box.zmin)/(float)sideLength;
-
+    **/
+    
     grid = new ShapeList[sideLength][sideLength][sideLength];
     for(int i=0; i<shapes.size(); i++){
       Point minPoint = shapes.get(i).minPoint();

@@ -9,10 +9,12 @@ public class Ray{
   }
   
   public Ray(PVector direction){
+    origin = new Point();
     this.direction = direction;
   }
   public Ray(Point origin){
     this.origin = origin;
+    direction = new PVector();
   }
   public Ray(Point origin, PVector direction){
     this.origin = origin;

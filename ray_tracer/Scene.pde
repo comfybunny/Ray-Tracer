@@ -11,6 +11,11 @@ public class Scene{
   private HashMap<String, Shape> named_objects;
   private int start_list;
   private int rays_per_pixel;
+  int num_cast;  //each light sourse casts this many caustic photons into the scene
+  int num_near;  // query kd tree to find this many
+  float max_near_dist; //given to kd tree
+  boolean caustic = false;
+  boolean diffuse = false;
     
   public Scene(){
     background = new Color();
@@ -104,5 +109,12 @@ public class Scene{
   
   public void setListStartIndex(int index){
     start_list = index;
+  }
+  
+  public void causticTrue(int numcast, int numnear, float neardist){
+    caustic = true;
+    num_cast = numcast;
+    num_near = numnear;
+    max_near_dist = neardist;
   }
 }

@@ -22,11 +22,11 @@ int screen_width = 850;
 int screen_height = 850;
 
 // debug drawing stuff
-int num_photons = 8000;    // number of photons to draw (small number)
-float photon_radius = 8;   // drawing of photons
+//int num_photons = 8000;    // number of photons to draw (small number)
+//float photon_radius = 8;   // drawing of photons
 
-//int num_photons = 400000;   // number of photons to draw (large number)
-//float photon_radius = 2;    // drawing of photons
+int num_photons = 400000;   // number of photons to draw (large number)
+float photon_radius = 2;    // drawing of photons
 
 float old_mouseX,old_mouseY;
 boolean first_draw = true;
@@ -44,7 +44,11 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t09.cli");
+  interpreter("t01.cli");
+    
+  // initialize kd-tree
+  photons = new kd_tree();
+
   
   int i;
   
@@ -52,21 +56,22 @@ void setup(){
   photons = new kd_tree();
   
   // create random list of "photons"
-  for (i = 0; i < num_photons; i++) {
-    float x,y;
-    // pick random positions, with variable density in x
-    do {
-      x = random (0.0, screen_width);
-      y = random (0.0, screen_height);
-    } while (x > random (0.0, screen_width));
-    float z = 0.0;
-    Photon p = new Photon (x, y, z);
-    photons.add_photon (p);
-  }
+  //for (i = 0; i < num_photons; i++) {
+  //  float x,y;
+  //  // pick random positions, with variable density in x
+  //  do {
+  //    x = random (0.0, screen_width);
+  //    y = random (0.0, screen_height);
+  //  } while (x > random (0.0, screen_width));
+  //  float z = 0.0;
+  //  Photon p = new Photon (x, y, z);
+  //  photons.add_photon (p);
+  //}
   
-  // build the kd-tree
-  photons.build_tree();
-  println ("finished building tree");
+  //// build the kd-tree
+  //photons.build_tree();
+  //println ("finished building tree");
+  
 }
 
 // Press key 1 to 9 and 0 to run different test cases.
@@ -320,6 +325,10 @@ void interpreter(String filename) {
         currentScene.setRaysPerPixel(Integer.parseInt(token[1]));
       }
       
+      else if(token[0].equals("caustic_photons")){
+        currentScene.causticTrue(Integer.parseInt(token[1]), Integer.parseInt(token[2]), Float.parseFloat(token[3]));
+      }
+      
       else if (token[0].equals("read")) {  // reads input from another file
         interpreter (token[1]);
       }
@@ -347,6 +356,27 @@ void interpreter(String filename) {
       }
       else if (token[0].equals("write")) {
         // save the current image to a .png file
+        if(currentScene.caustic){
+          float rand_x;
+          float rand_y;
+          float rand_z;
+          Point lightLocation = currentScene.getLights().get(0).getPoint();
+          Ray ray = new Ray(lightLocation);
+          for(int emitted=0; emitted < currentScene.num_cast; emitted++){
+            rand_x = random(2)-1.0;
+            rand_y = random(2)-1.0;
+            rand_z = random(2)-1.0;
+            while((rand_x*rand_x + rand_y*rand_y + rand_z*rand_z) > 1){
+              rand_x = random(2)-1.0;
+              rand_y = random(2)-1.0;
+              rand_z = random(2)-1.0;
+            }
+            ray.setDirection(rand_x, rand_y, rand_z);
+            shootPhoton(false, ray, 1.0);
+          }
+          photons.build_tree();
+          println("tree built");
+        }
         rayTrace();
         if(refine > 1 && refineBoolean){
           refine = refine/2;
@@ -420,11 +450,12 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
       firstIntersectionToOrigin.div(firstIntersectionToOrigin.mag());
       
       float lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
-      if(lightAndShapeNormalAlignment < 0 && firstShape.getClass().equals(Triangle.class)){
+      float eyenormal = firstShapeSurfaceNormal.dot(ray.getDirection());
+      if(eyenormal > 0 && firstShape.getClass().equals(Triangle.class)){
         firstShapeSurfaceNormal = firstShapeSurfaceNormal.mult(-1);
         lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
       }
-      if(lightAndShapeNormalAlignment < 0 && firstShape.getClass().equals(Hollow_Cylinder.class)){
+      if(eyenormal > 0 && firstShape.getClass().equals(Hollow_Cylinder.class)){
         firstShapeSurfaceNormal = firstShapeSurfaceNormal.mult(-1);
         lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
       }
@@ -625,48 +656,46 @@ void rayTrace(){
 
 }
 
-//void draw() {
-//  int num_near = 40;
-//  boolean fast = false;
+void draw() {
+ //int num_near = 40;
+ //boolean fast = false;
   
-//  // draw all the "photons" in black only once
-//  if (first_draw) {
-//    // get ready to draw
-//    background (255, 255, 255);
-//    noStroke();
-//    fill (0, 0, 0);
+ //// draw all the "photons" in black only once
+ //if (first_draw) {
+ //  // get ready to draw
+ //  background (255, 255, 255);
+ //  noStroke();
+ //  fill (0, 0, 0);
   
-//    // draw the initial photons
-//    photons.draw(photons.root);
+ //  // draw the initial photons
+ //  photons.draw(photons.root);
     
-//    first_draw = false;
-//  }
+ //  first_draw = false;
+ //}
   
-//  noStroke();
+ //noStroke();
   
-//  ArrayList<Photon> plist;
+ //ArrayList<Photon> plist;
   
-//  // re-draw the last frame's photons in black
-//  fill (0, 0, 0);
-//  plist = photons.find_near ((float) old_mouseX, (float) old_mouseY, 0.0, num_near, 200.0);
-//  draw_photon_list (plist);
+ //// re-draw the last frame's photons in black
+ //fill (0, 0, 0);
+ //plist = photons.find_near ((float) old_mouseX, (float) old_mouseY, 0.0, num_near, 200.0);
+ //draw_photon_list (plist);
    
-//  // draw the new near photons in red
-//  fill (255, 0, 0);
-//  plist = photons.find_near ((float) mouseX, (float) mouseY, 0.0, num_near, 200.0);
-//  draw_photon_list (plist);
+ //// draw the new near photons in red
+ //fill (255, 0, 0);
+ //plist = photons.find_near ((float) mouseX, (float) mouseY, 0.0, num_near, 200.0);
+ //draw_photon_list (plist);
 
-//  // save these mouse positions for next frame
-//  old_mouseX = mouseX;
-//  old_mouseY = mouseY;
-//}
+ //// save these mouse positions for next frame
+ //old_mouseX = mouseX;
+ //old_mouseY = mouseY;
+}
 
 // when mouse is pressed, print the cursor location
 void mousePressed() {
   println ("mouse: " + mouseX + " " + mouseY);
 }
-
-
 
 // draw a list of photons
 void draw_photon_list(ArrayList<Photon> plist)
@@ -675,4 +704,47 @@ void draw_photon_list(ArrayList<Photon> plist)
     Photon photon = plist.get(i);
     ellipse (photon.pos[0], photon.pos[1], photon_radius, photon_radius);
   }
+}
+
+
+boolean shootPhoton(boolean fromReflective, Ray ray, float photon_power){
+  //println(ray.getOrigin().toString());
+  //println(ray.getDirection());
+  ArrayList<Shape> allObjects = currentScene.getAllObjects();
+  float minTime = MAX_FLOAT;
+  IntersectionObject intersectionInfo = null;
+  for(Shape a : allObjects){
+    IntersectionObject currIntersectionInfo = a.intersects(ray);
+    if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < minTime){
+      minTime = currIntersectionInfo.getTime();
+      intersectionInfo = currIntersectionInfo;
+    }
+  }
+  
+  if(intersectionInfo != null){
+    float reflective_coeff = intersectionInfo.getShape().getSurface().getReflectiveCoefficient();
+    // if it is reflective then bounce it
+    Point intersectionPoint = intersectionInfo.getIntersectionPoint();
+    if(reflective_coeff > 0){
+       PVector babyRay = intersectionPoint.subtract(ray.getOrigin());
+       babyRay.div(babyRay.mag());
+       babyRay.sub(PVector.mult(intersectionInfo.getSurfaceNormal(),(2*(babyRay.dot(intersectionInfo.getSurfaceNormal())))));
+       babyRay.div(babyRay.mag());
+       Point newOrigin = new Point(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ());
+       newOrigin.movePoint(babyRay, 0.00001);
+       Ray newRecurseRay = new Ray(newOrigin, babyRay);
+       // TODO Math here to see if we will shoot this new recurse ray
+       return shootPhoton(true, newRecurseRay, photon_power*reflective_coeff);
+    }
+    // if it came from a reflective surface and current is diffuse, then store it
+    else if(fromReflective && reflective_coeff == 0){
+      photons.add_photon(new Photon (intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ(), photon_power*10.0/currentScene.num_cast));
+      return true;
+    }
+    // else it came from eye and hit the diffuse surface first
+    else{
+      return false;
+    }
+  }
+  return false;
 }
