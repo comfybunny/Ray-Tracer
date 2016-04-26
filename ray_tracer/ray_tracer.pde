@@ -591,23 +591,26 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
     }
    
     if(currentScene.caustic){
-      ArrayList<Photon> plist = photons.find_near(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ(), currentScene.num_near, currentScene.max_near_dist);
-      float max_r = currentScene.max_near_dist;
-      float flux = 0;
-      if(plist != null){
-        for(Photon p : plist){
-          if(p!=null){
-            flux+=p.power_r;
-            float curr_dist = sqrt((pow(intersectionPoint.getX()-p.pos[0],2))+(pow(intersectionPoint.getY()-p.pos[1],2))+(pow(intersectionPoint.getZ()-p.pos[2],2)));
-            if(curr_dist < max_r){
-              max_r = curr_dist;
-            }
-          }
-        }
-        float irradiance = flux/(2*(float)Math.PI*max_r*max_r);
-        totalColor.add(new Color(irradiance, irradiance, irradiance));
-      }
+     ArrayList<Photon> plist = photons.find_near(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ(), currentScene.num_near, currentScene.max_near_dist);
+     float max_r = 0;
+     float flux = 0;
+     if(plist != null){
+       for(Photon p : plist){
+         if(p!=null){
+           flux+=abs(p.power_r);
+           float curr_dist = sqrt((pow(intersectionPoint.getX()-p.pos[0],2))+(pow(intersectionPoint.getY()-p.pos[1],2))+(pow(intersectionPoint.getZ()-p.pos[2],2)));
+           if(curr_dist > max_r){
+             max_r = curr_dist;
+           }
+         }
+       }
+       float irradiance = flux/(2*(float)Math.PI*max_r*max_r);
+       if(max_r!=0){
+         totalColor.add(new Color(irradiance*10, irradiance*10, irradiance*10));
+       }
+     }
     }
+    
     return totalColor;
     
   }
