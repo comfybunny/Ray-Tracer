@@ -112,7 +112,15 @@ public class Scene{
   }
   
   public void causticTrue(int numcast, int numnear, float neardist){
+    diffuse = false;
     caustic = true;
+    num_cast = numcast;
+    num_near = numnear;
+    max_near_dist = neardist;
+  }
+  public void diffuseTrue(int numcast, int numnear, float neardist){
+    caustic = false;
+    diffuse = true;
     num_cast = numcast;
     num_near = numnear;
     max_near_dist = neardist;

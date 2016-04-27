@@ -44,7 +44,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
-  interpreter("t04.cli");
+  interpreter("t10.cli");
     
   // initialize kd-tree
   photons = new kd_tree();
@@ -328,6 +328,9 @@ void interpreter(String filename) {
       else if(token[0].equals("caustic_photons")){
         currentScene.causticTrue(Integer.parseInt(token[1]), Integer.parseInt(token[2]), Float.parseFloat(token[3]));
       }
+      else if(token[0].equals("diffuse_photons")){
+        currentScene.diffuseTrue(Integer.parseInt(token[1]), Integer.parseInt(token[2]), Float.parseFloat(token[3]));
+      }
       
       else if (token[0].equals("read")) {  // reads input from another file
         interpreter (token[1]);
@@ -377,7 +380,31 @@ void interpreter(String filename) {
             shootPhoton(false, ray, lightColor.getR()*10, lightColor.getG()*10, lightColor.getB()*10);
           }
           photons.build_tree();
-          println("tree built");
+          println("caustic tree built");
+          println(currentScene.num_cast);
+        }
+        else if(currentScene.diffuse){
+          photons = new kd_tree();
+          float rand_x;
+          float rand_y;
+          float rand_z;
+          Point lightLocation = currentScene.getLights().get(0).getPoint();
+          Color lightColor = currentScene.getLights().get(0).getColor();
+          Ray ray = new Ray(lightLocation);
+          for(int emitted=0; emitted < currentScene.num_cast; emitted++){
+            rand_x = random(2)-1.0;
+            rand_y = random(2)-1.0;
+            rand_z = random(2)-1.0;
+            while((rand_x*rand_x + rand_y*rand_y + rand_z*rand_z) > 1){
+              rand_x = random(2)-1.0;
+              rand_y = random(2)-1.0;
+              rand_z = random(2)-1.0;
+            }
+            ray.setDirection(rand_x, rand_y, rand_z);
+            shootDiffusePhoton(0, ray, lightColor.getR()*10, lightColor.getG()*10, lightColor.getB()*10);
+          }
+          photons.build_tree();
+          println("diffuse tree built");
           println(currentScene.num_cast);
         }
         rayTrace();
@@ -560,7 +587,7 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
 
       for(Shape b : allObjects){
         IntersectionObject currIntersectionInfo = b.intersects(lightRay);
-        if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && currIntersectionInfo.getShape()!=firstShape && currIntersectionInfo.getShape()!=null){
+        if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < shadeTime && currIntersectionInfo.getShape()!=null && currIntersectionInfo.getShape()!=firstShape){
           shadeShapeIntersect = b;
           shadeTime = currIntersectionInfo.getTime();
           shadeIntersection = currIntersectionInfo;
@@ -775,4 +802,67 @@ boolean shootPhoton(boolean fromReflective, Ray ray, float photon_r, float photo
     }
   }
   return false;
+}
+
+void shootDiffusePhoton(int bounces, Ray ray, float photon_r, float photon_g, float photon_b){
+  ArrayList<Shape> allObjects = currentScene.getAllObjects();
+  float minTime = MAX_FLOAT;
+  IntersectionObject intersectionInfo = null;
+  for(Shape a : allObjects){
+    IntersectionObject currIntersectionInfo = a.intersects(ray);
+    if(currIntersectionInfo.getTime() > 0 && currIntersectionInfo.getTime() < minTime){
+      minTime = currIntersectionInfo.getTime();
+      intersectionInfo = currIntersectionInfo;
+    }
+  }
+  
+  if(intersectionInfo != null){
+    float reflective_coeff = intersectionInfo.getShape().getSurface().getReflectiveCoefficient();
+    Point intersectionPoint = intersectionInfo.getIntersectionPoint();
+    PVector currSurfaceNorm = intersectionInfo.getShape().shapeNormal(intersectionPoint);
+    // if it is reflective just "reflect it" and do not increase bounces
+    if(reflective_coeff > 0){
+      PVector babyRay = intersectionPoint.subtract(ray.getOrigin());
+     babyRay.div(babyRay.mag());
+     babyRay.sub(PVector.mult(intersectionInfo.getSurfaceNormal(),(2*(babyRay.dot(intersectionInfo.getSurfaceNormal())))));
+     babyRay.div(babyRay.mag());
+     Point newOrigin = new Point(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ());
+     newOrigin.movePoint(babyRay, 0.00001);
+     Ray newRecurseRay = new Ray(newOrigin, babyRay);
+     // TODO Math here to see if we will shoot this new recurse ray
+     shootDiffusePhoton(bounces, newRecurseRay, photon_r*reflective_coeff, photon_g*reflective_coeff, photon_b*reflective_coeff);
+    }
+    // diffuse stuff and russian roulette
+    else{
+      // if already bounced then store the photon
+      if(bounces > 0){
+        photons.add_photon(new Photon (intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ(), photon_r/currentScene.num_cast, photon_g/currentScene.num_cast, photon_b/currentScene.num_cast));
+      }
+      Color diffColor = intersectionInfo.getShape().getSurface().getDiffuseColor();
+      float avg = (diffColor.getR() + diffColor.getG() + diffColor.getB())/3.0;
+      if(random(1) < avg){
+        // create bounced photon direction
+        // pick random point in unit disk
+        float currX = random(2)-1;
+        float currY = random(2)-1;
+        while(sqrt(currX*currX + currY*currY) > 1){
+          currX = random(2) -1;
+          currY = random(2) -1;
+        }
+        // project up
+        float currZ = sqrt(1 - currX*currX - currY*currY);
+        PVector p = new PVector(1.0, 0, 0);
+        if(abs(currSurfaceNorm.x) > abs(currSurfaceNorm.y) && abs(currSurfaceNorm.x) > abs(currSurfaceNorm.z)){
+          p = new PVector(0, 1.0, 0);
+        }
+        PVector Q = currSurfaceNorm.cross(p);
+        Q = Q.div(Q.mag());
+        PVector P = currSurfaceNorm.cross(Q);
+        P = P.div(P.mag());
+        PVector newDir = P.mult(currX).add(Q.mult(currY)).add(currSurfaceNorm.mult(currZ));
+        Ray newDiffRay = new Ray(intersectionPoint, newDir);
+        shootDiffusePhoton(bounces+1, newDiffRay, photon_r*(diffColor.getR()/avg), photon_g*(diffColor.getG()/avg), photon_b*(diffColor.getB()/avg));
+      }
+    }
+  }
 }
