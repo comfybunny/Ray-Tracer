@@ -401,7 +401,7 @@ void interpreter(String filename) {
               rand_z = random(2)-1.0;
             }
             ray.setDirection(rand_x, rand_y, rand_z);
-            shootDiffusePhoton(0, ray, lightColor.getR()*10, lightColor.getG()*10, lightColor.getB()*10);
+            shootDiffusePhoton(0, ray, lightColor.getR(), lightColor.getG(), lightColor.getB());
           }
           photons.build_tree();
           println("diffuse tree built");
@@ -637,6 +637,32 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
        }
      }
     }
+    else if(currentScene.diffuse){
+     ArrayList<Photon> plist = photons.find_near(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ(), currentScene.num_near, currentScene.max_near_dist);
+     float max_r = 0;
+     float flux_r = 0;
+     float flux_g = 0;
+     float flux_b = 0;
+     if(plist != null){
+       for(Photon p : plist){
+         if(p!=null){
+           flux_r+=abs(p.power_r);
+           flux_g+=abs(p.power_g);
+           flux_b+=abs(p.power_b);
+           float curr_dist = sqrt((pow(intersectionPoint.getX()-p.pos[0],2))+(pow(intersectionPoint.getY()-p.pos[1],2))+(pow(intersectionPoint.getZ()-p.pos[2],2)));
+           if(curr_dist > max_r){
+             max_r = curr_dist;
+           }
+         }
+       }
+       float irradiance_r = flux_r/(2*(float)Math.PI*max_r*max_r);
+       float irradiance_g = flux_g/(2*(float)Math.PI*max_r*max_r);
+       float irradiance_b = flux_b/(2*(float)Math.PI*max_r*max_r);
+       if(max_r!=0){
+         totalColor.add(new Color(irradiance_r, irradiance_g, irradiance_b));
+       }
+     }
+    }
     
     return totalColor;
     
@@ -837,9 +863,11 @@ void shootDiffusePhoton(int bounces, Ray ray, float photon_r, float photon_g, fl
       // if already bounced then store the photon
       if(bounces > 0){
         photons.add_photon(new Photon (intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ(), photon_r/currentScene.num_cast, photon_g/currentScene.num_cast, photon_b/currentScene.num_cast));
+        //photons.add_photon(new Photon (intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ(), 1,1,1));
       }
       Color diffColor = intersectionInfo.getShape().getSurface().getDiffuseColor();
       float avg = (diffColor.getR() + diffColor.getG() + diffColor.getB())/3.0;
+      //float avg = (photon_r + photon_g + photon_b)/3.0;
       if(random(1) < avg){
         // create bounced photon direction
         // pick random point in unit disk
