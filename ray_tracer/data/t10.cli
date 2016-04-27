@@ -12,9 +12,9 @@ point_light  0 .98 -2.5  .5 .5 .5
 
 # global diffuse photons
 
-diffuse_photons  9000  1 0.02
+# diffuse_photons  20000  20 0.1
 # diffuse_photons  90000  5 0.1
-# diffuse_photons  900000  200 0.1
+diffuse_photons  900000  200 0.1
 
 # box
 

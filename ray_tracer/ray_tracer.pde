@@ -5,7 +5,7 @@ import java.util.List;
 //  Ray Tracing Shell
 //
 ///////////////////////////////////////////////////////////////////////
-
+Color diffuseSurfaceColor;
 float[] distribution = new float[10];
 
 PrintWriter output = createWriter("C:\\Users\\comfybunny\\Documents\\Ray Tracer\\ray_tracer\\debugger.txt");
@@ -44,6 +44,7 @@ void setup(){
   colorMode (RGB, 1.0);
   background (0, 0, 0);
   currentScene = new Scene();
+  randomSeed(1234);
   interpreter("t10.cli");
     
   // initialize kd-tree
@@ -392,6 +393,7 @@ void interpreter(String filename) {
           Color lightColor = currentScene.getLights().get(0).getColor();
           Ray ray = new Ray(lightLocation);
           for(int emitted=0; emitted < currentScene.num_cast; emitted++){
+            //println("emitted photon number:\t" + emitted);
             rand_x = random(2)-1.0;
             rand_y = random(2)-1.0;
             rand_z = random(2)-1.0;
@@ -401,7 +403,11 @@ void interpreter(String filename) {
               rand_z = random(2)-1.0;
             }
             ray.setDirection(rand_x, rand_y, rand_z);
-            shootDiffusePhoton(0, ray, lightColor.getR(), lightColor.getG(), lightColor.getB());
+            try{
+            shootDiffusePhoton(0, ray, lightColor.getR()*4, lightColor.getG()*4, lightColor.getB()*4);
+            }
+            catch(StackOverflowError e){
+            }
           }
           photons.build_tree();
           println("diffuse tree built");
@@ -493,7 +499,7 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
         lightAndShapeNormalAlignment = firstShapeSurfaceNormal.dot(shapeToLight);
       }
       float diffuse = max(0, lightAndShapeNormalAlignment);
-      Color diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
+      diffuseSurfaceColor = new Color(diffuseColor.getR()*diffuse, diffuseColor.getG()*diffuse, diffuseColor.getB()*diffuse);
       
       if(firstShape.getSurface().getTexture() == ProceduralTexture.NOISE){
         float scalarNoise = firstShape.getSurface().getNoise();
@@ -659,7 +665,11 @@ public Color recursive(Ray ray, Shape lastHit, int x, int y){
        float irradiance_g = flux_g/(2*(float)Math.PI*max_r*max_r);
        float irradiance_b = flux_b/(2*(float)Math.PI*max_r*max_r);
        if(max_r!=0){
-         totalColor.add(new Color(irradiance_r, irradiance_g, irradiance_b));
+         //Color tempColor = new Color(irradiance_r*diffuseSurfaceColor.getR(), irradiance_g*diffuseSurfaceColor.getG(), irradiance_b*diffuseSurfaceColor.getB());
+         Color tempColor = new Color(irradiance_r*3, irradiance_g*3, irradiance_b*3);
+         //println(flux_r + "\t" + flux_g + "\t" + flux_b + "\t" + max_r);
+         //println("adding color:\t" + tempColor.toString());
+         totalColor.add(tempColor);
        }
      }
     }
@@ -831,6 +841,7 @@ boolean shootPhoton(boolean fromReflective, Ray ray, float photon_r, float photo
 }
 
 void shootDiffusePhoton(int bounces, Ray ray, float photon_r, float photon_g, float photon_b){
+  if(bounces < 10){
   ArrayList<Shape> allObjects = currentScene.getAllObjects();
   float minTime = MAX_FLOAT;
   IntersectionObject intersectionInfo = null;
@@ -844,11 +855,18 @@ void shootDiffusePhoton(int bounces, Ray ray, float photon_r, float photon_g, fl
   
   if(intersectionInfo != null){
     float reflective_coeff = intersectionInfo.getShape().getSurface().getReflectiveCoefficient();
+    
     Point intersectionPoint = intersectionInfo.getIntersectionPoint();
     PVector currSurfaceNorm = intersectionInfo.getShape().shapeNormal(intersectionPoint);
+    
+    //println("hit something");
+    //println(intersectionPoint.toString());
+    //println("reflective_coeff\t" + reflective_coeff);
+    //println("diffuse color\t" + intersectionInfo.getShape().getSurface().getDiffuseColor().toString());
     // if it is reflective just "reflect it" and do not increase bounces
     if(reflective_coeff > 0){
-      PVector babyRay = intersectionPoint.subtract(ray.getOrigin());
+      //println("reflects");
+     PVector babyRay = intersectionPoint.subtract(ray.getOrigin());
      babyRay.div(babyRay.mag());
      babyRay.sub(PVector.mult(intersectionInfo.getSurfaceNormal(),(2*(babyRay.dot(intersectionInfo.getSurfaceNormal())))));
      babyRay.div(babyRay.mag());
@@ -858,10 +876,12 @@ void shootDiffusePhoton(int bounces, Ray ray, float photon_r, float photon_g, fl
      // TODO Math here to see if we will shoot this new recurse ray
      shootDiffusePhoton(bounces, newRecurseRay, photon_r*reflective_coeff, photon_g*reflective_coeff, photon_b*reflective_coeff);
     }
+    
     // diffuse stuff and russian roulette
-    else{
+    else if(reflective_coeff == 0){
       // if already bounced then store the photon
       if(bounces > 0){
+        //println("storing a photon:\t" + photon_r/currentScene.num_cast + "\t" + photon_g/currentScene.num_cast + "\t" + photon_b/currentScene.num_cast);
         photons.add_photon(new Photon (intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ(), photon_r/currentScene.num_cast, photon_g/currentScene.num_cast, photon_b/currentScene.num_cast));
         //photons.add_photon(new Photon (intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ(), 1,1,1));
       }
@@ -869,6 +889,7 @@ void shootDiffusePhoton(int bounces, Ray ray, float photon_r, float photon_g, fl
       float avg = (diffColor.getR() + diffColor.getG() + diffColor.getB())/3.0;
       //float avg = (photon_r + photon_g + photon_b)/3.0;
       if(random(1) < avg){
+        //println("diffuse bounce");
         // create bounced photon direction
         // pick random point in unit disk
         float currX = random(2)-1;
@@ -888,9 +909,12 @@ void shootDiffusePhoton(int bounces, Ray ray, float photon_r, float photon_g, fl
         PVector P = currSurfaceNorm.cross(Q);
         P = P.div(P.mag());
         PVector newDir = P.mult(currX).add(Q.mult(currY)).add(currSurfaceNorm.mult(currZ));
-        Ray newDiffRay = new Ray(intersectionPoint, newDir);
+        Point newOrigin = new Point(intersectionPoint.getX(), intersectionPoint.getY(), intersectionPoint.getZ());
+        newOrigin.movePoint(newDir, 0.00001);
+        Ray newDiffRay = new Ray(newOrigin, newDir);
         shootDiffusePhoton(bounces+1, newDiffRay, photon_r*(diffColor.getR()/avg), photon_g*(diffColor.getG()/avg), photon_b*(diffColor.getB()/avg));
       }
     }
+  }
   }
 }
